@@ -2,6 +2,7 @@ infra/terraform/.terraform/
 infra/terraform/*.tfstate
 infra/terraform/*.tfstate.*
 infra/terraform/*-source.zip
+infra/terraform/CICD_SETUP.md
 services/**/__pycache__/
 gecx/tools/python/__pycache__/
 **/node_modules/
