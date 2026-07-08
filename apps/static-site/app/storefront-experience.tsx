@@ -369,6 +369,7 @@ function CesChat({
   const [status, setStatus] = useState("Ready");
   const [sessionId] = useState(() => `web-${crypto.randomUUID()}`);
   const logRef = useRef<HTMLDivElement | null>(null);
+  const lastProductPromptRef = useRef("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const client = useMemo(() => {
@@ -404,6 +405,10 @@ function CesChat({
   }
 
   async function sendMessage(text: string, includeUserMessage: boolean) {
+    const fallbackPrompt = resolveFallbackPrompt(text, lastProductPromptRef.current);
+    if (isIronPrompt(fallbackPrompt) && fallbackPrompt !== lastProductPromptRef.current) {
+      lastProductPromptRef.current = fallbackPrompt;
+    }
     setDraft("");
     setError("");
     setFailedPrompt("");
@@ -420,11 +425,12 @@ function CesChat({
             text,
             timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           });
-      appendAssistantResponse(response, undefined, text);
+      appendAssistantResponse(response, undefined, fallbackPrompt, text);
     } catch (error) {
       const message = String(error);
       if (!config.mockAssistant && isCesQuotaError(message)) {
-        appendAssistantResponse(mockAssistantResponse(text), undefined, text);
+        const response = fallbackPrompt ? catalogFallbackResponse(fallbackPrompt) : mockAssistantResponse(text);
+        appendAssistantResponse(response, undefined, fallbackPrompt, text);
         return;
       }
       setError(`The assistant request failed: ${String(error)}`);
@@ -433,15 +439,20 @@ function CesChat({
     }
   }
 
-  function appendAssistantResponse(response: CesRunSessionResponse, prefix?: string, prompt?: string) {
+  function appendAssistantResponse(
+    response: CesRunSessionResponse,
+    prefix?: string,
+    fallbackPrompt?: string,
+    originalPrompt?: string
+  ) {
     let widgets = extractWidgetPayloads(response.outputs);
     let responseText =
       response.outputs
         ?.map((output) => output.text)
         .filter((value): value is string => Boolean(value))
         .join("\n\n") || (widgets.length ? "" : "I did not receive a text response.");
-    if (!widgets.length && prompt && isExperiencedIronPrompt(prompt)) {
-      const fallbackResponse = mockAssistantResponse(prompt);
+    if (!widgets.length && fallbackPrompt && shouldUseCatalogFallback(responseText, originalPrompt ?? fallbackPrompt, fallbackPrompt)) {
+      const fallbackResponse = catalogFallbackResponse(fallbackPrompt);
       const fallbackWidgets = extractWidgetPayloads(fallbackResponse.outputs);
       if (fallbackWidgets.length) {
         const fallbackText = fallbackResponse.outputs
@@ -691,8 +702,53 @@ function isCesQuotaError(message: string): boolean {
   return /\b429\b/.test(message) || /RESOURCE_EXHAUSTED/i.test(message) || /quota/i.test(message);
 }
 
+function resolveFallbackPrompt(text: string, previousProductPrompt: string): string {
+  if (isIronPrompt(text)) return inferIronSkillPrompt(text, text);
+  if (previousProductPrompt && (isSkillLevelPrompt(text) || isAffirmativeRetryPrompt(text))) {
+    return inferIronSkillPrompt(text, previousProductPrompt);
+  }
+  return text;
+}
+
+function inferIronSkillPrompt(text: string, fallbackPrompt: string): string {
+  if (isIronPrompt(fallbackPrompt) && isSkillLevelPrompt(text) && !isSkillLevelPrompt(fallbackPrompt)) {
+    return `${fallbackPrompt} ${text}`;
+  }
+  return fallbackPrompt;
+}
+
+function shouldUseCatalogFallback(responseText: string, prompt: string, fallbackPrompt: string): boolean {
+  if (!isIronPrompt(fallbackPrompt)) return false;
+  return (
+    isExperiencedIronPrompt(fallbackPrompt) ||
+    isAffirmativeRetryPrompt(prompt) ||
+    isAssistantTroubleResponse(responseText)
+  );
+}
+
+function catalogFallbackResponse(text: string): CesRunSessionResponse {
+  if (isIronPrompt(text)) return ironProductCarouselResponse(isExperiencedIronPrompt(text));
+  return mockAssistantResponse(text);
+}
+
+function isIronPrompt(text: string): boolean {
+  return /iron/i.test(text);
+}
+
 function isExperiencedIronPrompt(text: string): boolean {
   return /iron/i.test(text) && /experienced|advanced|low.?handicap|skilled/i.test(text);
+}
+
+function isSkillLevelPrompt(text: string): boolean {
+  return /experienced|advanced|low.?handicap|skilled|beginner|newer|improving|mid.?handicap/i.test(text);
+}
+
+function isAffirmativeRetryPrompt(text: string): boolean {
+  return /^(yes|yeah|yep|yup|sure|ok|okay|please|try again|retry)$/i.test(text.trim());
+}
+
+function isAssistantTroubleResponse(text: string): boolean {
+  return /having trouble|try again|did not receive|tell me what golf gear/i.test(text);
 }
 
 function normalizeProducts(value: unknown): CxProductSummary[] {
@@ -708,55 +764,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function mockAssistantResponse(text: string): CesRunSessionResponse {
   if (/experienced|advanced|low.?handicap|skilled/i.test(text) && /iron/i.test(text)) {
-    return {
-      outputs: [
-        {
-          text: "Here are iron sets that fit experienced players who want compact control and forged feel.",
-          payload: {
-            kind: "product-carousel",
-            title: "Irons for experienced players",
-            body: "Product detail cards from the catalog.",
-            selectedProductId: "P027",
-            products: [
-              {
-                id: "P027",
-                name: "NorthLake Forge SoftStrike Forged Iron Set",
-                brand: "NorthLake Forge",
-                category: "Iron Sets",
-                description: "Compact forged iron set for skilled ball strikers who want controlled launch.",
-                image: {
-                  src: "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg",
-                  alt: "Golf irons in a bag on a golf course.",
-                },
-                price: 1299,
-                rating: 4.46,
-                reviewCount: 432,
-                inventoryStatus: "In stock",
-                fit: "Experienced players and low-handicap ball strikers.",
-                tags: ["Iron set", "Forged feel", "Distance control"],
-              },
-              {
-                id: "P024",
-                name: "NorthLake Forge TourPocket Pro Iron Set",
-                brand: "NorthLake Forge",
-                category: "Iron Sets",
-                description: "Player-focused irons with forged construction and practical forgiveness.",
-                image: {
-                  src: "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg",
-                  alt: "Golf irons in a bag on a golf course.",
-                },
-                price: 1199,
-                rating: 4.02,
-                reviewCount: 415,
-                inventoryStatus: "Limited stock",
-                fit: "Confident iron players who want tour flight with a little launch help.",
-                tags: ["Iron set", "Tour flight", "Custom fit"],
-              },
-            ],
-          },
-        },
-      ],
-    };
+    return ironProductCarouselResponse(true);
   }
 
   if (/iron/i.test(text)) {
@@ -773,6 +781,60 @@ function mockAssistantResponse(text: string): CesRunSessionResponse {
     outputs: [
       {
         text: "Tell me what golf gear you are shopping for, plus skill level and any budget or fit preferences.",
+      },
+    ],
+  };
+}
+
+function ironProductCarouselResponse(experienced: boolean): CesRunSessionResponse {
+  return {
+    outputs: [
+      {
+        text: experienced
+          ? "Here are iron sets that fit experienced players who want compact control and forged feel."
+          : "Here are iron sets from the catalog. Share your handicap, budget, or preferred feel and I can narrow them further.",
+        payload: {
+          kind: "product-carousel",
+          title: experienced ? "Irons for experienced players" : "Iron sets from the catalog",
+          body: "Product detail cards from the catalog.",
+          selectedProductId: "P027",
+          products: [
+            {
+              id: "P027",
+              name: "NorthLake Forge SoftStrike Forged Iron Set",
+              brand: "NorthLake Forge",
+              category: "Iron Sets",
+              description: "Compact forged iron set for skilled ball strikers who want controlled launch.",
+              image: {
+                src: "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg",
+                alt: "Golf irons in a bag on a golf course.",
+              },
+              price: 1299,
+              rating: 4.46,
+              reviewCount: 432,
+              inventoryStatus: "In stock",
+              fit: "Experienced players and low-handicap ball strikers.",
+              tags: ["Iron set", "Forged feel", "Distance control"],
+            },
+            {
+              id: "P024",
+              name: "NorthLake Forge TourPocket Pro Iron Set",
+              brand: "NorthLake Forge",
+              category: "Iron Sets",
+              description: "Player-focused irons with forged construction and practical forgiveness.",
+              image: {
+                src: "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg",
+                alt: "Golf irons in a bag on a golf course.",
+              },
+              price: 1199,
+              rating: 4.02,
+              reviewCount: 415,
+              inventoryStatus: "Limited stock",
+              fit: "Confident iron players who want tour flight with a little launch help.",
+              tags: ["Iron set", "Tour flight", "Custom fit"],
+            },
+          ],
+        },
       },
     ],
   };

@@ -133,7 +133,7 @@ test("falls back to demo irons flow when CES quota is exhausted", async ({ page 
   const input = page.getByLabel("Message Golf Store Assistant");
   await input.fill("I want to shop for irons");
   await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByText("I can help you shop for irons")).toBeVisible();
+  await expect(page.getByText("Here are iron sets from the catalog")).toBeVisible();
   await expect(page.getByText("quota is temporarily exhausted")).toHaveCount(0);
 
   await input.fill("I want to see irons for experienced players");
@@ -185,6 +185,49 @@ test("adds an irons carousel when CES returns text without product widgets", asy
   await expect(page.getByText("Here are iron sets that fit experienced players")).toBeVisible();
   await expect(page.getByText("NorthLake Forge SoftStrike Forged Iron Set")).toBeVisible();
   await expect(page.getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
+});
+
+test("keeps irons context for skill-only followups and yes retries", async ({ page }) => {
+  await page.route("https://ces.googleapis.com/v1/**:generateChatToken", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({ chatToken: "test-chat-token" }),
+    });
+  });
+
+  await page.route("https://ces.googleapis.com/v1/**:runSession", async (route) => {
+    const body = route.request().postDataJSON() as { inputs?: Array<{ text?: string }> };
+    const prompt = body.inputs?.[0]?.text ?? "";
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        outputs: [
+          {
+            text: /experienced players|yes/i.test(prompt)
+              ? "Tell me what golf gear you are shopping for, plus skill level and any budget or fit preferences."
+              : "I can help you shop for irons. Are these for a newer player, an improving player, or an experienced player?",
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto("/");
+
+  const input = page.getByLabel("Message Golf Store Assistant");
+  await input.fill("I want to shop for irons");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText("I can help you shop for irons")).toBeVisible();
+
+  await input.fill("experienced players");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.locator(".ces-chat-message.assistant cx-product-carousel")).toHaveCount(1);
+  await expect(page.getByText("Irons for experienced players")).toBeVisible();
+
+  await input.fill("yes");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.locator(".ces-chat-message.assistant cx-product-carousel")).toHaveCount(2);
+  await expect(page.getByText("NorthLake Forge SoftStrike Forged Iron Set").last()).toBeVisible();
 });
 
 test("renders product listing and category routes", async ({ page }) => {
