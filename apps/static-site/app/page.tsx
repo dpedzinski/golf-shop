@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { StorefrontExperience } from "./storefront-experience";
 
 function envValue(name: string, fallback = ""): string {
@@ -53,9 +54,14 @@ export default function Home() {
             </div>
           </div>
           <div className="hero-media" aria-label="Golfer selecting a club at sunset">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1551524559-8af4e6624178?auto=format&fit=crop&w=1200&q=82"
               alt=""
+              width={1200}
+              height={1500}
+              priority
+              sizes="(max-width: 860px) 100vw, 54vw"
+              unoptimized
             />
             <div className="hero-note">
               <strong>Fit-first advice</strong>

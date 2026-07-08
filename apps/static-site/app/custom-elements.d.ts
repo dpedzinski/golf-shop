@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 declare namespace JSX {
   interface IntrinsicElements {
     "df-messenger": {
@@ -6,7 +8,7 @@ declare namespace JSX {
       "agent-id": string;
       "language-code": string;
       "oauth-client-id"?: string;
-      children?: React.ReactNode;
+      children?: ReactNode;
     };
     "df-messenger-chat-bubble": {
       "chat-title": string;
