@@ -93,6 +93,9 @@ test("renders storefront widgets and two-turn irons product carousel", async ({ 
   await input.fill("I want to shop for irons");
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.locator(".ces-chat-message.assistant").filter({ hasText: "I can help you shop for irons" })).toBeVisible();
+  await expect(page.locator(".ces-chat-message.user").first()).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(page.locator(".ces-chat-message.user .ces-chat-message-text p").first()).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(page.locator(".ces-chat-log")).toHaveCSS("overflow-y", "auto");
 
   await input.fill("I want to see irons for experienced players");
   await page.getByRole("button", { name: "Send" }).click();
