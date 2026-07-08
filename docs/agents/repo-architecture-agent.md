@@ -27,8 +27,7 @@ structure and runtime wiring.
 ## Update Rules
 
 - Start from local repo truth. Do not infer package scripts or endpoint names.
-- Keep `apps/static-site` separate from the older `frontend` and `backend`
-  Vertex AI Studio demo path.
+- Treat `apps/static-site` as the canonical storefront app; the older Vertex AI Studio `frontend/` and `backend/` demo path has been removed.
 - Preserve the canonical flow as website -> GECX -> MCP -> product API ->
   BigQuery when Terraform still attaches the MCP toolset to the root agent.
 - Update the Mermaid diagram if any deployed component, service, or direct

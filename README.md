@@ -1,53 +1,43 @@
-# Vertex AI Studio Frontend App with Node.js Backend
+# Fairway Supply GECX Golf Shop
 
-This repository contains a frontend and a Node.js backend, designed to run together.
-The backend acts as a proxy, handling Google Cloud API calls.
+This repository contains the Fairway Supply golf-store prototype. The canonical runnable app is the Vinext/Next static storefront in `apps/static-site`, backed by local SDK/component packages and optional Google Cloud Product API, MCP, and GECX/CES integrations.
 
-This project is intended for demonstration and prototyping purposes only.
-It is not intended for use in a production environment.
+The project is intended for demonstration and prototyping purposes only. It is not intended for production use as-is.
 
-## Prerequisites
+## Primary Areas
 
-To run this application locally, you need:
+- `apps/static-site/`: Canonical storefront app with shop, category, product detail, cart, checkout, compare, and assistant/demo widget flows.
+- `packages/gecx-sdk/`: Browser clients for the product REST API, MCP JSON-RPC endpoint, CES chat sessions, and messenger fallback.
+- `packages/gecx-components/`: Reusable storefront web components and Dialogflow CX Messenger rich-content helpers.
+- `services/product-api/`: BigQuery-backed Product API source for Google Cloud Functions.
+- `services/mcp-server/`: MCP endpoint source that forwards tool calls to the Product API.
+- `infra/terraform/`: Google Cloud deployment stack.
+- `gecx/`: Exported GECX/CES app, agent, tool, skill, guardrail, and evaluation metadata.
 
-*   **[Google Cloud SDK / gcloud CLI](https://cloud.google.com/sdk/docs/install)**: Follow the instructions to install the SDK.
+## Local Demo
 
-*   **gcloud Initialization**:
-    *   Initialize the gcloud CLI:
-        ```bash
-        gcloud init
-        ```
-    *   Authenticate for Application Default Credentials (needed to call Google Cloud APIs):
-        ```bash
-        gcloud auth application-default login
-        ```
-
-*   **Node.js and npm**: Ensure you have Node.js and its package manager, `npm`, installed on your machine.
-
-## Project Structure
-
-The project is organized into two main directories:
-
-*   `frontend/`: Contains the Frontend application code.
-*   `backend/`: Contains the Node.js/Express server code to proxy Google Cloud API calls.
-
-## Backend Environment Variables
-
-The `backend/.env.local` file is automatically generated when you download this application.
-It contains essential Google Cloud environment variables pre-configured based on your project settings at the time of download.
-
-The variables set in `backend/.env.local` are:
-*   `API_BACKEND_PORT`: The port the backend API server listens on (e.g., `5000`).
-*   `API_PAYLOAD_MAX_SIZE`: The maximum size of the request payload accepted by the backend server (e.g., `5mb`).
-*   `GOOGLE_CLOUD_LOCATION`: The Google Cloud region associated with your project.
-*   `GOOGLE_CLOUD_PROJECT`: Your Google Cloud Project ID.
-
-**Note:** These variables are automatically populated during the download process.
-You can modify the values in `backend/.env.local` if you need to change them.
-
-## Installation and Running the App
-
-To install dependencies and run your Google Cloud Vertex AI Studio App locally, execute the following command:
+Install dependencies and run the canonical local storefront:
 
 ```bash
-npm install && npm run dev
+npm install --cache .npm-cache
+npm run site:dev
+```
+
+For a fully local mock assistant/demo-data experience, create `apps/static-site/.env.local` from `.env.example` and set:
+
+```env
+VITE_GECX_PROJECT_ID=demo-project
+VITE_GECX_MOCK_ASSISTANT=true
+VITE_PRODUCT_API_URL=
+VITE_MCP_SERVER_URL=
+```
+
+This runs the storefront locally with demo product data and mock assistant behavior. The real Product API, MCP server, and GECX/CES assistant paths still require Google Cloud configuration.
+
+## Validation
+
+```bash
+npm run typecheck
+npm run test
+npm run build --workspaces --if-present
+```

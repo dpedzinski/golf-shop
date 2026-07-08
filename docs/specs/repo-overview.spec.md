@@ -28,7 +28,7 @@ agent assets, and BigQuery seed data.
 - `data/bigquery/`: SQL seed file that creates product, inventory, pricing,
   sales, financing, loyalty, promotion, policy, and checkout support tables and
   views.
-- `frontend/` and `backend/`: Existing Vertex AI Studio demo frontend and proxy.
+- Legacy Vertex AI Studio `frontend/` and `backend/` demo directories have been removed; `apps/static-site` is the canonical storefront.
   These are separate from the newer `apps/static-site` GECX storefront path.
 
 ## Runtime Responsibilities
