@@ -2,6 +2,10 @@ from typing import Any, Optional
 
 
 def search_products(
+    q: Optional[str] = None,
+    keyword: Optional[str] = None,
+    category: Optional[str] = None,
+    category_slug: Optional[str] = None,
     product_type: Optional[str] = None,
     skill_level: Optional[str] = None,
     budget_range: Optional[str] = None,
@@ -9,8 +13,10 @@ def search_products(
     brand: Optional[str] = None,
     product_category: Optional[str] = None,
     preferences: Optional[str] = None,
+    max_price: Optional[float] = None,
+    limit: Optional[int] = 5,
 ) -> dict[str, Any]:
-    """Searches golf products using customer needs such as category, skill level, budget, brand, playing style, and preferences."""
+    """Searches golf products using keywords, category, skill level, budget, brand, playing style, and preferences."""
     club_image = "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg"
     ball_image = "https://upload.wikimedia.org/wikipedia/commons/e/e6/Golfball.jpg"
     bag_image = "https://upload.wikimedia.org/wikipedia/commons/0/00/Golf_bag_near_green.jpg"
@@ -47,6 +53,7 @@ def search_products(
             "id": "P027",
             "name": "NorthLake Forge SoftStrike Forged Iron Set",
             "category": "irons",
+            "category_slug": "iron-sets",
             "product_category": "iron set",
             "skill_level": "experienced advanced low handicap",
             "price": 1299.99,
@@ -61,6 +68,7 @@ def search_products(
             "id": "P024",
             "name": "NorthLake Forge TourPocket Pro Iron Set",
             "category": "irons",
+            "category_slug": "iron-sets",
             "product_category": "iron set",
             "skill_level": "experienced advanced low handicap",
             "price": 1199.99,
@@ -116,6 +124,10 @@ def search_products(
         str(value).lower()
         for value in [
             product_type,
+            q,
+            keyword,
+            category,
+            category_slug,
             skill_level,
             budget_range,
             playing_style,
@@ -133,10 +145,13 @@ def search_products(
         return any(token in haystack for token in text.replace("$", "").replace("-", " ").split())
 
     products = [product for product in catalog if matches(product)]
+    if max_price is not None:
+        products = [product for product in products if product.get("price", 0) <= max_price]
     if not products:
         return {
             "products": [],
             "message": "No exact demo-catalog matches were found. Try broadening the category, budget, brand, or preference.",
         }
 
-    return {"products": products[:5]}
+    result_limit = max(1, min(int(limit or 5), 50))
+    return {"products": products[:result_limit]}

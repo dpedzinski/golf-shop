@@ -23,6 +23,11 @@ output "bigquery_smoke_counts_job_id" {
   value       = "projects/${var.project_id}/jobs/${terraform_data.bigquery_smoke_counts.output.job_id}"
 }
 
+output "ces_evaluation_run_file" {
+  description = "Local JSON artifact written by Terraform with CES evaluation sync and run details."
+  value       = var.sync_ces_evaluations ? terraform_data.ces_evaluations[0].output.artifact_path : null
+}
+
 output "agent_name" {
   description = "Fully qualified root agent resource name."
   value       = google_ces_agent.golf_store_assistant.name

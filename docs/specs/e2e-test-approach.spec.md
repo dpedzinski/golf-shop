@@ -107,6 +107,31 @@ Expected: the script sends `I am looking for new Irons for my game`, observes
 successful CES `generateChatToken` and `runSession` calls, captures a
 screenshot, and prints the assistant's response.
 
+## Layer 2b: CES Evaluation Regressions
+
+The hosted browser smoke verifies the storefront-rendered carousel. The same
+irons regressions are also checked inside CES as golden evaluations:
+
+- `Storefront Irons Experienced Player`: sends `I want to shop for irons`, then
+  `I want to see irons for experienced players`, and expects a
+  CES `search_products` tool call plus NorthLake iron products in the answer.
+- `Storefront Irons Yes Retry`: sends `I want to shop for irons`, then `yes`,
+  and expects the agent to keep irons context, call `search_products`, and show
+  iron products instead of resetting the gear-selection question.
+
+Validate the local evaluation JSON:
+
+```bash
+npm run ces:evaluations:validate
+```
+
+Terraform syncs and runs these CES evaluations by default during apply. Review
+the latest sync/run artifact with:
+
+```bash
+terraform -chdir=infra/terraform output -raw ces_evaluation_run_file
+```
+
 ## Layer 3: API To BigQuery Smoke Tests
 
 Set the product API URL:

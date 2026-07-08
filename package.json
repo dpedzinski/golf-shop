@@ -17,6 +17,7 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "ces:evaluations:validate": "node scripts/sync-ces-evaluations.mjs --dry-run --project demo-project --location us --app golf-store-customer-service --toolset golf-store-bigquery-mcp gecx/evaluations/Storefront_Irons_Experienced_Player/Storefront_Irons_Experienced_Player.json gecx/evaluations/Storefront_Irons_Yes_Retry/Storefront_Irons_Yes_Retry.json",
     "site:prepare": "npm run build --workspace packages/gecx-sdk && npm run build --workspace packages/gecx-components",
     "site:dev": "npm run site:prepare && npm run dev --workspace apps/static-site",
     "site:build": "npm run site:prepare && npm run build --workspace apps/static-site"

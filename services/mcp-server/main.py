@@ -12,6 +12,7 @@ PRODUCT_API_AUTH_MODE = os.environ.get("PRODUCT_API_AUTH_MODE", "none")
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*")
 
 MCP_PROTOCOL_VERSION = "2025-03-26"
+MCP_SERVER_NAME = "golf_store_bigquery_mcp"
 
 
 def _headers(content_type="application/json"):
@@ -65,6 +66,7 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "q": {"type": "string", "description": "Keyword such as driver, wedge, shoes, beginner, waterproof."},
+                "keyword": {"type": "string", "description": "Alias for q. Use q when possible."},
                 "category": {"type": "string", "description": "Category or parent category."},
                 "category_id": {"type": "string", "description": "Stable category ID such as CAT_DRIVERS."},
                 "category_slug": {"type": "string", "description": "URL category slug such as drivers or golf-balls."},
@@ -228,6 +230,8 @@ def _tool_result(data):
 def _call_tool(name, arguments):
     arguments = arguments or {}
     if name == "search_products":
+        if arguments.get("keyword") is not None and arguments.get("q") is None:
+            arguments["q"] = arguments["keyword"]
         params = {
             key: arguments[key]
             for key in [
@@ -308,7 +312,7 @@ def _handle_jsonrpc(message):
             {
                 "protocolVersion": MCP_PROTOCOL_VERSION,
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "golf-store-bigquery-mcp", "version": "0.1.0"},
+                "serverInfo": {"name": MCP_SERVER_NAME, "version": "0.1.0"},
             },
         )
     if method == "tools/list":
@@ -335,7 +339,7 @@ def handle_request(request):
             {
                 "status": "ok",
                 "protocolVersion": MCP_PROTOCOL_VERSION,
-                "serverInfo": {"name": "golf-store-bigquery-mcp", "version": "0.1.0"},
+                "serverInfo": {"name": MCP_SERVER_NAME, "version": "0.1.0"},
                 "tools": [tool["name"] for tool in TOOLS],
             }
         )

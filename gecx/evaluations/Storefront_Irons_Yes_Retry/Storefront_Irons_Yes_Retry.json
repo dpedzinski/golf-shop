@@ -1,0 +1,110 @@
+{
+  "name": "storefront-irons-yes-retry",
+  "displayName": "Storefront Irons Yes Retry",
+  "description": "Golden regression for the retry path that previously lost context: after a shopper asks for irons, an affirmative retry should keep the irons context and return catalog products instead of asking what gear they want.",
+  "tags": ["storefront", "irons", "retry", "regression"],
+  "golden": {
+    "turns": [
+      {
+        "steps": [
+          {
+            "userInput": {
+              "text": "I want to shop for irons"
+            }
+          }
+        ]
+      },
+      {
+        "steps": [
+          {
+            "userInput": {
+              "text": "yes"
+            }
+          },
+          {
+            "expectation": {
+              "note": "yes_retry_search_products_called_for_irons",
+              "toolCall": {
+                "tool": "{{SEARCH_PRODUCTS_TOOL_NAME}}"
+              }
+            }
+          },
+          {
+            "expectation": {
+              "note": "mock_retry_irons_catalog_response",
+              "mockToolResponse": {
+                "tool": "{{SEARCH_PRODUCTS_TOOL_NAME}}",
+                "response": {
+                  "count": 2,
+                  "page": 1,
+                  "page_size": 2,
+                  "products": [
+                    {
+                      "product_id": "P027",
+                      "product_name": "NorthLake Forge SoftStrike Forged Iron Set",
+                      "brand_name": "NorthLake Forge",
+                      "category_name": "Iron Sets",
+                      "current_sale_price": 1299,
+                      "average_rating": 4.46,
+                      "review_count": 432,
+                      "inventory_status": "In stock",
+                      "target_player_profile": "Experienced players and low-handicap ball strikers.",
+                      "short_description": "Compact forged iron set for skilled ball strikers who want controlled launch."
+                    },
+                    {
+                      "product_id": "P024",
+                      "product_name": "NorthLake Forge TourPocket Pro Iron Set",
+                      "brand_name": "NorthLake Forge",
+                      "category_name": "Iron Sets",
+                      "current_sale_price": 1199,
+                      "average_rating": 4.02,
+                      "review_count": 415,
+                      "inventory_status": "Limited stock",
+                      "target_player_profile": "Confident iron players who want tour flight with a little launch help.",
+                      "short_description": "Player-focused irons with forged construction and practical forgiveness."
+                    }
+                  ],
+                  "total_count": 2
+                }
+              }
+            }
+          },
+          {
+            "expectation": {
+              "note": "agent_recommends_irons_after_yes_retry",
+              "agentResponse": {
+                "chunks": [
+                  {
+                    "text": "After the shopper says yes, keep the irons context and show iron products instead of resetting to a generic gear question. Recommend NorthLake Forge SoftStrike Forged Iron Set and NorthLake Forge TourPocket Pro Iron Set from the irons catalog with prices, player profiles, or fit benefits. It is okay to ask a follow-up after the products are shown."
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "evaluationMetricsConfigOverride": {
+    "goldenMetricsConfig": {
+      "semanticSimilarityMetricsConfig": {
+        "enableSemanticSimilarityMetrics": true
+      },
+      "stepToolCorrectnessMetricsConfig": {
+        "enableToolCorrectnessMetrics": true
+      },
+      "toolCorrectnessMetricsConfig": {
+        "enableToolCorrectnessMetrics": true
+      }
+    }
+  },
+  "evaluationMetricsThresholdOverride": {
+    "goldenHallucinationMetricBehavior": "DISABLED",
+    "goldenEvaluationMetricsThresholds": {
+      "turnLevelMetricsThresholds": {
+        "semanticSimilaritySuccessThreshold": 2,
+        "overallToolInvocationCorrectnessThreshold": 1
+      }
+    }
+  }
+}

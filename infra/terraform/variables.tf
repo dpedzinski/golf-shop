@@ -219,6 +219,24 @@ variable "app_version_id" {
   default     = "web-v1"
 }
 
+variable "sync_ces_evaluations" {
+  description = "Whether Terraform should sync the checked-in CES regression evaluations into the Customer Engagement Suite app."
+  type        = bool
+  default     = true
+}
+
+variable "run_ces_evaluations" {
+  description = "Whether Terraform should start a fake-tool CES evaluation run after syncing the checked-in regression evaluations."
+  type        = bool
+  default     = true
+}
+
+variable "ces_evaluation_timeout_seconds" {
+  description = "Maximum time to wait for the CES evaluation run operation to finish."
+  type        = number
+  default     = 900
+}
+
 variable "deployment_display_name" {
   description = "Display name for the Customer Engagement Suite web deployment."
   type        = string

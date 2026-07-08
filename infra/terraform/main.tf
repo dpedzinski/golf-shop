@@ -20,6 +20,16 @@ locals {
   agent_instruction_file     = "${local.repo_root}/gecx/agents/golf-store-assistant/instruction.txt"
   bigquery_seed_sql_file     = "${local.repo_root}/${var.bigquery_seed_sql_file}"
   bigquery_smoke_counts_file = "${local.repo_root}/artifacts/terraform/bigquery-smoke-counts.json"
+  ces_evaluation_run_file    = "${local.repo_root}/artifacts/terraform/ces-evaluation-run.json"
+
+  ces_evaluation_files = [
+    "gecx/evaluations/Storefront_Irons_Experienced_Player/Storefront_Irons_Experienced_Player.json",
+    "gecx/evaluations/Storefront_Irons_Yes_Retry/Storefront_Irons_Yes_Retry.json",
+  ]
+
+  ces_evaluation_file_paths = [
+    for path in local.ces_evaluation_files : "${local.repo_root}/${path}"
+  ]
 
   required_services = toset([
     "artifactregistry.googleapis.com",
@@ -101,6 +111,10 @@ locals {
   static_site_source_hash = substr(sha256(join("", [
     for path in local.static_site_source_files : filesha256("${local.repo_root}/${path}")
   ])), 0, 16)
+
+  ces_evaluation_hash = sha256(join("", [
+    for path in local.ces_evaluation_file_paths : filesha256(path)
+  ]))
 
   static_site_image = "${var.static_site_region}-docker.pkg.dev/${var.project_id}/${var.static_site_artifact_repository_id}/${var.static_site_service_name}:${local.static_site_source_hash}"
 
@@ -572,6 +586,7 @@ resource "google_ces_agent" "golf_store_assistant" {
   description  = "Friendly golf-store customer service and product recommendation assistant."
 
   instruction = local.agent_instruction
+  tools       = [google_ces_tool.python["search_products"].id]
 
   model_settings {
     model       = var.model
@@ -625,6 +640,53 @@ resource "google_ces_deployment" "web" {
       }
     }
   }
+}
+
+resource "terraform_data" "ces_evaluations" {
+  count = var.sync_ces_evaluations ? 1 : 0
+
+  input = {
+    artifact_path = local.ces_evaluation_run_file
+    run_enabled   = var.run_ces_evaluations
+  }
+
+  triggers_replace = {
+    agent_instruction_sha256 = sha256(local.agent_instruction)
+    app_id                   = google_ces_app.golf_store.app_id
+    app_version              = google_ces_app_version.web.name
+    evaluation_files_sha256  = local.ces_evaluation_hash
+    mcp_server_source_sha256 = data.archive_file.mcp_server.output_sha256
+    search_tool              = google_ces_tool.python["search_products"].id
+    search_tool_sha256       = filesha256(local.python_tools.search_products.code_path)
+    script_sha256            = filesha256("${local.repo_root}/scripts/sync-ces-evaluations.mjs")
+    toolset                  = google_ces_toolset.golf_store_mcp.name
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      set -euo pipefail
+      node '${local.repo_root}/scripts/sync-ces-evaluations.mjs' \
+        --project '${var.project_id}' \
+        --location '${google_ces_app.golf_store.location}' \
+        --app '${google_ces_app.golf_store.app_id}' \
+        --toolset '${google_ces_toolset.golf_store_mcp.name}' \
+        --agent '${google_ces_agent.golf_store_assistant.name}' \
+        --artifact '${self.input.artifact_path}' \
+        --timeout-seconds '${var.ces_evaluation_timeout_seconds}' \
+        ${var.run_ces_evaluations ? "--run" : ""} \
+        ${join(" ", [for path in local.ces_evaluation_file_paths : "'${path}'"])}
+    EOT
+  }
+
+  depends_on = [
+    google_ces_agent.golf_store_assistant,
+    google_ces_app_version.web,
+    google_ces_deployment.web,
+    google_ces_tool.python,
+    google_ces_toolset.golf_store_mcp,
+    google_cloudfunctions2_function.mcp_server,
+  ]
 }
 
 resource "terraform_data" "build_static_site_image" {
