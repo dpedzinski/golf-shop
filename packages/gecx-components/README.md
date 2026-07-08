@@ -1,6 +1,6 @@
-# CX Web Components
+# GECX Components
 
-TypeScript web components for Dialogflow CX Messenger custom templates and host-page web injection.
+TypeScript web components for GECX storefront widgets, Dialogflow CX Messenger custom templates, and host-page web injection.
 
 ## Install and Build
 
@@ -104,6 +104,9 @@ registerDialogflowBridge(dfMessenger, {
 - `cx-payment-plan`
 - `cx-monthly-payment-estimate`
 - `cx-financing-disclosure`
+- `cx-product-list`
+- `cx-product-comparison`
+- `cx-loyalty-tiers`
 
 All components dispatch bubbling, composed events:
 
