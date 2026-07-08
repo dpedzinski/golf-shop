@@ -424,11 +424,7 @@ function CesChat({
     } catch (error) {
       const message = String(error);
       if (!config.mockAssistant && isCesQuotaError(message)) {
-        appendAssistantResponse(
-          mockAssistantResponse(text),
-          "The live assistant quota is temporarily exhausted, so I’m showing the demo product response for this request.",
-          text
-        );
+        appendAssistantResponse(mockAssistantResponse(text), undefined, text);
         return;
       }
       setError(`The assistant request failed: ${String(error)}`);

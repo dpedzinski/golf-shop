@@ -133,8 +133,8 @@ test("falls back to demo irons flow when CES quota is exhausted", async ({ page 
   const input = page.getByLabel("Message Golf Store Assistant");
   await input.fill("I want to shop for irons");
   await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByText("The live assistant quota is temporarily exhausted")).toBeVisible();
   await expect(page.getByText("I can help you shop for irons")).toBeVisible();
+  await expect(page.getByText("quota is temporarily exhausted")).toHaveCount(0);
 
   await input.fill("I want to see irons for experienced players");
   await page.getByRole("button", { name: "Send" }).click();

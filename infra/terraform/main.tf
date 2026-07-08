@@ -69,6 +69,7 @@ locals {
   static_site_app_files = [
     for path in fileset(local.static_site_source_dir, "**") : "apps/static-site/${path}"
     if !contains([".vinext", ".vite", ".wrangler", "coverage", "dist", "node_modules", "playwright-report", "test-results"], split("/", path)[0])
+    && !contains(split("/", path), ".wrangler")
     && !endswith(path, ".tsbuildinfo")
     && (path == ".env.example" || !startswith(path, ".env"))
   ]
