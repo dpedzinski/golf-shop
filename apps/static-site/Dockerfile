@@ -3,8 +3,6 @@ FROM node:22-bookworm-slim AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-COPY frontend/package.json ./frontend/package.json
-COPY backend/package.json ./backend/package.json
 COPY packages/gecx-sdk/package.json ./packages/gecx-sdk/package.json
 COPY packages/gecx-components/package.json ./packages/gecx-components/package.json
 COPY apps/static-site/package.json ./apps/static-site/package.json

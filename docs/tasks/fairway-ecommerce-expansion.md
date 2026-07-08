@@ -2,13 +2,13 @@
 
 ## Summary
 
-Turn the canonical `apps/static-site` Fairway Supply storefront into a fuller e-commerce demo backed by the BigQuery product API. The legacy `frontend/index.html` and older Vite pages remain reference material only; new work should target `apps/static-site`.
+Turn the canonical `apps/static-site` Fairway Supply storefront into a fuller e-commerce demo backed by the BigQuery product API. The legacy Vertex AI Studio `frontend/` and `backend/` demo has been removed; new work should target `apps/static-site`.
 
 ## Current Findings
 
 - [x] Canonical storefront is `apps/static-site/`.
 - [x] Current canonical site now includes route-backed e-commerce pages, while preserving the existing assistant/widget homepage experience.
-- [x] Legacy `frontend/index.html` is non-canonical unless that frontend is revived later. It is FairwayIQ-branded, loads Tailwind from CDN, loads CES chat scripts, and has duplicate module script references.
+- [x] Legacy `frontend/` and `backend/` have been removed from the canonical repo surface.
 - [x] Product API reads BigQuery views for catalog, compare, categories, inventory, financing, loyalty, promotions, shipping, returns, warranties, and checkout guidance.
 - [x] BigQuery seed has rich e-commerce data and now includes storefront-oriented read views.
 - [x] Active financing and promotion views now use `CURRENT_DATE()` instead of the hard-coded active date. Remaining `DATE '2026-07-08'` values are seed snapshot data, not active-date filters.
@@ -232,7 +232,7 @@ Expected result: each storefront view returns nonzero rows. Active financing and
 - [x] No real payment capture.
 - [x] No durable order persistence.
 - [x] No transactional writes to BigQuery.
-- [x] No revival of legacy `frontend/index.html`.
+- [x] No revival of the legacy `frontend/` and `backend/` Vertex demo.
 - [x] No production deployment in this task.
 - [x] No authenticated customer account flow.
 - [x] No warehouse reservation or inventory decrement logic.

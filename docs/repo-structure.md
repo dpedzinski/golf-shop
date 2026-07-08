@@ -15,7 +15,6 @@ This repo is organized as a monorepo for the GECX golf-store prototype.
 
 ## Supporting Areas
 
-- `frontend/` and `backend/`: Existing Vertex AI Studio demo app and proxy server. These remain separate from the GECX storefront path.
 - `docs/`: Repo-level documentation.
 
 ## Canonical Sources
