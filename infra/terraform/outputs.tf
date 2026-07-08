@@ -13,6 +13,16 @@ output "bigquery_seed_job_id" {
   value       = "projects/${var.project_id}/jobs/${terraform_data.seed_golf_products.output.job_id}"
 }
 
+output "bigquery_smoke_counts_file" {
+  description = "Local JSON artifact written by Terraform with post-seed BigQuery smoke row counts."
+  value       = terraform_data.bigquery_smoke_counts.output.artifact_path
+}
+
+output "bigquery_smoke_counts_job_id" {
+  description = "BigQuery SQL job that recorded post-seed smoke row counts."
+  value       = "projects/${var.project_id}/jobs/${terraform_data.bigquery_smoke_counts.output.job_id}"
+}
+
 output "agent_name" {
   description = "Fully qualified root agent resource name."
   value       = google_ces_agent.golf_store_assistant.name

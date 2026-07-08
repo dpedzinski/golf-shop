@@ -38,6 +38,8 @@ Terraform outputs used by the site and validation runbooks:
 - `static_site_image`
 - `bigquery_dataset`
 - `bigquery_seed_job_id`
+- `bigquery_smoke_counts_file`
+- `bigquery_smoke_counts_job_id`
 - `web_deployment_name`
 - `agent_name`
 - `app_name`

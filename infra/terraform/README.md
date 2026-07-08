@@ -26,11 +26,12 @@ terraform plan
 terraform apply
 ```
 
-The direct CES Python tools return demo data. The MCP toolset calls the deployed serverless REST API, which queries the BigQuery views created by the SQL seed script. The seed script is applied with the `bq` CLI because BigQuery multi-statement scripts cannot be run through the Terraform BigQuery job resource's default destination-table settings.
+The direct CES Python tools return demo data. The MCP toolset calls the deployed serverless REST API, which queries the BigQuery views created by the SQL seed script. The seed script is applied with the `bq` CLI because BigQuery multi-statement scripts cannot be run through the Terraform BigQuery job resource's default destination-table settings. After the seed job, Terraform runs the storefront smoke-count queries and writes the results to `artifacts/terraform/bigquery-smoke-counts.json`.
 
 Useful endpoints after `terraform apply`:
 
 - `static_site_url`: public Cloud Run storefront URL
+- `bigquery_smoke_counts_file`: local JSON artifact containing post-seed BigQuery view row counts
 - `GET <product_api_url>/health`
 - `GET <product_api_url>/products?q=driver&limit=5`
 - `GET <product_api_url>/products/{product_id}`
@@ -55,3 +56,23 @@ Set `allow_unauthenticated_serverless = false` to keep the functions private. Te
 The static storefront is deployed to Cloud Run because the Vinext app has a server runtime in addition to client assets. Terraform submits the repository to Cloud Build, builds `apps/static-site/Dockerfile`, pushes the image to Artifact Registry, and deploys the Cloud Run service with runtime environment variables populated from the Terraform-managed Product API, MCP server, and CES WEB_UI deployment. Keep `allow_unauthenticated_serverless = true` for the current browser-facing storefront path; if the API and MCP services are made private, add a backend proxy before exposing the site publicly.
 
 The seed SQL is written for clean reruns: it drops and recreates the views/tables inside `bigquery_dataset_id` before inserting the fixture data.
+
+## BigQuery Smoke Counts
+
+`terraform apply` runs the seed SQL and then records row counts for:
+
+- `vw_product_listing_current`
+- `vw_product_detail_current`
+- `vw_product_facets`
+- `vw_category_navigation`
+- `vw_cart_pricing_current`
+- `vw_active_financing_options`
+- `vw_active_promotions`
+
+Read the artifact path with:
+
+```bash
+terraform output -raw bigquery_smoke_counts_file
+```
+
+The JSON file is generated under `artifacts/`, which is ignored by Git.

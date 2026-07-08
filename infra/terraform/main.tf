@@ -12,13 +12,14 @@ terraform {
 }
 
 locals {
-  repo_root              = abspath("${path.module}/../..")
-  product_api_source_dir = "${local.repo_root}/services/product-api"
-  mcp_server_source_dir  = "${local.repo_root}/services/mcp-server"
-  static_site_source_dir = "${local.repo_root}/apps/static-site"
-  gecx_tool_python_dir   = "${local.repo_root}/gecx/tools/python"
-  agent_instruction_file = "${local.repo_root}/gecx/agents/golf-store-assistant/instruction.txt"
-  bigquery_seed_sql_file = "${local.repo_root}/${var.bigquery_seed_sql_file}"
+  repo_root                  = abspath("${path.module}/../..")
+  product_api_source_dir     = "${local.repo_root}/services/product-api"
+  mcp_server_source_dir      = "${local.repo_root}/services/mcp-server"
+  static_site_source_dir     = "${local.repo_root}/apps/static-site"
+  gecx_tool_python_dir       = "${local.repo_root}/gecx/tools/python"
+  agent_instruction_file     = "${local.repo_root}/gecx/agents/golf-store-assistant/instruction.txt"
+  bigquery_seed_sql_file     = "${local.repo_root}/${var.bigquery_seed_sql_file}"
+  bigquery_smoke_counts_file = "${local.repo_root}/artifacts/terraform/bigquery-smoke-counts.json"
 
   required_services = toset([
     "artifactregistry.googleapis.com",
@@ -39,6 +40,29 @@ locals {
     "location = 'US'",
     "location = '${var.bigquery_location}'"
   )
+
+  bigquery_smoke_counts_sql = <<-SQL
+    SELECT 'vw_product_listing_current' AS object_name, COUNT(*) AS row_count
+    FROM `${var.project_id}.${var.bigquery_dataset_id}.vw_product_listing_current`
+    UNION ALL
+    SELECT 'vw_product_detail_current', COUNT(*)
+    FROM `${var.project_id}.${var.bigquery_dataset_id}.vw_product_detail_current`
+    UNION ALL
+    SELECT 'vw_product_facets', COUNT(*)
+    FROM `${var.project_id}.${var.bigquery_dataset_id}.vw_product_facets`
+    UNION ALL
+    SELECT 'vw_category_navigation', COUNT(*)
+    FROM `${var.project_id}.${var.bigquery_dataset_id}.vw_category_navigation`
+    UNION ALL
+    SELECT 'vw_cart_pricing_current', COUNT(*)
+    FROM `${var.project_id}.${var.bigquery_dataset_id}.vw_cart_pricing_current`
+    UNION ALL
+    SELECT 'vw_active_financing_options', COUNT(*)
+    FROM `${var.project_id}.${var.bigquery_dataset_id}.vw_active_financing_options`
+    UNION ALL
+    SELECT 'vw_active_promotions', COUNT(*)
+    FROM `${var.project_id}.${var.bigquery_dataset_id}.vw_active_promotions`
+  SQL
 
   agent_instruction = trimspace(file(local.agent_instruction_file))
 
@@ -184,6 +208,77 @@ resource "terraform_data" "seed_golf_products" {
   }
 
   depends_on = [google_bigquery_dataset.golf_products]
+}
+
+resource "terraform_data" "bigquery_smoke_counts" {
+  input = {
+    artifact_path = local.bigquery_smoke_counts_file
+    job_id        = "smoke_golf_products_cli_${substr(sha256(join("\n", [local.rendered_seed_sql, local.bigquery_smoke_counts_sql])), 0, 16)}"
+  }
+
+  triggers_replace = {
+    project_id       = var.project_id
+    dataset_id       = var.bigquery_dataset_id
+    location         = var.bigquery_location
+    seed_job_id      = terraform_data.seed_golf_products.output.job_id
+    smoke_sql_sha256 = sha256(local.bigquery_smoke_counts_sql)
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      set -euo pipefail
+      tmp_sql="$(mktemp)"
+      artifact_path='${self.input.artifact_path}'
+      cleanup() {
+        rm -f "$tmp_sql"
+      }
+      trap cleanup EXIT
+
+      mkdir -p "$(dirname "$artifact_path")"
+      cat > "$tmp_sql" <<'SQL'
+      ${local.bigquery_smoke_counts_sql}
+      SQL
+
+      rows_json="$(bq query \
+        --project_id='${var.project_id}' \
+        --location='${var.bigquery_location}' \
+        --job_id='${self.input.job_id}' \
+        --use_legacy_sql=false \
+        --format=json \
+        < "$tmp_sql")"
+
+      ROWS_JSON="$rows_json" python3 - <<'PY'
+      import json
+      import os
+
+      artifact_path = os.environ["ARTIFACT_PATH"]
+      payload = {
+          "project_id": os.environ["PROJECT_ID"],
+          "dataset_id": os.environ["DATASET_ID"],
+          "location": os.environ["LOCATION"],
+          "seed_job_id": os.environ["SEED_JOB_ID"],
+          "smoke_job_id": os.environ["SMOKE_JOB_ID"],
+          "row_counts": json.loads(os.environ["ROWS_JSON"]),
+      }
+      with open(artifact_path, "w", encoding="utf-8") as handle:
+          json.dump(payload, handle, indent=2, sort_keys=True)
+          handle.write("\\n")
+      print(json.dumps(payload, indent=2, sort_keys=True))
+      PY
+    EOT
+
+    environment = {
+      ARTIFACT_PATH = self.input.artifact_path
+      DATASET_ID    = var.bigquery_dataset_id
+      LOCATION      = var.bigquery_location
+      PROJECT_ID    = var.project_id
+      SEED_JOB_ID   = terraform_data.seed_golf_products.output.job_id
+      SMOKE_JOB_ID  = self.input.job_id
+    }
+  }
+
+  depends_on = [terraform_data.seed_golf_products]
 }
 
 resource "google_service_account" "product_api" {

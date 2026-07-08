@@ -178,6 +178,15 @@ Expected: JSON collections with `count` where implemented by the endpoint.
 
 ## Layer 4: BigQuery Row And View Checks
 
+Terraform applies the seed SQL during `terraform apply`, then runs the core
+storefront smoke-count queries and records them as JSON:
+
+```bash
+terraform -chdir=infra/terraform output -raw bigquery_smoke_counts_file
+```
+
+Use the manual queries below for ad hoc investigation or expanded validation.
+
 Set the dataset output and convert it to the `project.dataset` form expected by
 SQL. Terraform may return the dataset as a resource name such as
 `projects/PROJECT_ID/datasets/DATASET_ID`.

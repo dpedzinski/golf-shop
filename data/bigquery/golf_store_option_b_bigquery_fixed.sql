@@ -2864,22 +2864,22 @@ GROUP BY catalog.product_id;
 CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_facets` AS
 SELECT 'category' AS facet_type, category_id AS facet_value, category_slug AS facet_slug, category_name AS facet_label, COUNT(*) AS result_count, MIN(min_current_sale_price) AS min_price, MAX(max_current_sale_price) AS max_price
 FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
-GROUP BY category_id, category_slug, category_name
+GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'brand', brand_name, REGEXP_REPLACE(LOWER(brand_name), r'[^a-z0-9]+', '-'), brand_name, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
 FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 WHERE brand_name IS NOT NULL
-GROUP BY brand_name
+GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'player_profile', target_player_profile, REGEXP_REPLACE(LOWER(target_player_profile), r'[^a-z0-9]+', '-'), target_player_profile, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
 FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 WHERE target_player_profile IS NOT NULL
-GROUP BY target_player_profile
+GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'stock', inventory_status, REGEXP_REPLACE(LOWER(inventory_status), r'[^a-z0-9]+', '-'), inventory_status, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
 FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 WHERE inventory_status IS NOT NULL
-GROUP BY inventory_status
+GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'price', 'price', 'price', 'Price range', COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
 FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`;

@@ -181,7 +181,7 @@ Expected result: each storefront view returns nonzero rows. Active financing and
 
 - [x] Storefront API has read views for listing, detail, facets, category navigation, and cart pricing.
 - [x] Active promotion/financing logic is date-relative.
-- [ ] Apply seed SQL to the target BigQuery dataset and record row counts from the smoke queries above.
+- [x] Terraform applies the seed SQL to the target BigQuery dataset and records row counts from the smoke queries above in `artifacts/terraform/bigquery-smoke-counts.json`.
 
 ## Tests And Validation
 
@@ -213,7 +213,7 @@ Expected result: each storefront view returns nonzero rows. Active financing and
 
 ### Remaining Manual Validation
 
-- [ ] Execute BigQuery smoke queries after deploying the updated seed SQL.
+- [ ] Run `terraform apply` in a credentialed target environment and inspect `terraform output -raw bigquery_smoke_counts_file`.
 - [ ] Smoke `/products`, `/products/{id}`, `/facets`, `/cart/estimate`, `/promotions`, `/financing`, `/shipping`, `/returns`, and `/warranties` against the live API environment with BigQuery credentials.
 - [ ] Check API responses with a real `NEXT_PUBLIC_PRODUCT_API_URL` in `apps/static-site`.
 
