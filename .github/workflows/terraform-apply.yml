@@ -7,6 +7,7 @@ on:
       - '.github/workflows/terraform-*.yml'
     branches:
       - main
+      - 'feature/terraform-cicd-pipeline'  # Temporary: for testing only
 
 # Ensure only one apply runs at a time
 concurrency:
@@ -21,7 +22,7 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     runs-on: ubuntu-latest
-    environment: production
+    # environment: production  # Disabled for testing on feature branch
 
     defaults:
       run:
