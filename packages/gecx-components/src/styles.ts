@@ -173,6 +173,38 @@ export const baseStyles = `
     align-content: start;
   }
 
+  .cx-offer-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .cx-offer {
+    background: var(--cx-color-surface-alt);
+    border: 1px solid var(--cx-color-border);
+    border-radius: 6px;
+    display: grid;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .cx-offer-title {
+    color: var(--cx-color-text);
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .cx-offer-meta {
+    color: var(--cx-color-muted);
+    font-size: 12px;
+  }
+
+  .cx-cta-stack {
+    align-items: stretch;
+    display: grid;
+    gap: 8px;
+  }
+
   .cx-definition {
     background: var(--cx-color-surface-alt);
     border-radius: 6px;

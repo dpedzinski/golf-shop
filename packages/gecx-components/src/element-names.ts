@@ -14,7 +14,9 @@ export const ELEMENT_NAMES = {
   'payment-plan': 'cx-payment-plan',
   'monthly-payment-estimate': 'cx-monthly-payment-estimate',
   'financing-disclosure': 'cx-financing-disclosure',
+  'cta-group': 'cx-cta-group',
   'product-list': 'cx-product-list',
+  'product-offers': 'cx-product-offers',
   'product-comparison': 'cx-product-comparison',
   'loyalty-tiers': 'cx-loyalty-tiers',
 } as const satisfies Record<CxWidgetKind | 'widget-host', string>;

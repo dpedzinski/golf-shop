@@ -6,12 +6,19 @@ import type {
   CxCardOffer,
   CxCardOffersPayload,
   CxChoiceListPayload,
+  CxCtaGroupPayload,
   CxDataTablePayload,
   CxFinancingDisclosurePayload,
   CxFinancingOptionsPayload,
   CxFormPanelPayload,
+  CxLoyaltyTiersPayload,
   CxMonthlyPaymentEstimatePayload,
   CxPaymentPlanPayload,
+  CxProductComparisonPayload,
+  CxProductListPayload,
+  CxProductOffer,
+  CxProductOffersPayload,
+  CxProductSummary,
   CxRichCardPayload,
   CxStatusBannerPayload,
   CxWidgetPayload,
@@ -67,6 +74,16 @@ export function toRichContentFallback(payload: CxWidgetPayload): DialogflowRichC
       return { richContent: [monthlyEstimateFallback(payload)] };
     case 'financing-disclosure':
       return { richContent: [disclosureFallback(payload)] };
+    case 'cta-group':
+      return { richContent: [ctaGroupFallback(payload)] };
+    case 'product-list':
+      return { richContent: productListFallback(payload) };
+    case 'product-offers':
+      return { richContent: productOffersFallback(payload) };
+    case 'product-comparison':
+      return { richContent: [[htmlItem(productComparisonHtml(payload))]] };
+    case 'loyalty-tiers':
+      return { richContent: loyaltyTiersFallback(payload) };
     default:
       return { richContent: [[descriptionItem('Unsupported widget', ['This widget type does not have a fallback renderer.'])]] };
   }
@@ -201,6 +218,80 @@ function disclosureFallback(payload: CxFinancingDisclosurePayload): RichItem[] {
   return [descriptionItem(payload.title ?? 'Financing disclosure', [...asArray(payload.body), ...payload.disclosures])];
 }
 
+function ctaGroupFallback(payload: CxCtaGroupPayload): RichItem[] {
+  const items: RichItem[] = [];
+  if (payload.title || payload.subtitle || payload.body) {
+    items.push(descriptionItem(payload.title ?? 'Actions', compactLines([payload.subtitle, ...asArray(payload.body)])));
+  }
+  items.push(...actionsAsChips(payload.actions));
+  if (payload.disclosure) items.push(descriptionItem('Disclosure', [payload.disclosure]));
+  return items;
+}
+
+function productListFallback(payload: CxProductListPayload): RichItem[][] {
+  const cards = payload.products.map((product) => productInfoFallback(product));
+  return cards.length ? cards : [[descriptionItem(payload.title ?? 'Products', [payload.emptyMessage ?? 'No products are currently available.'])]];
+}
+
+function productOffersFallback(payload: CxProductOffersPayload): RichItem[][] {
+  const cards = payload.offers.map((offer) => productOfferFallback(offer));
+  if (payload.disclosure) cards.push([descriptionItem('Disclosure', [payload.disclosure])]);
+  return cards.length
+    ? cards
+    : [[descriptionItem(payload.title ?? payload.product?.name ?? 'Product offers', [payload.emptyMessage ?? 'No offers are currently available.'])]];
+}
+
+function productInfoFallback(product: CxProductSummary): RichItem[] {
+  const lines = [
+    product.description,
+    product.brand ? `Brand: ${product.brand}` : undefined,
+    product.category ? `Category: ${product.category}` : undefined,
+    product.price === undefined ? undefined : `Price: ${typeof product.price === 'number' ? formatCurrency(product.price) : product.price}`,
+    product.rating === undefined ? undefined : `Rating: ${product.rating} / 5`,
+    product.reviewCount === undefined ? undefined : `Reviews: ${product.reviewCount}`,
+    product.inventoryStatus ? `Inventory: ${product.inventoryStatus}` : undefined,
+    product.fit ? `Best fit: ${product.fit}` : undefined,
+    ...(product.offers ?? []).map((offer) => `Offer: ${offer.headline}`),
+  ].filter(Boolean) as string[];
+  const image = product.image?.src && safeUrl(product.image.src)
+    ? [{ type: 'image', rawUrl: safeUrl(product.image.src), accessibilityText: product.image.alt ?? product.name }]
+    : [];
+  return [
+    ...image,
+    descriptionItem(product.name, lines),
+    ...actionsAsChips([product.action, ...(product.actions ?? [])].filter((action): action is CxAction => Boolean(action))),
+  ];
+}
+
+function productOfferFallback(offer: CxProductOffer): RichItem[] {
+  const lines = [
+    offer.description,
+    offer.label ? `Type: ${offer.label}` : undefined,
+    offer.price === undefined ? undefined : `Price: ${typeof offer.price === 'number' ? formatCurrency(offer.price) : offer.price}`,
+    offer.badge ? `Badge: ${offer.badge}` : undefined,
+    offer.expiresAt ? `Ends: ${offer.expiresAt}` : undefined,
+    offer.eligibilityNotes ? `Eligibility: ${offer.eligibilityNotes}` : undefined,
+  ].filter(Boolean) as string[];
+  return [
+    descriptionItem(offer.headline, lines),
+    ...actionsAsChips([offer.action, ...(offer.actions ?? [])].filter((action): action is CxAction => Boolean(action))),
+  ];
+}
+
+function loyaltyTiersFallback(payload: CxLoyaltyTiersPayload): RichItem[][] {
+  const cards = payload.tiers.map((tier) => [
+    descriptionItem(tier.name, [
+      tier.annualSpend ? `Annual spend: ${tier.annualSpend}` : undefined,
+      tier.earningRate ? `Earn: ${tier.earningRate}` : undefined,
+      tier.redemptionRate ? `Redeem: ${tier.redemptionRate}` : undefined,
+      ...tier.benefits,
+      ...(tier.caveats ?? []),
+    ].filter(Boolean) as string[]),
+  ]);
+  if (payload.disclosure) cards.push([descriptionItem('Disclosure', [payload.disclosure])]);
+  return cards.length ? cards : [[descriptionItem(payload.title ?? 'Loyalty tiers', ['No loyalty tiers are currently available.'])]];
+}
+
 function actionsAsChips(actions: CxAction[] | undefined): RichItem[] {
   const options = (actions ?? [])
     .filter((action) => action.label)
@@ -255,6 +346,37 @@ function cardCompareHtml(payload: CxCardComparePayload): string {
       const values: Record<string, string> = { feature: row.label };
       cards.forEach((card, index) => {
         values[card.id] = row.values[index] ?? 'Not provided';
+      });
+      return values;
+    }),
+  };
+  return tableHtml(table);
+}
+
+function productComparisonHtml(payload: CxProductComparisonPayload): string {
+  const products = payload.products;
+  const rows =
+    payload.rows ??
+    [
+      { label: 'Brand', values: products.map((product) => product.brand ?? 'Not provided') },
+      { label: 'Category', values: products.map((product) => product.category ?? 'Not provided') },
+      {
+        label: 'Price',
+        values: products.map((product) =>
+          product.price === undefined ? 'Not provided' : typeof product.price === 'number' ? formatCurrency(product.price) : product.price
+        ),
+      },
+      { label: 'Rating', values: products.map((product) => (product.rating === undefined ? 'Not provided' : `${product.rating} / 5`)) },
+      { label: 'Inventory', values: products.map((product) => product.inventoryStatus ?? 'Not provided') },
+      { label: 'Best fit', values: products.map((product) => product.fit ?? 'Not provided') },
+    ];
+  const table: CxDataTablePayload = {
+    kind: 'data-table',
+    columns: [{ key: 'feature', label: 'Feature' }, ...products.map((product) => ({ key: product.id, label: product.name }))],
+    rows: rows.map((row) => {
+      const values: Record<string, string> = { feature: row.label };
+      products.forEach((product, index) => {
+        values[product.id] = row.values[index] ?? 'Not provided';
       });
       return values;
     }),

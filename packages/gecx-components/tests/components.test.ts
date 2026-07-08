@@ -7,6 +7,9 @@ import {
   formPayload,
   monthlyEstimatePayload,
   paymentPlanPayload,
+  productListPayload,
+  productOffersPayload,
+  ctaGroupPayload,
 } from '../demo/sample-payloads';
 
 describe('CX web components', () => {
@@ -114,24 +117,7 @@ describe('CX web components', () => {
     const host = document.createElement('div');
     document.body.append(host);
 
-    renderCxWidget(host, {
-      kind: 'product-list',
-      title: 'Featured gear',
-      products: [
-        {
-          id: 'P001',
-          name: 'LaunchMax Carbon Driver',
-          brand: 'Fairway Supply',
-          category: 'Drivers',
-          price: 449.99,
-          rating: 4.7,
-          reviewCount: 128,
-          inventoryStatus: 'In stock',
-          fit: 'Forgiving distance',
-          tags: ['Beginner friendly', 'High launch'],
-        },
-      ],
-    });
+    renderCxWidget(host, productListPayload);
     renderCxWidget(host, {
       kind: 'loyalty-tiers',
       title: 'Rewards',
@@ -147,8 +133,39 @@ describe('CX web components', () => {
 
     const productList = host.querySelector(ELEMENT_NAMES['product-list']);
     const loyalty = host.querySelector(ELEMENT_NAMES['loyalty-tiers']);
-    expect(productList?.shadowRoot?.textContent).toContain('LaunchMax Carbon Driver');
-    expect(productList?.shadowRoot?.textContent).toContain('Forgiving distance');
+    expect(productList?.shadowRoot?.textContent).toContain('Strata Ultimate Complete Golf Set');
+    expect(productList?.shadowRoot?.textContent).toContain('Check financing');
     expect(loyalty?.shadowRoot?.textContent).toContain('Member pricing');
+  });
+
+  it('renders product offers and dispatches offer CTAs', () => {
+    const element = document.createElement(ELEMENT_NAMES['product-offers']);
+    element.payload = productOffersPayload;
+    document.body.append(element);
+
+    const listener = vi.fn();
+    document.addEventListener('cx-action', listener);
+
+    expect(element.shadowRoot?.textContent).toContain('$25 reward certificate');
+    expect(element.shadowRoot?.textContent).toContain('Build bundle');
+    element.shadowRoot?.querySelector('button')?.click();
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener.mock.calls[0][0].detail.action.id).toBe('review-card-offer');
+  });
+
+  it('renders reusable CTA groups', () => {
+    const element = document.createElement(ELEMENT_NAMES['cta-group']);
+    element.payload = ctaGroupPayload;
+    document.body.append(element);
+
+    const listener = vi.fn();
+    document.addEventListener('cx-action', listener);
+
+    expect(element.shadowRoot?.textContent).toContain('Next steps');
+    element.shadowRoot?.querySelector('button')?.click();
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener.mock.calls[0][0].detail.action.id).toBe('continue-shopping');
   });
 });

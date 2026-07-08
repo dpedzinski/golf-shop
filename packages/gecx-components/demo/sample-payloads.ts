@@ -135,12 +135,185 @@ export const formPayload: CxWidgetPayload = {
   submitLabel: 'Send',
 };
 
+export const productListPayload: CxWidgetPayload = {
+  kind: 'product-list',
+  title: 'Recommended gear',
+  subtitle: 'Catalog-style cards with offers and shopper CTAs.',
+  products: [
+    {
+      id: 'CLUB-STRATA-SET',
+      name: 'Strata Ultimate Complete Golf Set',
+      brand: 'Strata',
+      category: 'Clubs',
+      description: 'Forgiving full set with driver, fairway wood, hybrid, irons, putter, and stand bag.',
+      price: 499.99,
+      rating: 4.5,
+      reviewCount: 120,
+      inventoryStatus: 'In stock',
+      fit: 'New golfers who want one affordable package.',
+      image: {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg',
+        alt: 'Golf clubs in a bag on a golf course.',
+      },
+      tags: ['Beginner friendly', 'Complete set'],
+      offers: [
+        {
+          id: 'strata-promo-finance',
+          label: 'Financing',
+          headline: '0% promo APR may be available for 12 months',
+          description: 'Shown for qualifying purchases over $499.',
+          badge: 'Limited time',
+          eligibilityNotes: 'Subject to credit approval and final terms.',
+          action: {
+            id: 'check-strata-financing',
+            label: 'Check financing',
+            kind: 'event',
+            eventName: 'check_product_financing',
+            payload: { productId: 'CLUB-STRATA-SET' },
+          },
+        },
+      ],
+      actions: [
+        {
+          id: 'view-strata',
+          label: 'View details',
+          kind: 'event',
+          eventName: 'view_product_details',
+          payload: { productId: 'CLUB-STRATA-SET' },
+        },
+        {
+          id: 'compare-strata',
+          label: 'Compare',
+          kind: 'event',
+          eventName: 'add_to_compare',
+          variant: 'secondary',
+          payload: { productId: 'CLUB-STRATA-SET' },
+        },
+      ],
+    },
+    {
+      id: 'BALL-TITLEIST-TRUFEEL',
+      name: 'Titleist TruFeel Golf Balls',
+      brand: 'Titleist',
+      category: 'Balls',
+      description: 'Soft-feel golf balls with good control at a moderate price.',
+      price: 24.99,
+      rating: 4.6,
+      reviewCount: 210,
+      inventoryStatus: 'In stock',
+      fit: 'Players who value feel and short-game control.',
+      image: {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Golfball.jpg',
+        alt: 'White golf ball beside a cup on a putting green.',
+      },
+      tags: ['Soft feel', 'Value'],
+      actions: [
+        {
+          id: 'view-trufeel',
+          label: 'View details',
+          kind: 'event',
+          eventName: 'view_product_details',
+          payload: { productId: 'BALL-TITLEIST-TRUFEEL' },
+        },
+        {
+          id: 'add-trufeel',
+          label: 'Add to cart',
+          kind: 'event',
+          eventName: 'add_to_cart',
+          variant: 'primary',
+          payload: { productId: 'BALL-TITLEIST-TRUFEEL', quantity: 1 },
+        },
+      ],
+    },
+  ],
+};
+
+export const productOffersPayload: CxWidgetPayload = {
+  kind: 'product-offers',
+  title: 'Offers for Strata Ultimate Complete Golf Set',
+  productId: 'CLUB-STRATA-SET',
+  offers: [
+    {
+      id: 'strata-card-offer',
+      label: 'Store card',
+      headline: '$25 reward certificate after first qualifying purchase',
+      description: 'For eligible store card members after account approval and purchase posting.',
+      badge: 'Card offer',
+      eligibilityNotes: 'Subject to credit approval. Terms apply.',
+      actions: [
+        {
+          id: 'review-card-offer',
+          label: 'Review card offer',
+          kind: 'event',
+          eventName: 'review_card_offer',
+          payload: { productId: 'CLUB-STRATA-SET' },
+        },
+        {
+          id: 'terms-card-offer',
+          label: 'Terms',
+          kind: 'link',
+          href: 'https://example.com/store-card-terms',
+          variant: 'ghost',
+        },
+      ],
+    },
+    {
+      id: 'strata-bundle-offer',
+      label: 'Bundle',
+      headline: 'Save 10% on balls and tees with this club set',
+      description: 'Applies when eligible accessories are added in the same cart.',
+      badge: 'Bundle',
+      expiresAt: '2026-08-31',
+      action: {
+        id: 'build-strata-bundle',
+        label: 'Build bundle',
+        kind: 'event',
+        eventName: 'build_bundle',
+        payload: { productId: 'CLUB-STRATA-SET' },
+      },
+    },
+  ],
+  disclosure: 'Offers are examples for widget rendering. Availability and final terms can change.',
+};
+
+export const ctaGroupPayload: CxWidgetPayload = {
+  kind: 'cta-group',
+  title: 'Next steps',
+  body: 'Use CTA groups when the agent needs to present several clear shopper actions.',
+  layout: 'row',
+  actions: [
+    {
+      id: 'continue-shopping',
+      label: 'Continue shopping',
+      kind: 'event',
+      eventName: 'continue_shopping',
+    },
+    {
+      id: 'compare-selected',
+      label: 'Compare selected',
+      kind: 'event',
+      eventName: 'compare_selected_products',
+      variant: 'secondary',
+    },
+    {
+      id: 'talk-to-associate',
+      label: 'Talk to associate',
+      kind: 'event',
+      eventName: 'handoff_to_associate',
+      variant: 'ghost',
+    },
+  ],
+};
+
 export const demoPayloads: CxWidgetPayload[] = [
   cardOffersPayload,
   cardComparePayload,
   financingOptionsPayload,
   paymentPlanPayload,
   monthlyEstimatePayload,
+  productListPayload,
+  productOffersPayload,
+  ctaGroupPayload,
   formPayload,
   {
     kind: 'financing-disclosure',

@@ -6,6 +6,7 @@ import type {
   CxCardOffer,
   CxCardOffersPayload,
   CxChoiceListPayload,
+  CxCtaGroupPayload,
   CxDataTablePayload,
   CxFinancingDisclosurePayload,
   CxFinancingOption,
@@ -18,6 +19,8 @@ import type {
   CxPaymentPlanPayload,
   CxProductComparisonPayload,
   CxProductListPayload,
+  CxProductOffer,
+  CxProductOffersPayload,
   CxProductSummary,
   CxRichCardPayload,
   CxStatusBannerPayload,
@@ -97,7 +100,9 @@ function renderCardOffer(offer: CxCardOffer, onAction: (action: CxAction, offer:
     for (const caveat of offer.caveats) list.append(createElement('li', { text: caveat }));
     shell.append(list);
   }
-  const actions = [offer.primaryAction, termsAction(offer)].filter((action): action is CxAction => Boolean(action));
+  const actions = [offer.primaryAction, ...(offer.actions ?? []), termsAction(offer)].filter((action): action is CxAction =>
+    Boolean(action)
+  );
   appendIf(shell, createActions(actions, (action) => onAction(action, offer)));
   return shell;
 }
@@ -132,6 +137,39 @@ function formatPrice(value: string | number | undefined): string | undefined {
   return value;
 }
 
+function offerActions(offer: CxProductOffer): CxAction[] {
+  return [offer.action, ...(offer.actions ?? [])].filter((action): action is CxAction => Boolean(action));
+}
+
+function renderProductOffer(offer: CxProductOffer, onAction: (action: CxAction, offer: CxProductOffer) => void): HTMLElement {
+  const shell = createElement('article', { className: 'cx-offer' });
+  const header = createElement('div', { className: 'cx-stack' });
+  const title = createElement('h4', { className: 'cx-offer-title', text: offer.headline });
+  header.append(title);
+  const meta = [offer.label, formatPrice(offer.price), offer.expiresAt ? `Ends ${offer.expiresAt}` : undefined].filter(Boolean).join(' | ');
+  if (meta) header.append(createElement('div', { className: 'cx-offer-meta', text: meta }));
+  if (offer.badge) header.append(createElement('span', { className: 'cx-pill', text: offer.badge }));
+  shell.append(header);
+  if (offer.description) shell.append(createElement('p', { className: 'cx-muted', text: offer.description }));
+  if (offer.eligibilityNotes) shell.append(createElement('p', { className: 'cx-disclosure', text: offer.eligibilityNotes }));
+  appendIf(shell, createActions(offerActions(offer), (action) => onAction(action, offer)));
+  return shell;
+}
+
+function renderProductOffers(
+  offers: CxProductOffer[] | undefined,
+  onAction: (action: CxAction, offer: CxProductOffer) => void
+): HTMLElement | null {
+  if (!offers?.length) return null;
+  const list = createElement('div', { className: 'cx-offer-list' });
+  for (const offer of offers) list.append(renderProductOffer(offer, onAction));
+  return list;
+}
+
+function productActions(product: CxProductSummary): CxAction[] {
+  return [product.action, ...(product.actions ?? [])].filter((action): action is CxAction => Boolean(action));
+}
+
 function renderProduct(product: CxProductSummary, onAction: (action: CxAction, product: CxProductSummary) => void): HTMLElement {
   const shell = cardShell();
   shell.classList.add('cx-product-card');
@@ -159,7 +197,8 @@ function renderProduct(product: CxProductSummary, onAction: (action: CxAction, p
     for (const tag of product.tags) row.append(createElement('span', { className: 'cx-pill', text: tag }));
     shell.append(row);
   }
-  appendIf(shell, createActions(product.action ? [product.action] : undefined, (action) => onAction(action, product)));
+  appendIf(shell, renderProductOffers(product.offers, (action) => onAction(action, product)));
+  appendIf(shell, createActions(productActions(product), (action) => onAction(action, product)));
   return shell;
 }
 
@@ -486,6 +525,21 @@ export class CxFinancingDisclosureElement extends CxElement<CxFinancingDisclosur
   }
 }
 
+export class CxCtaGroupElement extends CxElement<CxCtaGroupPayload> {
+  protected renderPayload(payload: CxCtaGroupPayload): Node {
+    const shell = cardShell(payload?.tone);
+    appendIf(shell, createHeader(payload ?? {}));
+    appendIf(shell, createBody(payload?.body));
+    const actionContainer = createActions(payload?.actions, (action) => this.dispatchAction(action));
+    if (actionContainer) {
+      if (payload?.layout === 'stack') actionContainer.classList.add('cx-cta-stack');
+      shell.append(actionContainer);
+    }
+    if (payload?.disclosure) shell.append(createElement('p', { className: 'cx-disclosure', text: payload.disclosure }));
+    return shell;
+  }
+}
+
 export class CxProductListElement extends CxElement<CxProductListPayload> {
   protected renderPayload(payload: CxProductListPayload): Node {
     const shell = createElement('section', { className: 'cx-stack' });
@@ -498,6 +552,26 @@ export class CxProductListElement extends CxElement<CxProductListPayload> {
       grid.append(renderProduct(product, (action, source) => this.dispatchAction(action, source)));
     }
     if (products.length) shell.append(grid);
+    appendIf(shell, createActions(payload?.actions, (action) => this.dispatchAction(action)));
+    return shell;
+  }
+}
+
+export class CxProductOffersElement extends CxElement<CxProductOffersPayload> {
+  protected renderPayload(payload: CxProductOffersPayload): Node {
+    const shell = createElement('section', { className: 'cx-stack' });
+    appendIf(
+      shell,
+      createHeader({
+        title: payload?.title ?? payload?.product?.name,
+        subtitle: payload?.subtitle ?? payload?.product?.description,
+      })
+    );
+    appendIf(shell, createBody(payload?.body));
+    const offers = payload?.offers ?? [];
+    if (!offers.length) shell.append(renderEmpty(payload?.emptyMessage ?? 'No offers are currently available for this product.'));
+    appendIf(shell, renderProductOffers(offers, (action, source) => this.dispatchAction(action, source)));
+    if (payload?.disclosure) shell.append(createElement('p', { className: 'cx-disclosure', text: payload.disclosure }));
     appendIf(shell, createActions(payload?.actions, (action) => this.dispatchAction(action)));
     return shell;
   }
@@ -583,7 +657,9 @@ export const componentDefinitions = {
   [ELEMENT_NAMES['payment-plan']]: CxPaymentPlanElement,
   [ELEMENT_NAMES['monthly-payment-estimate']]: CxMonthlyPaymentEstimateElement,
   [ELEMENT_NAMES['financing-disclosure']]: CxFinancingDisclosureElement,
+  [ELEMENT_NAMES['cta-group']]: CxCtaGroupElement,
   [ELEMENT_NAMES['product-list']]: CxProductListElement,
+  [ELEMENT_NAMES['product-offers']]: CxProductOffersElement,
   [ELEMENT_NAMES['product-comparison']]: CxProductComparisonElement,
   [ELEMENT_NAMES['loyalty-tiers']]: CxLoyaltyTiersElement,
 };

@@ -104,7 +104,9 @@ registerDialogflowBridge(dfMessenger, {
 - `cx-payment-plan`
 - `cx-monthly-payment-estimate`
 - `cx-financing-disclosure`
+- `cx-cta-group`
 - `cx-product-list`
+- `cx-product-offers`
 - `cx-product-comparison`
 - `cx-loyalty-tiers`
 
@@ -113,6 +115,8 @@ All components dispatch bubbling, composed events:
 - `cx-action` for links, choices, and CTA buttons
 - `cx-submit` for form submissions
 - `cx-error` for render failures
+
+Product catalog cards support multiple CTAs through `actions` and compact promo/financing blocks through `offers`. Use `cx-product-offers` when the agent needs to show offers for one product, and `cx-cta-group` when the response is primarily a set of next-step actions.
 
 ## Safety Notes
 

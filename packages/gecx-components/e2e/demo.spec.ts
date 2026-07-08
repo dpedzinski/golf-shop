@@ -15,5 +15,8 @@ test('demo index renders the full widget set', async ({ page }) => {
 
   await expect(page.getByText('Compare financing choices')).toBeVisible();
   await expect(page.getByText('Estimated payment plans')).toBeVisible();
+  await expect(page.getByText('Recommended gear')).toBeVisible();
+  await expect(page.getByText('Offers for Strata Ultimate Complete Golf Set')).toBeVisible();
+  await expect(page.getByText('Next steps')).toBeVisible();
   await expect(page.getByText('Financing disclosure')).toBeVisible();
 });

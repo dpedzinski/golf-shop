@@ -110,6 +110,7 @@ export interface CxCardOffer {
   caveats?: string[];
   termsUrl?: string;
   primaryAction?: CxAction;
+  actions?: CxAction[];
 }
 
 export interface CxCardOffersPayload extends CxWidgetPayloadBase {
@@ -175,6 +176,26 @@ export interface CxMonthlyPaymentEstimatePayload extends CxWidgetPayloadBase {
   disclosure?: string;
 }
 
+export interface CxCtaGroupPayload extends CxWidgetPayloadBase {
+  kind: 'cta-group';
+  actions: CxAction[];
+  layout?: 'row' | 'stack';
+  disclosure?: string;
+}
+
+export interface CxProductOffer {
+  id: string;
+  label?: string;
+  headline: string;
+  description?: string;
+  price?: string | number;
+  badge?: string;
+  eligibilityNotes?: string;
+  expiresAt?: string;
+  action?: CxAction;
+  actions?: CxAction[];
+}
+
 export interface CxProductSummary {
   id: string;
   name: string;
@@ -189,12 +210,23 @@ export interface CxProductSummary {
   fit?: string;
   tags?: string[];
   action?: CxAction;
+  actions?: CxAction[];
+  offers?: CxProductOffer[];
 }
 
 export interface CxProductListPayload extends CxWidgetPayloadBase {
   kind: 'product-list';
   products: CxProductSummary[];
   emptyMessage?: string;
+}
+
+export interface CxProductOffersPayload extends CxWidgetPayloadBase {
+  kind: 'product-offers';
+  product?: CxProductSummary;
+  productId?: string;
+  offers: CxProductOffer[];
+  emptyMessage?: string;
+  disclosure?: string;
 }
 
 export interface CxProductComparisonPayload extends CxWidgetPayloadBase {
@@ -232,7 +264,9 @@ export type CxWidgetPayload =
   | CxPaymentPlanPayload
   | CxMonthlyPaymentEstimatePayload
   | CxFinancingDisclosurePayload
+  | CxCtaGroupPayload
   | CxProductListPayload
+  | CxProductOffersPayload
   | CxProductComparisonPayload
   | CxLoyaltyTiersPayload;
 

@@ -4,7 +4,7 @@ import {
   toCustomTemplateForPayload,
   toRichContentFallback,
 } from '../src';
-import { cardOffersPayload, formPayload } from '../demo/sample-payloads';
+import { cardOffersPayload, ctaGroupPayload, formPayload, productListPayload, productOffersPayload } from '../demo/sample-payloads';
 import type { CxFormPanelPayload, DialogflowMessengerLike } from '../src';
 
 describe('Dialogflow helpers', () => {
@@ -59,5 +59,16 @@ describe('Dialogflow helpers', () => {
     );
     expect(renderCustomCard).toHaveBeenCalledWith(richContent.richContent);
     expect(result).toEqual({ status: 'OK', reason: null });
+  });
+
+  it('generates fallback rich content for product catalog CTAs and offers', () => {
+    const productList = toRichContentFallback(productListPayload);
+    const productOffers = toRichContentFallback(productOffersPayload);
+    const ctaGroup = toRichContentFallback(ctaGroupPayload);
+
+    expect(JSON.stringify(productList)).toContain('Strata Ultimate Complete Golf Set');
+    expect(JSON.stringify(productList)).toContain('Check financing');
+    expect(JSON.stringify(productOffers)).toContain('Review card offer');
+    expect(JSON.stringify(ctaGroup)).toContain('Compare selected');
   });
 });
