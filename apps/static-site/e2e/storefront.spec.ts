@@ -103,10 +103,12 @@ test("renders storefront widgets and two-turn irons product carousel", async ({ 
   await expect(page.getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
   await expect(page.getByText("Experienced players and low-handicap ball strikers.")).toBeVisible();
   await expect(carousel.locator(".cx-carousel-track")).toBeVisible();
-  expect(prompts).toEqual(["I want to shop for irons", "I want to see irons for experienced players"]);
+  expect(prompts).toEqual(["I want to shop for irons"]);
 });
 
 test("falls back to demo irons flow when CES quota is exhausted", async ({ page }) => {
+  let runSessionCount = 0;
+
   await page.route("https://ces.googleapis.com/v1/**:generateChatToken", async (route) => {
     await route.fulfill({
       contentType: "application/json",
@@ -115,6 +117,7 @@ test("falls back to demo irons flow when CES quota is exhausted", async ({ page 
   });
 
   await page.route("https://ces.googleapis.com/v1/**:runSession", async (route) => {
+    runSessionCount += 1;
     await route.fulfill({
       status: 429,
       contentType: "application/json",
@@ -140,12 +143,15 @@ test("falls back to demo irons flow when CES quota is exhausted", async ({ page 
   await page.getByRole("button", { name: "Send" }).click();
 
   const carousel = page.locator(".ces-chat-message.assistant cx-product-carousel");
-  await expect(carousel).toHaveCount(1);
-  await expect(page.getByText("NorthLake Forge SoftStrike Forged Iron Set")).toBeVisible();
-  await expect(page.getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
+  await expect(carousel).toHaveCount(2);
+  await expect(page.getByLabel("Irons for experienced players").getByText("NorthLake Forge SoftStrike Forged Iron Set")).toBeVisible();
+  await expect(page.getByLabel("Irons for experienced players").getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
+  expect(runSessionCount).toBe(1);
 });
 
 test("adds an irons carousel when CES returns text without product widgets", async ({ page }) => {
+  const prompts: string[] = [];
+
   await page.route("https://ces.googleapis.com/v1/**:generateChatToken", async (route) => {
     await route.fulfill({
       contentType: "application/json",
@@ -156,6 +162,7 @@ test("adds an irons carousel when CES returns text without product widgets", asy
   await page.route("https://ces.googleapis.com/v1/**:runSession", async (route) => {
     const body = route.request().postDataJSON() as { inputs?: Array<{ text?: string }> };
     const prompt = body.inputs?.[0]?.text ?? "";
+    prompts.push(prompt);
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
@@ -185,9 +192,12 @@ test("adds an irons carousel when CES returns text without product widgets", asy
   await expect(page.getByText("Here are iron sets that fit experienced players")).toBeVisible();
   await expect(page.getByText("NorthLake Forge SoftStrike Forged Iron Set")).toBeVisible();
   await expect(page.getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
+  expect(prompts).toEqual(["I want to shop for irons"]);
 });
 
 test("keeps irons context for skill-only followups and yes retries", async ({ page }) => {
+  const prompts: string[] = [];
+
   await page.route("https://ces.googleapis.com/v1/**:generateChatToken", async (route) => {
     await route.fulfill({
       contentType: "application/json",
@@ -198,6 +208,7 @@ test("keeps irons context for skill-only followups and yes retries", async ({ pa
   await page.route("https://ces.googleapis.com/v1/**:runSession", async (route) => {
     const body = route.request().postDataJSON() as { inputs?: Array<{ text?: string }> };
     const prompt = body.inputs?.[0]?.text ?? "";
+    prompts.push(prompt);
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
@@ -228,6 +239,7 @@ test("keeps irons context for skill-only followups and yes retries", async ({ pa
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.locator(".ces-chat-message.assistant cx-product-carousel")).toHaveCount(2);
   await expect(page.getByText("NorthLake Forge SoftStrike Forged Iron Set").last()).toBeVisible();
+  expect(prompts).toEqual(["I want to shop for irons"]);
 });
 
 test("renders product listing and category routes", async ({ page }) => {

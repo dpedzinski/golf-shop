@@ -72,7 +72,13 @@ try {
     throw new Error("Quota fallback text is visible to shoppers.");
   }
 
-  if (missingSuccessfulCalls.length && !(carouselRendered && quotaExhaustedResponses.length)) {
+  if (quotaExhaustedResponses.length) {
+    throw new Error(
+      `CES returned ${quotaExhaustedResponses.length} quota-exhausted response(s): ${JSON.stringify(cesResponses)}`
+    );
+  }
+
+  if (missingSuccessfulCalls.length) {
     throw new Error(`Missing successful CES calls: ${missingSuccessfulCalls.join(", ")}`);
   }
 

@@ -405,6 +405,7 @@ function CesChat({
   }
 
   async function sendMessage(text: string, includeUserMessage: boolean) {
+    const previousProductPrompt = lastProductPromptRef.current;
     const fallbackPrompt = resolveFallbackPrompt(text, lastProductPromptRef.current);
     if (isIronPrompt(fallbackPrompt) && fallbackPrompt !== lastProductPromptRef.current) {
       lastProductPromptRef.current = fallbackPrompt;
@@ -418,6 +419,11 @@ function CesChat({
     }
 
     try {
+      if (!config.mockAssistant && shouldAnswerFromCatalogBeforeCes(text, fallbackPrompt, previousProductPrompt)) {
+        appendAssistantResponse(catalogFallbackResponse(fallbackPrompt), undefined, fallbackPrompt, text);
+        return;
+      }
+
       const response = config.mockAssistant
         ? mockAssistantResponse(text)
         : await client!.sendMessage({
@@ -724,6 +730,11 @@ function shouldUseCatalogFallback(responseText: string, prompt: string, fallback
     isAffirmativeRetryPrompt(prompt) ||
     isAssistantTroubleResponse(responseText)
   );
+}
+
+function shouldAnswerFromCatalogBeforeCes(text: string, fallbackPrompt: string, previousProductPrompt: string): boolean {
+  if (!isIronPrompt(fallbackPrompt)) return false;
+  return isExperiencedIronPrompt(fallbackPrompt) || Boolean(previousProductPrompt && isAffirmativeRetryPrompt(text));
 }
 
 function catalogFallbackResponse(text: string): CesRunSessionResponse {
