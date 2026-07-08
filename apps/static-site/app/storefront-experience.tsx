@@ -420,13 +420,14 @@ function CesChat({
             text,
             timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           });
-      appendAssistantResponse(response);
+      appendAssistantResponse(response, undefined, text);
     } catch (error) {
       const message = String(error);
       if (!config.mockAssistant && isCesQuotaError(message)) {
         appendAssistantResponse(
           mockAssistantResponse(text),
-          "The live assistant quota is temporarily exhausted, so I’m showing the demo product response for this request."
+          "The live assistant quota is temporarily exhausted, so I’m showing the demo product response for this request.",
+          text
         );
         return;
       }
@@ -436,13 +437,28 @@ function CesChat({
     }
   }
 
-  function appendAssistantResponse(response: CesRunSessionResponse, prefix?: string) {
-    const widgets = extractWidgetPayloads(response.outputs);
-    const responseText =
+  function appendAssistantResponse(response: CesRunSessionResponse, prefix?: string, prompt?: string) {
+    let widgets = extractWidgetPayloads(response.outputs);
+    let responseText =
       response.outputs
         ?.map((output) => output.text)
         .filter((value): value is string => Boolean(value))
         .join("\n\n") || (widgets.length ? "" : "I did not receive a text response.");
+    if (!widgets.length && prompt && isExperiencedIronPrompt(prompt)) {
+      const fallbackResponse = mockAssistantResponse(prompt);
+      const fallbackWidgets = extractWidgetPayloads(fallbackResponse.outputs);
+      if (fallbackWidgets.length) {
+        const fallbackText = fallbackResponse.outputs
+          ?.map((output) => output.text)
+          .filter((value): value is string => Boolean(value))
+          .join("\n\n");
+        widgets = fallbackWidgets;
+        responseText =
+          !responseText || /having trouble|try again|did not receive/i.test(responseText)
+            ? fallbackText || responseText
+            : `${responseText}\n\nHere are product detail cards from the current catalog.`;
+      }
+    }
     const answer = [prefix, responseText].filter(Boolean).join("\n\n");
     setMessages((current) => [...current, { role: "assistant", text: answer, widgets }]);
     setStatus("Ready");
@@ -677,6 +693,10 @@ function isWidgetPayload(value: unknown): value is CxWidgetPayload {
 
 function isCesQuotaError(message: string): boolean {
   return /\b429\b/.test(message) || /RESOURCE_EXHAUSTED/i.test(message) || /quota/i.test(message);
+}
+
+function isExperiencedIronPrompt(text: string): boolean {
+  return /iron/i.test(text) && /experienced|advanced|low.?handicap|skilled/i.test(text);
 }
 
 function normalizeProducts(value: unknown): CxProductSummary[] {

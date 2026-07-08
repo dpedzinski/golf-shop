@@ -213,15 +213,16 @@ resource "terraform_data" "seed_golf_products" {
 resource "terraform_data" "bigquery_smoke_counts" {
   input = {
     artifact_path = local.bigquery_smoke_counts_file
-    job_id        = "smoke_golf_products_cli_${substr(sha256(join("\n", [local.rendered_seed_sql, local.bigquery_smoke_counts_sql])), 0, 16)}"
+    job_id        = "smoke_golf_products_cli_${substr(sha256(join("\n", [local.rendered_seed_sql, local.bigquery_smoke_counts_sql, "json_writer_v2"])), 0, 16)}"
   }
 
   triggers_replace = {
-    project_id       = var.project_id
-    dataset_id       = var.bigquery_dataset_id
-    location         = var.bigquery_location
-    seed_job_id      = terraform_data.seed_golf_products.output.job_id
-    smoke_sql_sha256 = sha256(local.bigquery_smoke_counts_sql)
+    artifact_writer_version = "json_writer_v2"
+    project_id              = var.project_id
+    dataset_id              = var.bigquery_dataset_id
+    location                = var.bigquery_location
+    seed_job_id             = terraform_data.seed_golf_products.output.job_id
+    smoke_sql_sha256        = sha256(local.bigquery_smoke_counts_sql)
   }
 
   provisioner "local-exec" {
@@ -263,7 +264,7 @@ resource "terraform_data" "bigquery_smoke_counts" {
       }
       with open(artifact_path, "w", encoding="utf-8") as handle:
           json.dump(payload, handle, indent=2, sort_keys=True)
-          handle.write("\\n")
+          handle.write("\n")
       print(json.dumps(payload, indent=2, sort_keys=True))
       PY
     EOT

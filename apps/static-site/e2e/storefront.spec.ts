@@ -145,6 +145,48 @@ test("falls back to demo irons flow when CES quota is exhausted", async ({ page 
   await expect(page.getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
 });
 
+test("adds an irons carousel when CES returns text without product widgets", async ({ page }) => {
+  await page.route("https://ces.googleapis.com/v1/**:generateChatToken", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({ chatToken: "test-chat-token" }),
+    });
+  });
+
+  await page.route("https://ces.googleapis.com/v1/**:runSession", async (route) => {
+    const body = route.request().postDataJSON() as { inputs?: Array<{ text?: string }> };
+    const prompt = body.inputs?.[0]?.text ?? "";
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        outputs: [
+          {
+            text: /experienced players/i.test(prompt)
+              ? "Hmm, I'm having trouble with that. Do you want me to try again?"
+              : "I'd be happy to help you find the right set of irons. What skill level are you shopping for?",
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto("/");
+
+  const input = page.getByLabel("Message Golf Store Assistant");
+  await input.fill("I want to shop for irons");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText("What skill level are you shopping for?")).toBeVisible();
+
+  await input.fill("I want to see irons for experienced players");
+  await page.getByRole("button", { name: "Send" }).click();
+
+  const carousel = page.locator(".ces-chat-message.assistant cx-product-carousel");
+  await expect(carousel).toHaveCount(1);
+  await expect(page.getByText("Here are iron sets that fit experienced players")).toBeVisible();
+  await expect(page.getByText("NorthLake Forge SoftStrike Forged Iron Set")).toBeVisible();
+  await expect(page.getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
+});
+
 test("renders product listing and category routes", async ({ page }) => {
   await page.goto("/shop?q=driver");
 

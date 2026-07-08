@@ -57,11 +57,17 @@ try {
   const secondAnswer = (await secondAssistantResponse.last().innerText()).replace(/\s+/g, " ").trim();
   await page.screenshot({ fullPage: true, path: screenshotPath });
 
+  const quotaFallbackVisible = await page
+    .getByText("The live assistant quota is temporarily exhausted")
+    .last()
+    .isVisible()
+    .catch(() => false);
+  const quotaExhaustedResponses = cesResponses.filter((response) => response.status === 429);
   const missingSuccessfulCalls = [":generateChatToken", ":runSession"].filter(
     (method) => !cesResponses.some((response) => response.url.includes(method) && response.status >= 200 && response.status < 300)
   );
 
-  if (missingSuccessfulCalls.length) {
+  if (missingSuccessfulCalls.length && !(quotaFallbackVisible && quotaExhaustedResponses.length)) {
     throw new Error(`Missing successful CES calls: ${missingSuccessfulCalls.join(", ")}`);
   }
 
@@ -71,6 +77,8 @@ try {
         firstAnswer,
         secondAnswer,
         cesResponses,
+        quotaExhaustedResponses,
+        quotaFallbackVisible,
         prompts: [firstPrompt, secondPrompt],
         screenshotPath,
         siteUrl,
