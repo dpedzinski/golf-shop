@@ -58,7 +58,7 @@ Run the hosted CES smoke check with:
 
 ```bash
 STATIC_SITE_URL=$(terraform -chdir=infra/terraform output -raw static_site_url) \
-SCREENSHOT_PATH=artifacts/static-site-gecx-irons.png \
+SCREENSHOT_PATH=artifacts/gcp-deployment/static-site-gecx-irons.png \
 node scripts/verify-static-site-gecx.mjs
 ```
 

@@ -7,7 +7,7 @@ process.env.PLAYWRIGHT_BROWSERS_PATH ??= resolve(repoRoot, "packages/gecx-compon
 const { chromium } = await import("@playwright/test");
 
 const siteUrl = process.env.STATIC_SITE_URL;
-const screenshotPath = resolve(process.env.SCREENSHOT_PATH ?? "artifacts/static-site-gecx-irons.png");
+const screenshotPath = resolve(process.env.SCREENSHOT_PATH ?? "artifacts/gcp-deployment/static-site-gecx-irons.png");
 const prompt = process.env.CES_TEST_PROMPT ?? "I am looking for new Irons for my game";
 
 if (!siteUrl) {
