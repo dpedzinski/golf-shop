@@ -1,10 +1,10 @@
 name: Terraform Apply
 
 on:
-  workflow_run:
-    workflows: ["Terraform Plan"]
-    types:
-      - completed
+  push:
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/terraform-*.yml'
     branches:
       - main
 
@@ -22,8 +22,6 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     environment: production
-    # Only run if the plan workflow succeeded
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     defaults:
       run:
