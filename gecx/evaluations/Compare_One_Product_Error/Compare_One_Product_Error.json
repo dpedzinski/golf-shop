@@ -1,0 +1,38 @@
+{
+  "name": "035583dc-1022-4a4e-9313-0f205d897823",
+  "displayName": "Compare One Product Error",
+  "scenario": {
+    "task": "Compare product.",
+    "scenarioExpectations": [{
+      "toolExpectation": {
+        "expectedToolCall": {
+          "tool": "compare_products",
+          "args": {
+            "product_ids": ["GB201"]
+          },
+          "displayName": "compare_products"
+        },
+        "mockToolResponse": {
+          "tool": "compare_products",
+          "response": {
+            "error": true,
+            "message": "Please provide at least two product IDs to compare."
+          },
+          "displayName": "compare_products"
+        }
+      }
+    }],
+    "userFacts": [{
+      "name": "product_id",
+      "value": "GB201"
+    }, {
+      "name": "current_date",
+      "value": "2026-07-28"
+    }],
+    "maxTurns": 10,
+    "variableOverrides": {
+      "current_date": "2026-07-28[America/Los_Angeles]"
+    },
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

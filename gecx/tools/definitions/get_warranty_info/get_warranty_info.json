@@ -1,0 +1,9 @@
+{
+  "name": "c2ca1176-e600-4172-a1ef-74d4c7368e89",
+  "pythonFunction": {
+    "name": "get_warranty_info",
+    "pythonCode": "gecx/tools/python/get_warranty_info.py",
+    "description": "Retrieves warranty information for golf products.\n\nArgs:\n    product_id (Optional[str]): The ID of a specific product to get warranty details for.\n\nReturns:\n    dict[str, Any]: A dictionary containing general or product-specific warranty details.\n          Example: {\"general_warranty\": \"Most products carry a 1-year manufacturer\u0027s warranty against defects.\", \"product_specific\": {\"GC101\": \"2-year warranty on club heads.\"}}\n          Example: {\"error\": True, \"message\": \"Product with ID \u0027XYZ\u0027 not found for specific warranty details.\"}"
+  },
+  "displayName": "get_warranty_info"
+}

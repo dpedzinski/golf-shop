@@ -1,0 +1,77 @@
+{
+  "name": "7da359a7-d2a4-420d-85a1-36c697d9c77d",
+  "displayName": "golf AI",
+  "rootAgent": "Golf Store Assistant",
+  "audioProcessingConfig": {
+    "synthesizeSpeechConfigs": {
+      "en-US": {
+        "voice": "en-US-Chirp3-HD-Zephyr",
+        "speakingRate": 1.0
+      }
+    },
+    "bargeInConfig": {
+      "bargeInAwareness": true
+    },
+    "inactivityTimeout": "30s",
+    "ambientSoundConfig": {
+      "prebuiltAmbientSound": "office_1"
+    }
+  },
+  "loggingSettings": {
+    "redactionConfig": {
+    },
+    "audioRecordingConfig": {
+    },
+    "bigqueryExportSettings": {
+    },
+    "cloudLoggingSettings": {
+      "enableCloudLogging": true
+    },
+    "conversationLoggingSettings": {
+      "retentionWindow": "31536000s"
+    },
+    "evaluationAudioRecordingConfig": {
+    },
+    "metricAnalysisSettings": {
+    }
+  },
+  "guardrails": ["Default Safety Guardrail", "Default Prompt Guardrail"],
+  "dataStoreSettings": {
+  },
+  "languageSettings": {
+    "defaultLanguageCode": "en-US"
+  },
+  "defaultChannelProfile": {
+    "personaProperty": {
+      "persona": "CHATTY"
+    }
+  },
+  "evaluationMetricsThresholds": {
+    "goldenEvaluationMetricsThresholds": {
+      "toolMatchingSettings": {
+        "extraToolCallBehavior": "FAIL"
+      }
+    }
+  },
+  "timeZoneSettings": {
+    "timeZone": "America/Los_Angeles"
+  },
+  "toolExecutionMode": "PARALLEL",
+  "evaluationSettings": {
+    "scenarioConversationInitiator": "USER",
+    "goldenEvaluationToolCallBehaviour": "FAKE",
+    "scenarioEvaluationToolCallBehaviour": "FAKE",
+    "goldenRunMethod": "NAIVE",
+    "metricsConfig": {
+    }
+  },
+  "errorHandlingSettings": {
+    "errorHandlingStrategy": "FALLBACK_RESPONSE",
+    "fallbackResponseConfig": {
+      "maxFallbackAttempts": 3
+    },
+    "endSessionConfig": {
+      "escalateSession": false
+    }
+  }
+}

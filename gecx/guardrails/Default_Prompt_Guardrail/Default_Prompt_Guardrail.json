@@ -1,0 +1,14 @@
+{
+  "name": "00ad6b66-1a3a-4215-be4a-15db691c673d",
+  "displayName": "Default Prompt Guardrail",
+  "enabled": true,
+  "action": {
+    "generativeAnswer": {
+      "prompt": "Generate a short, kind, and generic response for an AI assistant that cannot fulfill a user\u0027s request.\nThe response must:\nBe polite and apologetic.\nState the inability to help without giving a specific reason.\nOffer to help with something else.\nDo not explain why you cannot help. Generate a single, ready-to-use sentence."
+    }
+  },
+  "llmPromptSecurity": {
+    "defaultSettings": {
+    }
+  }
+}

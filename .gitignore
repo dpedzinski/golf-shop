@@ -1,0 +1,14 @@
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/*-source.zip
+services/**/__pycache__/
+gecx/tools/python/__pycache__/
+**/node_modules/
+**/dist/
+**/coverage/
+**/.vite/
+**/.npm-cache/
+**/.playwright-browsers/
+**/playwright-report/
+**/test-results/

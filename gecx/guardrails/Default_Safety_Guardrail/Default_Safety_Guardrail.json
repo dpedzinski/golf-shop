@@ -1,0 +1,25 @@
+{
+  "name": "65dfe7b9-4f2b-4f41-8974-d1aeeb389acc",
+  "displayName": "Default Safety Guardrail",
+  "enabled": true,
+  "action": {
+    "generativeAnswer": {
+      "prompt": "Generate a short, kind, and generic response for an AI assistant that cannot fulfill a user\u0027s request.\nThe response must:\nBe polite and apologetic.\nState the inability to help without giving a specific reason.\nOffer to help with something else.\nDo not explain why you cannot help. Generate a single, ready-to-use sentence."
+    }
+  },
+  "modelSafety": {
+    "safetySettings": [{
+      "category": "HARM_CATEGORY_HATE_SPEECH",
+      "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+    }, {
+      "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+      "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+    }, {
+      "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+      "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+    }, {
+      "category": "HARM_CATEGORY_HARASSMENT",
+      "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+    }]
+  }
+}

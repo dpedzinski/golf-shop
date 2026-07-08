@@ -1,0 +1,10 @@
+project_id = "your-gcp-project-id"
+
+# Optional overrides:
+# enable_required_apis = true
+# bigquery_dataset_id = "golf_products"
+# cloud_functions_region = "us-central1"
+# allow_unauthenticated_serverless = true
+# location    = "us"
+# model       = "gemini-3.0-flash-001"
+# temperature = 0.4

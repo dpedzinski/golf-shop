@@ -1,0 +1,38 @@
+{
+  "name": "f3823338-2d5d-48f4-891b-bd81173a48bc",
+  "displayName": "Product Details Not Found",
+  "scenario": {
+    "task": "Provide details for product.",
+    "scenarioExpectations": [{
+      "toolExpectation": {
+        "expectedToolCall": {
+          "tool": "get_product_details",
+          "args": {
+            "product_id": "XYZ999"
+          },
+          "displayName": "get_product_details"
+        },
+        "mockToolResponse": {
+          "tool": "get_product_details",
+          "response": {
+            "error": true,
+            "message": "Product with ID \u0027XYZ999\u0027 not found. Please check the product ID."
+          },
+          "displayName": "get_product_details"
+        }
+      }
+    }],
+    "userFacts": [{
+      "name": "product_id",
+      "value": "XYZ999"
+    }, {
+      "name": "current_date",
+      "value": "2026-07-22"
+    }],
+    "maxTurns": 10,
+    "variableOverrides": {
+      "current_date": "2026-07-22[America/Los_Angeles]"
+    },
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "4b48b2f7-b2d1-4f74-9bf4-d8d3331dc541",
+  "pythonFunction": {
+    "name": "get_returns_policy",
+    "pythonCode": "gecx/tools/python/get_returns_policy.py",
+    "description": "Retrieves information about the store\u0027s return policy.\n\nReturns:\n    dict[str, Any]: A dictionary containing details about the return policy.\n          Example: {\"return_window\": \"30 days from purchase\", \"conditions\": \"Items must be unused with original packaging and tags.\", \"process\": \"Initiate return online or in-store.\"}"
+  },
+  "displayName": "get_returns_policy"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "94d11360-eb2b-4e53-a66c-feb3620a823d",
+  "displayName": "General Shipping Info",
+  "scenario": {
+    "task": "Provide shipping options.",
+    "scenarioExpectations": [{
+      "toolExpectation": {
+        "expectedToolCall": {
+          "tool": "get_shipping_info",
+          "args": {
+          },
+          "displayName": "get_shipping_info"
+        },
+        "mockToolResponse": {
+          "tool": "get_shipping_info",
+          "response": {
+            "options": ["{\"type\": \"Standard Shipping\", \"cost\": \"$7.99\", \"delivery_estimate\": \"5 business days\", \"estimated_date\": \"2026-08-04\"}", "{\"type\": \"Express Shipping\", \"cost\": \"$19.99\", \"delivery_estimate\": \"2 business days\", \"estimated_date\": \"2026-08-01\"}"]
+          },
+          "displayName": "get_shipping_info"
+        }
+      }
+    }],
+    "userFacts": [{
+      "name": "current_date",
+      "value": "2026-07-30"
+    }],
+    "maxTurns": 10,
+    "variableOverrides": {
+      "current_date": "2026-07-30[America/Los_Angeles]"
+    },
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

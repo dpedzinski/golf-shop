@@ -1,0 +1,9 @@
+{
+  "name": "2482e999-d5dd-4ac6-ae9a-fadbfebfced6",
+  "pythonFunction": {
+    "name": "get_product_details",
+    "pythonCode": "gecx/tools/python/get_product_details.py",
+    "description": "Retrieves detailed information about a specific golf product.\n\nArgs:\n    product_id (str): The unique identifier of the product.\n\nReturns:\n    dict[str, Any]: A dictionary containing detailed product information, or an error message if not found.\n          Example: {\"id\": \"GC101\", \"name\": \"Strata Ultimate Complete Golf Set\", \"price\": \"$499.99\", \"features\": [\"Driver\", \"3 Wood\", \"5 Hybrid\", \"6-PW Irons\", \"Putter\", \"Stand Bag\"], \"reviews\": \"4.5/5 stars from 120 reviews\", \"availability\": \"In Stock\"}\n          Example: {\"error\": True, \"message\": \"Product with ID \u0027XYZ\u0027 not found.\"}"
+  },
+  "displayName": "get_product_details"
+}

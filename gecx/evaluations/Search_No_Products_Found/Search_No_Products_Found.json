@@ -1,0 +1,55 @@
+{
+  "name": "3a290a0c-90f5-4c23-9551-ad82af57ece7",
+  "displayName": "Search No Products Found",
+  "scenario": {
+    "task": "Show some golf shoes under a price limit.",
+    "scenarioExpectations": [{
+      "toolExpectation": {
+        "expectedToolCall": {
+          "tool": "search_products",
+          "args": {
+            "budget_range": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "under $50"
+            },
+            "product_type": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "golf shoes"
+            },
+            "skill_level": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "advanced"
+            }
+          },
+          "displayName": "search_products"
+        },
+        "mockToolResponse": {
+          "tool": "search_products",
+          "response": {
+            "message": "No products found matching your criteria. Please try adjusting your search.",
+            "products": []
+          },
+          "displayName": "search_products"
+        }
+      }
+    }],
+    "userFacts": [{
+      "name": "skill_level",
+      "value": "advanced"
+    }, {
+      "name": "price_limit",
+      "value": "$50"
+    }, {
+      "name": "current_date",
+      "value": "2026-07-15"
+    }],
+    "maxTurns": 10,
+    "variableOverrides": {
+      "current_date": "2026-07-15[America/Los_Angeles]"
+    },
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

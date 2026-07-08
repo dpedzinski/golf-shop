@@ -1,0 +1,40 @@
+{
+  "name": "86327876-58eb-4c06-bffa-18c6e127090c",
+  "displayName": "Compare Two Products",
+  "scenario": {
+    "task": "Compare products.",
+    "scenarioExpectations": [{
+      "toolExpectation": {
+        "expectedToolCall": {
+          "tool": "compare_products",
+          "args": {
+            "product_ids": ["GC101", "GC103"]
+          },
+          "displayName": "compare_products"
+        },
+        "mockToolResponse": {
+          "tool": "compare_products",
+          "response": {
+            "comparison": ["{\"id\": \"GC101\", \"name\": \"Strata Ultimate Complete Golf Set\", \"price\": \"$499.99\", \"features\": \"Driver, 3W, 5H, 6-PW, Putter, Bag\", \"skill_level\": \"Beginner\", \"forgiveness\": \"High\", \"distance\": \"Good\"}", "{\"id\": \"GC103\", \"name\": \"Callaway Edge 10-Piece Set\", \"price\": \"$999.99\", \"features\": \"Driver, 3W, 5H, 6-PW, SW, Putter, Bag\", \"skill_level\": \"Beginner/Intermediate\", \"forgiveness\": \"Very High\", \"distance\": \"Excellent\"}"]
+          },
+          "displayName": "compare_products"
+        }
+      }
+    }],
+    "userFacts": [{
+      "name": "product_id_1",
+      "value": "GC101"
+    }, {
+      "name": "product_id_2",
+      "value": "GC103"
+    }, {
+      "name": "current_date",
+      "value": "2026-07-25"
+    }],
+    "maxTurns": 10,
+    "variableOverrides": {
+      "current_date": "2026-07-25[America/Los_Angeles]"
+    },
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

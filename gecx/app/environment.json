@@ -1,0 +1,23 @@
+{
+  "tools": {
+    "search_product_catalog": {
+      "dataStoreTool": {
+        "engineSource": {
+          "dataStoreSources": [{
+            "dataStore": {
+              "name": "projects/817026452665/locations/global/collections/default_collection/dataStores/golf-product-catalog_1783436075952_fact_product_performance_90d"
+            }
+          }, {
+            "dataStore": {
+              "name": "projects/817026452665/locations/global/collections/default_collection/dataStores/golf-product-catalog_1783436075952_fact_product_reviews"
+            }
+          }, {
+            "dataStore": {
+              "name": "projects/817026452665/locations/global/collections/default_collection/dataStores/golf-product-catalog_1783436075952_vw_product_catalog_current"
+            }
+          }]
+        }
+      }
+    }
+  }
+}

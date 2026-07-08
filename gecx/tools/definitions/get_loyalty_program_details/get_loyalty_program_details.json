@@ -1,0 +1,9 @@
+{
+  "name": "7a17a1f6-34a6-491b-86d1-1b9032cab753",
+  "pythonFunction": {
+    "name": "get_loyalty_program_details",
+    "pythonCode": "gecx/tools/python/get_loyalty_program_details.py",
+    "description": "Provides information about the store\u0027s loyalty rewards program, including points, discounts, and benefits.\n\nReturns:\n    dict[str, Any]: A dictionary containing details about the loyalty program.\n          Example: {\"program_name\": \"Golf Pro Rewards\", \"benefits\": [\"Earn 1 point for every $1 spent\", \"Exclusive member discounts\", \"Early access to sales\"], \"how_to_redeem\": \"Points can be redeemed at checkout, 100 points \u003d $1 off.\"}"
+  },
+  "displayName": "get_loyalty_program_details"
+}

@@ -1,0 +1,64 @@
+{
+  "name": "26d0c81c-f7e7-4074-92b7-c44432181252",
+  "displayName": "Search Beginner Full Set",
+  "scenario": {
+    "task": "Find a full set of golf clubs for a user level, under a price limit, that are forgiving.",
+    "scenarioExpectations": [{
+      "toolExpectation": {
+        "expectedToolCall": {
+          "tool": "search_products",
+          "args": {
+            "budget_range": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "under $500"
+            },
+            "preferences": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "forgiving"
+            },
+            "product_category": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "full set"
+            },
+            "product_type": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "golf clubs"
+            },
+            "skill_level": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "beginner"
+            }
+          },
+          "displayName": "search_products"
+        },
+        "mockToolResponse": {
+          "tool": "search_products",
+          "response": {
+            "products": ["{\"id\": \"GC101\", \"name\": \"Strata Ultimate Complete Golf Set\", \"description\": \"Great for beginners, includes all essential clubs, very forgiving.\"}"]
+          },
+          "displayName": "search_products"
+        }
+      }
+    }],
+    "userFacts": [{
+      "name": "user_level",
+      "value": "beginner"
+    }, {
+      "name": "price_limit",
+      "value": "$500"
+    }, {
+      "name": "current_date",
+      "value": "2026-07-12"
+    }],
+    "maxTurns": 10,
+    "variableOverrides": {
+      "current_date": "2026-07-12[America/Los_Angeles]"
+    },
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

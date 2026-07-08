@@ -1,0 +1,54 @@
+{
+  "name": "f051c226-7144-46e5-82e2-cd4ca3db666e",
+  "dataStoreTool": {
+    "name": "search_product_catalog",
+    "engineSource": {
+      "dataStoreSources": [{
+        "dataStore": {
+          "name": "$env_var",
+          "engineType": "SEARCH_ENGINE"
+        }
+      }, {
+        "dataStore": {
+          "name": "$env_var",
+          "engineType": "SEARCH_ENGINE"
+        }
+      }, {
+        "dataStore": {
+          "name": "$env_var",
+          "engineType": "SEARCH_ENGINE"
+        }
+      }]
+    },
+    "modalityConfigs": [{
+      "modalityType": "TEXT",
+      "rewriterConfig": {
+        "modelSettings": {
+        }
+      },
+      "summarizationConfig": {
+        "modelSettings": {
+        }
+      },
+      "groundingConfig": {
+        "groundingLevel": 4.0
+      }
+    }, {
+      "modalityType": "AUDIO",
+      "rewriterConfig": {
+        "modelSettings": {
+        }
+      },
+      "summarizationConfig": {
+        "modelSettings": {
+        }
+      },
+      "groundingConfig": {
+        "groundingLevel": 4.0
+      }
+    }],
+    "filterParameterBehavior": "ALWAYS_INCLUDE"
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "search_product_catalog"
+}

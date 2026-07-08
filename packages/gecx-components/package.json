@@ -1,0 +1,45 @@
+{
+  "name": "@bread-prototype/gecx-components",
+  "version": "0.1.0",
+  "description": "Custom web components for GECX storefront widgets and Dialogflow CX Messenger rich content.",
+  "type": "module",
+  "private": true,
+  "main": "./dist/gecx-components.umd.cjs",
+  "module": "./dist/gecx-components.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/gecx-components.js",
+      "require": "./dist/gecx-components.umd.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -p tsconfig.build.json && vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "keywords": [
+    "dialogflow",
+    "custom-elements",
+    "web-components",
+    "cx-messenger",
+    "rich-widgets"
+  ],
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@playwright/test": "^1.54.0",
+    "@types/node": "^26.1.0",
+    "jsdom": "^26.1.0",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.4"
+  }
+}

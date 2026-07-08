@@ -1,0 +1,9 @@
+{
+  "name": "f18bc098-aa99-4329-a1dd-09af44768848",
+  "pythonFunction": {
+    "name": "compare_products",
+    "pythonCode": "gecx/tools/python/compare_products.py",
+    "description": "Compares features and specifications of multiple golf products.\n\nArgs:\n    product_ids (List[str]): A list of unique identifiers for the products to compare.\n\nReturns:\n    dict[str, Any]: A dictionary containing a comparison summary or an error if products are not found.\n          Example: {\"comparison\": [{\"id\": \"GC101\", \"name\": \"Strata Ultimate\", \"price\": \"$499.99\", \"key_feature\": \"Max Forgiveness\"}, {\"id\": \"GC103\", \"name\": \"Callaway Edge\", \"price\": \"$999.99\", \"key_feature\": \"Premium Forgiveness \u0026 Distance\"}]}\n          Example: {\"error\": True, \"message\": \"Could not find details for one or more products.\"}"
+  },
+  "displayName": "compare_products"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "1fbee15b-003e-48e0-af31-d366f93c362a",
+  "pythonFunction": {
+    "name": "get_shipping_info",
+    "pythonCode": "gecx/tools/python/get_shipping_info.py",
+    "description": "Retrieves shipping information, including estimated costs and delivery times.\n\nArgs:\n    product_id (Optional[str]): The ID of a specific product to get shipping estimates for.\n    destination_zip (Optional[str]): The destination zip code for more accurate estimates.\n\nReturns:\n    dict[str, Any]: A dictionary containing shipping options, estimated costs, and delivery dates.\n          Example: {\"options\": [{\"type\": \"Standard\", \"cost\": \"$7.99\", \"delivery_estimate\": \"3-5 business days\", \"estimated_date\": \"2023-11-20\"}, {\"type\": \"Express\", \"cost\": \"$19.99\", \"delivery_estimate\": \"1-2 business days\", \"estimated_date\": \"2023-11-17\"}]}\n          Example: {\"error\": True, \"message\": \"Please provide a valid destination zip code.\"}"
+  },
+  "displayName": "get_shipping_info"
+}

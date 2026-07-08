@@ -1,0 +1,6 @@
+{
+  "name": "d6998116-9233-40f0-9ee2-573b0382527e",
+  "displayName": "Golf Store Assistant",
+  "instruction": "gecx/agents/golf-store-assistant/instruction.txt",
+  "tools": ["compare_products", "customize_response", "end_session", "get_financing_options", "get_loyalty_program_details", "get_product_details", "get_returns_policy", "get_shipping_info", "get_warranty_info", "search_product_catalog"]
+}

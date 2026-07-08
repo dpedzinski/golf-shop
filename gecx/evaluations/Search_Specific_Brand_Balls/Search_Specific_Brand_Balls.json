@@ -1,0 +1,42 @@
+{
+  "name": "ace20ab9-4ecd-4a21-a7f0-b5e7dac83f62",
+  "displayName": "Search Specific Brand Balls",
+  "scenario": {
+    "task": "Find golf balls from a brand.",
+    "scenarioExpectations": [{
+      "toolExpectation": {
+        "expectedToolCall": {
+          "tool": "search_products",
+          "args": {
+            "brand": "Titleist",
+            "product_type": {
+              "$matchType": "ignore",
+              "$matchValue": "",
+              "$originalValue": "golf balls"
+            }
+          },
+          "displayName": "search_products"
+        },
+        "mockToolResponse": {
+          "tool": "search_products",
+          "response": {
+            "products": ["{\"id\": \"GB201\", \"name\": \"Titleist Pro V1 Golf Balls (Dozen)\", \"description\": \"High velocity, low spin, Exceptional greenside control, Soft feel\"}"]
+          },
+          "displayName": "search_products"
+        }
+      }
+    }],
+    "userFacts": [{
+      "name": "brand",
+      "value": "Titleist"
+    }, {
+      "name": "current_date",
+      "value": "2026-07-18"
+    }],
+    "maxTurns": 10,
+    "variableOverrides": {
+      "current_date": "2026-07-18[America/Los_Angeles]"
+    },
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

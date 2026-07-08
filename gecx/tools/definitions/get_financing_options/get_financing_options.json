@@ -1,0 +1,9 @@
+{
+  "name": "b9d1d326-9d06-4c52-9f18-8267816de0af",
+  "pythonFunction": {
+    "name": "get_financing_options",
+    "pythonCode": "gecx/tools/python/get_financing_options.py",
+    "description": "Provides information about available financing options for purchases at the golf store.\n\nReturns:\n    dict[str, Any]: A dictionary containing a list of financing options with their details.\n          Example: {\"financing_options\": [{\"name\": \"Store Credit Card\", \"details\": \"0% APR for 12 months on purchases over $500, then variable APR. Rewards points on all purchases. Subject to credit approval.\"}]}"
+  },
+  "displayName": "get_financing_options"
+}
