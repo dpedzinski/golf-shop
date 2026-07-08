@@ -1,4 +1,102 @@
-import type { CxWidgetPayload } from '../src';
+import { ELEMENT_NAMES } from '../src';
+import type { CxElementName, CxWidgetPayload } from '../src';
+
+export interface CxGallerySample {
+  id: string;
+  label: string;
+  description: string;
+  kind: CxWidgetPayload['kind'] | 'widget-host';
+  elementName: CxElementName;
+  payload: CxWidgetPayload;
+}
+
+export const richCardPayload: CxWidgetPayload = {
+  kind: 'rich-card',
+  eyebrow: 'Assistant result',
+  title: 'Driver fitting shortcut',
+  subtitle: 'A compact recommendation card for chat responses and host-page injection.',
+  body: [
+    'Prioritize launch help, forgiveness, and adjustable loft before chasing raw distance.',
+    'Pair the recommendation with a fitting session if the shopper knows their swing speed.',
+  ],
+  image: {
+    src: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=900&q=80',
+    alt: 'Golfer addressing a ball on a fairway.',
+  },
+  metadata: [
+    { label: 'Skill fit', value: 'Beginner to intermediate' },
+    { label: 'Primary goal', value: 'Higher launch' },
+  ],
+  actions: [
+    {
+      id: 'open-fitting-guide',
+      label: 'Open guide',
+      kind: 'event',
+      eventName: 'open_fitting_guide',
+      variant: 'primary',
+    },
+  ],
+};
+
+export const choiceListPayload: CxWidgetPayload = {
+  kind: 'choice-list',
+  title: 'Choose a shopping goal',
+  body: 'The assistant can branch from a structured choice without leaving the chat.',
+  selectionMode: 'single',
+  options: [
+    {
+      id: 'beginner-set',
+      label: 'Build a beginner set',
+      description: 'Clubs, bag, balls, and tees',
+      value: 'beginner-set',
+      selected: true,
+    },
+    {
+      id: 'upgrade-driver',
+      label: 'Upgrade a driver',
+      description: 'Distance and forgiveness',
+      value: 'upgrade-driver',
+    },
+    {
+      id: 'compare-balls',
+      label: 'Compare golf balls',
+      description: 'Feel, spin, and price',
+      value: 'compare-balls',
+    },
+  ],
+};
+
+export const dataTablePayload: CxWidgetPayload = {
+  kind: 'data-table',
+  title: 'Shipping options',
+  body: 'Tables make policy and checkout details scannable inside rich responses.',
+  caption: 'Example delivery estimates',
+  columns: [
+    { key: 'method', label: 'Method' },
+    { key: 'speed', label: 'Speed' },
+    { key: 'cost', label: 'Cost', align: 'right' },
+  ],
+  rows: [
+    { method: 'Standard', speed: '3-5 business days', cost: '$6.95' },
+    { method: 'Express', speed: '2 business days', cost: '$14.95' },
+    { method: 'Store pickup', speed: 'Ready today where available', cost: '$0.00' },
+  ],
+};
+
+export const statusBannerPayload: CxWidgetPayload = {
+  kind: 'status-banner',
+  title: 'Cart updated',
+  body: 'The selected item is reserved while the shopper reviews checkout options.',
+  status: 'success',
+  actions: [
+    {
+      id: 'view-cart',
+      label: 'View cart',
+      kind: 'event',
+      eventName: 'view_cart',
+    },
+  ],
+};
 
 export const cardOffersPayload: CxWidgetPayload = {
   kind: 'card-offers',
@@ -52,6 +150,16 @@ export const cardComparePayload: CxWidgetPayload = {
   kind: 'card-compare',
   title: 'Compare financing choices',
   cards: cardOffersPayload.offers,
+};
+
+export const cardInfoPayload: CxWidgetPayload = {
+  kind: 'card-info',
+  title: 'Card offer details',
+  card: cardOffersPayload.offers[0],
+  details: [
+    { label: 'Best for', value: 'Frequent Fairway Supply shoppers' },
+    { label: 'Decision support', value: 'Compare APR, rewards, caveats, and promo terms before applying.' },
+  ],
 };
 
 export const financingOptionsPayload: CxWidgetPayload = {
@@ -276,6 +384,46 @@ export const productOffersPayload: CxWidgetPayload = {
   disclosure: 'Offers are examples for widget rendering. Availability and final terms can change.',
 };
 
+export const productComparisonPayload: CxWidgetPayload = {
+  kind: 'product-comparison',
+  title: 'Compare recommended products',
+  body: 'Product comparison can be rendered from catalog API results or assistant-generated payloads.',
+  products: productListPayload.products,
+};
+
+export const loyaltyTiersPayload: CxWidgetPayload = {
+  kind: 'loyalty-tiers',
+  title: 'Golf Pro Rewards',
+  body: 'Rewards information can appear in chat, checkout support, or account guidance.',
+  tiers: [
+    {
+      id: 'member',
+      name: 'Member',
+      annualSpend: '$0+ annual spend',
+      earningRate: '1 point per $1',
+      redemptionRate: '100 points = $1 off',
+      benefits: ['Member pricing', 'Seasonal bonus-point events', 'Order history for returns and warranties'],
+    },
+    {
+      id: 'tour',
+      name: 'Tour',
+      annualSpend: '$1,000+ annual spend',
+      earningRate: '2 points per $1',
+      redemptionRate: '100 points = $1 off',
+      benefits: ['Early access to select releases', 'Free standard shipping offers', 'Exclusive fitting events'],
+      caveats: ['Benefits vary by promotion and region.'],
+    },
+  ],
+  disclosure: 'Rewards should support better decisions, not encourage unnecessary purchases.',
+};
+
+export const widgetHostPayload: CxWidgetPayload = {
+  kind: 'status-banner',
+  title: 'Rendered through cx-widget-host',
+  body: 'The host element accepts any widget payload and delegates to the matching custom element.',
+  status: 'info',
+};
+
 export const ctaGroupPayload: CxWidgetPayload = {
   kind: 'cta-group',
   title: 'Next steps',
@@ -324,5 +472,57 @@ export const demoPayloads: CxWidgetPayload[] = [
       'Promotional financing may require minimum monthly payments.',
       'This widget does not make approval decisions or financial recommendations.',
     ],
+  },
+];
+
+function gallerySample(payload: CxWidgetPayload, label: string, description: string): CxGallerySample {
+  return {
+    id: payload.kind,
+    label,
+    description,
+    kind: payload.kind,
+    elementName: ELEMENT_NAMES[payload.kind],
+    payload,
+  };
+}
+
+export const componentGallerySamples: CxGallerySample[] = [
+  gallerySample(richCardPayload, 'Rich card', 'General-purpose card for recommendations, summaries, and rich assistant output.'),
+  gallerySample(choiceListPayload, 'Choice list', 'Structured option picker for guided chat branches.'),
+  gallerySample(dataTablePayload, 'Data table', 'Scrollable table for comparison, policy, and checkout details.'),
+  gallerySample(formPayload, 'Form panel', 'Simple structured input collection with submit events.'),
+  gallerySample(statusBannerPayload, 'Status banner', 'Compact status, success, warning, or error message.'),
+  gallerySample(cardOffersPayload, 'Card offers', 'Multiple payment card offers with terms, caveats, and actions.'),
+  gallerySample(cardInfoPayload, 'Card info', 'Single-card offer detail view.'),
+  gallerySample(cardComparePayload, 'Card compare', 'Side-by-side financing comparison rendered through an inner table widget.'),
+  gallerySample(financingOptionsPayload, 'Financing options', 'Installment, card, and pay-later option cards.'),
+  gallerySample(paymentPlanPayload, 'Payment plan', 'Estimated monthly plan cards for a purchase amount.'),
+  gallerySample(monthlyEstimatePayload, 'Monthly payment estimate', 'Single monthly payment estimate with financing disclosure.'),
+  gallerySample(ctaGroupPayload, 'CTA group', 'Action-only response with row or stacked button layout.'),
+  gallerySample(productListPayload, 'Product list', 'Catalog cards with images, metadata, offers, and CTAs.'),
+  gallerySample(productOffersPayload, 'Product offers', 'Offers scoped to one product.'),
+  gallerySample(productComparisonPayload, 'Product comparison', 'Side-by-side product comparison rendered through an inner table widget.'),
+  gallerySample(loyaltyTiersPayload, 'Loyalty tiers', 'Rewards tiers with benefits and caveats.'),
+  gallerySample(
+    {
+      kind: 'financing-disclosure',
+      title: 'Financing disclosure',
+      required: true,
+      disclosures: [
+        'Subject to credit approval.',
+        'Promotional financing may require minimum monthly payments.',
+        'This widget does not make approval decisions or financial recommendations.',
+      ],
+    },
+    'Financing disclosure',
+    'Required financing caveats and compliance-oriented disclosure copy.'
+  ),
+  {
+    id: 'widget-host',
+    label: 'Widget host',
+    description: 'Generic host that accepts a widget payload and renders the matching component internally.',
+    kind: 'widget-host',
+    elementName: ELEMENT_NAMES['widget-host'],
+    payload: widgetHostPayload,
   },
 ];
