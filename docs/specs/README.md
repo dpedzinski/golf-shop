@@ -28,7 +28,6 @@ Static site environment variables:
 - `VITE_GECX_AGENT_ID`
 - `VITE_GECX_LANGUAGE_CODE`
 - `VITE_GECX_CHAT_TITLE`
-- `VITE_GECX_OAUTH_CLIENT_ID`
 
 Terraform outputs used by the site and validation runbooks:
 

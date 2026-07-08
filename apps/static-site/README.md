@@ -34,11 +34,9 @@ The page reads these runtime environment variables:
 - `VITE_GECX_LANGUAGE_CODE`: defaults to `en`
 - `VITE_GECX_CHAT_TITLE`: defaults to `Golf Store Assistant`
 - `VITE_GECX_ENABLE_WIDGET`: defaults to `true`; set `false` to hide chat
-- `VITE_GECX_OAUTH_CLIENT_ID`: optional for authenticated messenger setups
 - `VITE_GECX_MOCK_ASSISTANT`: set `true` for local demo responses without CES
 
-If the GECX project, location, or agent ID is missing, the page renders a setup
-notice instead of mounting the chat widget.
+If the GECX project, location, agent ID, or deployment ID is missing, the page renders a setup notice instead of mounting the chat widget. Set `VITE_GECX_MOCK_ASSISTANT=true` for local chat without a CES deployment.
 
 Copy `.env.example` to `.env.local` for local testing, then fill in the
 Terraform outputs for the product API, MCP server, and GECX agent.

@@ -362,13 +362,6 @@ h3 {
   outline-offset: 2px;
 }
 
-df-messenger {
-  --df-messenger-font-family: var(--font-geist-sans), Inter, ui-sans-serif, system-ui, sans-serif;
-  --df-messenger-primary-color: var(--green);
-  --df-messenger-titlebar-background: var(--surface-strong);
-  --df-messenger-titlebar-title-font-color: #ffffff;
-  z-index: 20;
-}
 
 .ces-chat {
   background: #f8faf7;

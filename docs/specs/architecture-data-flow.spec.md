@@ -25,7 +25,6 @@ flowchart LR
   SDK["packages/gecx-sdk"]
   Components["packages/gecx-components"]
   CesChat["Native CES chat client"]
-  Messenger["Dialogflow CX Messenger fallback"]
   GECX["GECX / CES root agent"]
   Toolset["CES MCP toolset"]
   MCP["services/mcp-server Cloud Function"]
@@ -37,9 +36,7 @@ flowchart LR
   Site --> SDK
   Site --> Components
   SDK --> CesChat
-  SDK --> Messenger
   CesChat --> GECX
-  Messenger --> GECX
   GECX --> Toolset
   Toolset --> MCP
   MCP --> API
@@ -63,22 +60,11 @@ flowchart LR
 - `VITE_GECX_AGENT_ID`
 - `VITE_GECX_LANGUAGE_CODE`
 - `VITE_GECX_CHAT_TITLE`
-- `VITE_GECX_OAUTH_CLIENT_ID`
 
 `apps/static-site/app/storefront-experience.tsx` mounts the native CES chat when
 the widget is enabled and project, location, app ID, deployment ID, and agent ID
 are present. The SDK generates a public chat token for the CES WEB_UI
 deployment, then calls `runSession` for each user message.
-
-If the deployment ID is missing but project, location, and agent ID are present,
-the site falls back to the Dialogflow CX Messenger path. The SDK creates a
-`df-messenger` element and sets:
-
-- `project-id`
-- `location`
-- `agent-id`
-- `language-code`
-- `oauth-client-id` when present
 
 ## GECX To MCP
 

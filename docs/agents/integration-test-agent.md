@@ -14,7 +14,6 @@ website -> GECX -> MCP -> API -> BigQuery chain.
 - `apps/static-site/.env.example`
 - `packages/gecx-sdk/tests/`
 - `packages/gecx-components/tests/`
-- `packages/gecx-components/e2e/`
 - `infra/terraform/outputs.tf`
 - `services/product-api/main.py`
 - `services/mcp-server/main.py`
@@ -26,7 +25,7 @@ website -> GECX -> MCP -> API -> BigQuery chain.
 3. Validate the Cloud Run static site URL and env values from Terraform outputs.
 4. Smoke test product API endpoints.
 5. Smoke test MCP health, `tools/list`, and `tools/call`.
-6. Validate GECX/CES toolset behavior through the console or website messenger.
+6. Validate GECX/CES toolset behavior through the console or website CES chat.
 7. Confirm BigQuery seeded views return rows.
 
 ## Commands To Keep Current
@@ -44,8 +43,7 @@ terraform -chdir=infra/terraform output -raw bigquery_dataset
 
 ## Expected Signals
 
-- Static site Playwright test finds storefront widgets and configured messenger
-  attributes.
+- Static site Playwright test finds storefront widgets and configured native chat behavior. Component package coverage is handled by Vitest unit tests.
 - Product API `/health` returns `status: ok`.
 - Product API `/products` returns product data from BigQuery-backed views.
 - MCP `tools/list` returns the expected tool names.

@@ -46,8 +46,7 @@ Expected results:
 - TypeScript type checks pass across workspaces that define `typecheck`.
 - Vitest tests pass for `packages/gecx-sdk` and `packages/gecx-components`.
 - Static site builds successfully.
-- Playwright confirms storefront widgets render, a configured messenger gets
-  the expected `project-id` and `agent-id` attributes, and route-backed shop,
+- Playwright confirms storefront widgets render, configured native CES chat can respond, and route-backed shop,
   category, product detail, cart, checkout, and compare pages render.
 
 ## Layer 2: Website Runtime Configuration
@@ -66,7 +65,6 @@ VITE_GECX_DEPLOYMENT_ID=<terraform web_deployment_name>
 VITE_GECX_AGENT_ID=golf-store-assistant
 VITE_GECX_LANGUAGE_CODE=en
 VITE_GECX_CHAT_TITLE=Golf Store Assistant
-VITE_GECX_OAUTH_CLIENT_ID=
 ```
 
 Run the site:
@@ -80,9 +78,7 @@ Expected results:
 - Featured products load from the product API when `VITE_PRODUCT_API_URL` is
   reachable.
 - The MCP tools status lists tool names when `VITE_MCP_SERVER_URL` is reachable.
-- The assistant section mounts the native CES chat when
-  `VITE_GECX_DEPLOYMENT_ID` is present. Without a CES deployment ID, it falls
-  back to the Dialogflow CX Messenger path.
+- The assistant section mounts the native CES chat when `VITE_GECX_DEPLOYMENT_ID` is present, or local mock chat when `VITE_GECX_MOCK_ASSISTANT=true`. Without either value, it shows the setup notice.
 - If API or MCP endpoints are unavailable, the page degrades to demo product
   data or an MCP status message without crashing.
 
@@ -335,7 +331,7 @@ Expected: JSON-RPC result with compared products or missing IDs.
 ## Layer 6: GECX To MCP Validation
 
 Validate the deployed agent in the Conversational Agents / Dialogflow CX console
-or through the configured website messenger.
+or through the configured website CES chat.
 
 Test prompts:
 

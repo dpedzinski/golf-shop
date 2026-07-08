@@ -4,7 +4,7 @@ import {
   toCustomTemplateForPayload,
   toRichContentFallback,
 } from '../src';
-import { cardOffersPayload, ctaGroupPayload, formPayload, productListPayload, productOffersPayload } from '../demo/sample-payloads';
+import { cardOffersPayload, ctaGroupPayload, formPayload, productListPayload, productOffersPayload } from './fixtures/sample-payloads';
 import type { CxFormPanelPayload, DialogflowMessengerLike } from '../src';
 
 describe('Dialogflow helpers', () => {

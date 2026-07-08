@@ -7,7 +7,7 @@ The project is intended for demonstration and prototyping purposes only. It is n
 ## Primary Areas
 
 - `apps/static-site/`: Canonical storefront app with shop, category, product detail, cart, checkout, compare, and assistant/demo widget flows.
-- `packages/gecx-sdk/`: Browser clients for the product REST API, MCP JSON-RPC endpoint, CES chat sessions, and messenger fallback.
+- `packages/gecx-sdk/`: Browser clients for the product REST API, MCP JSON-RPC endpoint, CES chat sessions.
 - `packages/gecx-components/`: Reusable storefront web components and Dialogflow CX Messenger rich-content helpers.
 - `services/product-api/`: BigQuery-backed Product API source for Google Cloud Functions.
 - `services/mcp-server/`: MCP endpoint source that forwards tool calls to the Product API.

@@ -20,7 +20,7 @@
         <mxCell id="runtime" value="&lt;b&gt;Storefront Browser Runtime&lt;/b&gt;&lt;br&gt;routes: /, /shop, /category/[slug], /products/[productId], /cart, /checkout, /compare&lt;br&gt;config: apps/static-site/app/storefront-config.ts&lt;br&gt;env: VITE_PRODUCT_API_URL, VITE_MCP_SERVER_URL, VITE_GECX_*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDFA;strokeColor=#0D9488;fontSize=12;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
           <mxGeometry x="330" y="430" width="350" height="170" as="geometry"/>
         </mxCell>
-        <mxCell id="sdk" value="&lt;b&gt;Browser SDK&lt;/b&gt;&lt;br&gt;&lt;b&gt;@bread-prototype/gecx-sdk&lt;/b&gt;&lt;br&gt;ProductApiClient&lt;br&gt;McpClient&lt;br&gt;CesClient&lt;br&gt;mountGecxMessenger" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=12;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+        <mxCell id="sdk" value="&lt;b&gt;Browser SDK&lt;/b&gt;&lt;br&gt;&lt;b&gt;@bread-prototype/gecx-sdk&lt;/b&gt;&lt;br&gt;ProductApiClient&lt;br&gt;McpClient&lt;br&gt;CesClient" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontSize=12;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
           <mxGeometry x="750" y="170" width="300" height="165" as="geometry"/>
         </mxCell>
         <mxCell id="components" value="&lt;b&gt;Storefront UI Widgets&lt;/b&gt;&lt;br&gt;&lt;b&gt;@bread-prototype/gecx-components&lt;/b&gt;&lt;br&gt;product-list&lt;br&gt;product-comparison&lt;br&gt;financing-options&lt;br&gt;loyalty-tiers&lt;br&gt;Dialogflow CX rich content widgets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#EA580C;fontSize=12;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
@@ -49,9 +49,7 @@
         </mxCell>
         <mxCell id="assets" value="&lt;b&gt;GECX Exported Assets&lt;/b&gt;&lt;br&gt;instruction: gecx/agents/golf-store-assistant/instruction.txt&lt;br&gt;skills: product-advice, offers-and-financing, loyalty-and-promotions, purchase-support, storefront-rich-content&lt;br&gt;guardrails: Default Safety Guardrail, Default Prompt Guardrail&lt;br&gt;evaluations: search, details, compare, shipping scenarios" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDF2F8;strokeColor=#DB2777;fontSize=12;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
           <mxGeometry x="750" y="690" width="300" height="220" as="geometry"/>
-        </mxCell>
-        <mxCell id="fallback" value="&lt;b&gt;Dialogflow CX Messenger Fallback&lt;/b&gt;&lt;br&gt;df-messenger element&lt;br&gt;used when deployment ID is absent but project/location/agent ID exist&lt;br&gt;optional oauth client ID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontSize=12;align=left;verticalAlign=top;spacing=10;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="750" y="970" width="300" height="150" as="geometry"/>
+        </mxCell>          <mxGeometry x="750" y="970" width="300" height="150" as="geometry"/>
         </mxCell>
         <mxCell id="pytools" value="&lt;b&gt;Direct CES Python Tools&lt;/b&gt;&lt;br&gt;&lt;b&gt;google_ces_tool.python&lt;/b&gt;&lt;br&gt;search_products, get_product_details, compare_products, get_checkout_guidance, get_shipping_info, get_returns_policy, get_warranty_info, get_financing_options, get_loyalty_program_details&lt;br&gt;provisioned as demo/reference assets; root agent uses MCP path" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontSize=12;align=left;verticalAlign=top;spacing=10;dashed=1;" vertex="1" parent="1">
           <mxGeometry x="1130" y="870" width="360" height="230" as="geometry"/>
@@ -74,9 +72,7 @@
         </mxCell>
         <mxCell id="e14" value="direct MCP status: initialize, tools/list" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;endArrow=block;endFill=1;strokeColor=#CA8A04;fontSize=11;" edge="1" parent="1" source="sdk" target="mcp">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1940" y="260"/><mxPoint x="1940" y="510"/></Array></mxGeometry>
-        </mxCell>
-        <mxCell id="e15" value="fallback mountGecxMessenger" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;endArrow=block;endFill=1;strokeColor=#64748B;fontSize=11;dashed=1;dashPattern=8 4;" edge="1" parent="1" source="sdk" target="fallback"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e16" value="provisioned, not primary path" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;endArrow=block;endFill=1;strokeColor=#64748B;fontSize=11;dashed=1;dashPattern=8 4;" edge="1" parent="1" source="agent" target="pytools"><mxGeometry relative="1" as="geometry"/></mxCell>
+        </mxCell>        <mxCell id="e16" value="provisioned, not primary path" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;endArrow=block;endFill=1;strokeColor=#64748B;fontSize=11;dashed=1;dashPattern=8 4;" edge="1" parent="1" source="agent" target="pytools"><mxGeometry relative="1" as="geometry"/></mxCell>
       </root>
     </mxGraphModel>
   </diagram>

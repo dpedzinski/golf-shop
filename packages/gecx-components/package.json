@@ -19,12 +19,9 @@
     "README.md"
   ],
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
     "build": "tsc -p tsconfig.build.json && vite build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
-    "test:e2e": "playwright test",
-    "preview": "vite preview --host 127.0.0.1"
+    "test": "vitest run"
   },
   "keywords": [
     "dialogflow",
@@ -35,7 +32,6 @@
   ],
   "license": "UNLICENSED",
   "devDependencies": {
-    "@playwright/test": "^1.54.0",
     "@types/node": "^26.1.0",
     "jsdom": "^26.1.0",
     "typescript": "^5.8.3",
