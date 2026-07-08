@@ -31,7 +31,7 @@
         }
       },
       "groundingConfig": {
-        "groundingLevel": 4.0
+        "groundingLevel": 5.0
       }
     }, {
       "modalityType": "AUDIO",
@@ -44,7 +44,7 @@
         }
       },
       "groundingConfig": {
-        "groundingLevel": 4.0
+        "groundingLevel": 5.0
       }
     }],
     "filterParameterBehavior": "ALWAYS_INCLUDE"

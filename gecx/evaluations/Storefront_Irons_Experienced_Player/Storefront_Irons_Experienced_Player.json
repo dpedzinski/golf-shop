@@ -99,7 +99,7 @@
     }
   },
   "evaluationMetricsThresholdOverride": {
-    "goldenHallucinationMetricBehavior": "DISABLED",
+    "goldenHallucinationMetricBehavior": "ENABLED",
     "goldenEvaluationMetricsThresholds": {
       "turnLevelMetricsThresholds": {
         "semanticSimilaritySuccessThreshold": 2,

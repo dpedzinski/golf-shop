@@ -50,6 +50,9 @@ Primary GECX/CES assets:
 - `gecx/tools/python/` and `gecx/tools/definitions/`: direct Python demo tools
   and exported tool definitions. Treat these as reference assets unless a
   deployment explicitly attaches them to the root agent.
+  `gecx/tools/definitions/search_product_catalog` keeps the exported datastore
+  grounding threshold at the maximum `groundingLevel` of 5.0 for import paths
+  that attach that retrieval tool.
 
 Terraform-created GECX/CES resources:
 
@@ -65,8 +68,13 @@ Terraform-created GECX/CES resources:
 ## Primary Runtime Tool Path
 
 The root agent uses `google_ces_toolset.golf_store_mcp`, whose server address is
-the deployed MCP Cloud Function URL plus `/mcp/`. That server exposes JSON-RPC
-methods such as `initialize`, `tools/list`, and `tools/call`.
+the deployed MCP Cloud Function URL plus `/mcp/`. It also attaches the first-class
+CES `search_products` Python tool so catalog search remains available as an
+explicit grounded tool call in app-version evaluation runs. The agent
+instructions require catalog, pricing, inventory, offer, and policy claims to be
+grounded in tool output instead of memory. The storefront CES regression
+evaluations enable semantic similarity, tool correctness, and golden
+hallucination checks.
 
 The MCP server lists and calls tools including:
 
