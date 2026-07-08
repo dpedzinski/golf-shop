@@ -431,12 +431,11 @@ function CesChat({
     originalPrompt?: string
   ) {
     let widgets = extractWidgetPayloads(response.outputs);
-    let responseText = cleanAssistantText(
+    let responseText =
       response.outputs
         ?.map((output) => output.text)
         .filter((value): value is string => Boolean(value))
-        .join("\n\n") || (widgets.length ? "" : "I did not receive a text response.")
-    );
+        .join("\n\n") || (widgets.length ? "" : "I did not receive a text response.");
     if (!widgets.length && fallbackPrompt && shouldUseCatalogFallback(responseText, originalPrompt ?? fallbackPrompt, fallbackPrompt)) {
       const fallbackResponse = catalogFallbackResponse(fallbackPrompt);
       const fallbackWidgets = extractWidgetPayloads(fallbackResponse.outputs);
@@ -452,7 +451,7 @@ function CesChat({
             : `${responseText}\n\nHere are product detail cards from the current catalog.`;
       }
     }
-    const answer = cleanAssistantText([prefix, responseText].filter(Boolean).join("\n\n"));
+    const answer = [prefix, responseText].filter(Boolean).join("\n\n");
     setMessages((current) => [...current, { role: "assistant", text: answer, widgets }]);
     setStatus("Ready");
   }
@@ -577,32 +576,6 @@ function ChatWidgetRenderer({
   }, [payload, renderCxWidget]);
 
   return <div className="ces-chat-widget" data-widget-kind={payload.kind} ref={targetRef} />;
-}
-
-const toolArtifactBlockPattern =
-  /<\s*(tool[_-]?use|tool[_-]?call|tool[_-]?code|function[_-]?call|search_products|get_product_details|compare_products|get_financing_options|get_loyalty_program_details|get_shipping_info|get_returns_policy|get_warranty_info)\b[\s\S]*?<\/\s*\1\s*>/gi;
-
-const toolArtifactLinePattern =
-  /^<\/?(?:tool[_-]?use|tool[_-]?call|tool[_-]?code|function[_-]?call|search_products|get_product_details|compare_products|get_financing_options|get_loyalty_program_details|get_shipping_info|get_returns_policy|get_warranty_info)\b[^>]*\/?>\s*$/i;
-
-function cleanAssistantText(text: string): string {
-  return text
-    .replace(/```[\s\S]*?```/g, (block) =>
-      /tool[_-]?(?:use|call|code)|function[_-]?call|search_products|get_product_details|compare_products|get_financing_options|get_loyalty_program_details|get_shipping_info|get_returns_policy|get_warranty_info|<\?xml/i.test(block)
-        ? ""
-        : block
-    )
-    .replace(toolArtifactBlockPattern, "")
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter((line) => line && !toolArtifactLinePattern.test(line) && !isXmlToolArtifactLine(line))
-    .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function isXmlToolArtifactLine(line: string): boolean {
-  return /^<[^>]+>$/.test(line) && /tool|function|product|catalog|shipping|returns|warranty|loyalty|financing|compare/i.test(line);
 }
 
 function renderChatText(text: string) {

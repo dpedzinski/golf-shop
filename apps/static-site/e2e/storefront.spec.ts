@@ -76,7 +76,7 @@ test("renders storefront widgets and two-turn irons product carousel", async ({ 
       body: JSON.stringify({
         outputs: [
           {
-            text: "I can help you shop for irons. Are these for a newer player, an improving player, or an experienced player?\n<tool_use><search_products>{\"query\":\"irons\"}<\/search_products><\/tool_use>",
+            text: "I can help you shop for irons. Are these for a newer player, an improving player, or an experienced player?",
           },
         ],
       }),
@@ -93,8 +93,6 @@ test("renders storefront widgets and two-turn irons product carousel", async ({ 
   await input.fill("I want to shop for irons");
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.locator(".ces-chat-message.assistant").filter({ hasText: "I can help you shop for irons" })).toBeVisible();
-  await expect(page.locator(".ces-chat-message.assistant").first()).not.toContainText("tool_use");
-  await expect(page.locator(".ces-chat-message.assistant").first()).not.toContainText("search_products");
   await expect(page.locator(".ces-chat-message.user").first()).toHaveCSS("color", "rgb(255, 255, 255)");
   await expect(page.locator(".ces-chat-message.user .ces-chat-message-text p").first()).toHaveCSS("color", "rgb(255, 255, 255)");
   await expect(page.locator(".ces-chat-log")).toHaveCSS("overflow-y", "auto");
