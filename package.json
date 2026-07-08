@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/static-site",
+    "packages/gecx-sdk",
     "packages/gecx-components",
-    "packages/gecx-sdk"
+    "apps/static-site"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
