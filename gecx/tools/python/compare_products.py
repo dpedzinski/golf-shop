@@ -1,4 +1,7 @@
-def compare_products(product_ids):
+from typing import Any, List
+
+
+def compare_products(product_ids: List[str]) -> dict[str, Any]:
     """Compares multiple golf products and returns practical tradeoffs for a shopper."""
     club_image = "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg"
     ball_image = "https://upload.wikimedia.org/wikipedia/commons/e/e6/Golfball.jpg"

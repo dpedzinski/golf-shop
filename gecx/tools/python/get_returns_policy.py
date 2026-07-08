@@ -1,4 +1,7 @@
-def get_returns_policy():
+from typing import Any
+
+
+def get_returns_policy() -> dict[str, Any]:
     """Retrieves the online golf store return policy."""
     return {
         "return_window": "30 days from delivery for most unused products.",

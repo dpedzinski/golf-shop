@@ -16,7 +16,7 @@ variable "bigquery_dataset_id" {
 }
 
 variable "bigquery_location" {
-  description = "BigQuery dataset and seed job location."
+  description = "BigQuery dataset and seed script location."
   type        = string
   default     = "US"
 }
@@ -123,6 +123,66 @@ variable "mcp_server_service_account_id" {
   default     = "golf-mcp-server"
 }
 
+variable "static_site_service_account_id" {
+  description = "Service account ID for the Cloud Run static site runtime."
+  type        = string
+  default     = "golf-static-site"
+}
+
+variable "static_site_region" {
+  description = "Region for the Cloud Run static site and its Artifact Registry repository."
+  type        = string
+  default     = "us-central1"
+}
+
+variable "static_site_service_name" {
+  description = "Cloud Run service name for the static storefront."
+  type        = string
+  default     = "golf-store-static-site"
+}
+
+variable "static_site_artifact_repository_id" {
+  description = "Artifact Registry Docker repository ID for static site images."
+  type        = string
+  default     = "golf-store-static-site"
+}
+
+variable "static_site_build_timeout" {
+  description = "Cloud Build timeout for the static site container image."
+  type        = string
+  default     = "1200s"
+}
+
+variable "static_site_cpu" {
+  description = "CPU limit for the Cloud Run static site container."
+  type        = string
+  default     = "1"
+}
+
+variable "static_site_memory" {
+  description = "Memory limit for the Cloud Run static site container."
+  type        = string
+  default     = "512Mi"
+}
+
+variable "static_site_min_instance_count" {
+  description = "Minimum Cloud Run instances for the static site."
+  type        = number
+  default     = 0
+}
+
+variable "static_site_max_instance_count" {
+  description = "Maximum Cloud Run instances for the static site."
+  type        = number
+  default     = 3
+}
+
+variable "static_site_request_timeout_seconds" {
+  description = "Request timeout for the Cloud Run static site."
+  type        = number
+  default     = 60
+}
+
 variable "mcp_toolset_id" {
   description = "Customer Engagement Suite toolset ID for the deployed MCP server."
   type        = string
@@ -151,6 +211,18 @@ variable "agent_display_name" {
   description = "Display name for the customer service agent."
   type        = string
   default     = "Golf Store Assistant"
+}
+
+variable "app_version_id" {
+  description = "Stable ID for the Customer Engagement Suite app version used by the web deployment."
+  type        = string
+  default     = "web-v1"
+}
+
+variable "deployment_display_name" {
+  description = "Display name for the Customer Engagement Suite web deployment."
+  type        = string
+  default     = "Golf Store Web"
 }
 
 variable "default_language_code" {

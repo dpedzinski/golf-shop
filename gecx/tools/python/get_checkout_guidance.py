@@ -1,4 +1,7 @@
-def get_checkout_guidance():
+from typing import Any
+
+
+def get_checkout_guidance() -> dict[str, Any]:
     """Returns checkout guidance for cart review, payment, discounts, financing, loyalty rewards, and order confirmation."""
     return {
         "steps": [

@@ -45,7 +45,7 @@ export class McpClient {
       throw new Error('McpClient requires an endpoint.');
     }
     this.endpoint = options.endpoint;
-    this.fetchImpl = options.fetch ?? fetch;
+    this.fetchImpl = options.fetch ?? ((input, init) => fetch(input, init));
   }
 
   initialize(): Promise<McpInitializeResult> {

@@ -23,6 +23,8 @@ Static site environment variables:
 - `VITE_GECX_ENABLE_WIDGET`
 - `VITE_GECX_PROJECT_ID`
 - `VITE_GECX_LOCATION`
+- `VITE_GECX_APP_ID`
+- `VITE_GECX_DEPLOYMENT_ID`
 - `VITE_GECX_AGENT_ID`
 - `VITE_GECX_LANGUAGE_CODE`
 - `VITE_GECX_CHAT_TITLE`
@@ -32,8 +34,11 @@ Terraform outputs used by the site and validation runbooks:
 
 - `product_api_url`
 - `mcp_server_url`
+- `static_site_url`
+- `static_site_image`
 - `bigquery_dataset`
 - `bigquery_seed_job_id`
+- `web_deployment_name`
 - `agent_name`
 - `app_name`
 - `mcp_toolset_name`

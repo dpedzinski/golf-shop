@@ -1,4 +1,7 @@
-def get_financing_options():
+from typing import Any
+
+
+def get_financing_options() -> dict[str, Any]:
     """Provides available financing options, eligibility notes, fees, repayment periods, and responsible-purchasing caveats."""
     return {
         "financing_options": [

@@ -1,4 +1,7 @@
-def get_loyalty_program_details():
+from typing import Any
+
+
+def get_loyalty_program_details() -> dict[str, Any]:
     """Provides loyalty rewards, points, member discounts, exclusive offers, earning rules, and redemption guidance."""
     return {
         "program_name": "Golf Pro Rewards",

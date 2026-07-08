@@ -4,12 +4,12 @@ This repo is organized as a monorepo for the GECX golf-store prototype.
 
 ## Primary Areas
 
-- `apps/static-site/`: Sites/vinext static storefront that consumes the local SDK and component packages.
-- `packages/gecx-sdk/`: Typed browser clients for the product REST API, MCP JSON-RPC endpoint, and GECX messenger mounting.
+- `apps/static-site/`: Vinext storefront deployed to Cloud Run by Terraform and consuming the local SDK and component packages.
+- `packages/gecx-sdk/`: Typed browser clients for the product REST API, MCP JSON-RPC endpoint, CES chat sessions, and GECX messenger fallback.
 - `packages/gecx-components/`: Custom elements for storefront widgets and Dialogflow CX Messenger custom rich content.
 - `services/product-api/`: Cloud Functions Gen 2 REST API source for BigQuery-backed catalog and purchase-support queries.
 - `services/mcp-server/`: Cloud Functions Gen 2 MCP endpoint source that forwards tool calls to the product API.
-- `infra/terraform/`: Google Cloud infrastructure for BigQuery, Cloud Functions, CES/GECX app resources, tools, and toolsets.
+- `infra/terraform/`: Google Cloud infrastructure for BigQuery, Cloud Functions, Cloud Run storefront hosting, Artifact Registry, CES/GECX app resources, tools, and toolsets.
 - `gecx/`: Exported GECX/CES app, agent, skill, guardrail, evaluation, and tool metadata.
 - `data/bigquery/`: Seed SQL for the golf product warehouse.
 

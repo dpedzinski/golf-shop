@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { FormEvent } from "react";
 import {
+  CesClient,
   McpClient,
   ProductApiClient,
   mountGecxMessenger,
@@ -21,6 +23,8 @@ type StorefrontConfig = {
     enabled: boolean;
     projectId: string;
     location: string;
+    appId: string;
+    deploymentId: string;
     agentId: string;
     languageCode: string;
     chatTitle: string;
@@ -152,6 +156,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
 
   const widgetReady =
     config.gecx.enabled && config.gecx.projectId && config.gecx.location && config.gecx.agentId;
+  const cesChatReady = Boolean(widgetReady && config.gecx.appId && config.gecx.deploymentId);
 
   const comparisonPayload = useMemo<CxWidgetPayload>(
     () => ({
@@ -239,7 +244,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   }, [apiStatus, comparisonPayload, products, renderCxWidget]);
 
   useEffect(() => {
-    if (!widgetReady || !messengerRef.current) return;
+    if (!widgetReady || cesChatReady || !messengerRef.current) return;
     const mounted = mountGecxMessenger({
       projectId: config.gecx.projectId,
       location: config.gecx.location,
@@ -253,7 +258,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
     return () => {
       mounted.element.remove();
     };
-  }, [config.gecx, widgetReady]);
+  }, [cesChatReady, config.gecx, widgetReady]);
 
   return (
     <>
@@ -309,11 +314,103 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
               <code>VITE_GECX_AGENT_ID</code> after Terraform finishes.
             </p>
           </div>
+        ) : cesChatReady ? (
+          <CesChat config={config.gecx} />
         ) : (
           <div ref={messengerRef} data-testid="gecx-messenger-container" />
         )}
       </section>
     </>
+  );
+}
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  text: string;
+};
+
+function CesChat({ config }: { config: StorefrontConfig["gecx"] }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [draft, setDraft] = useState("");
+  const [status, setStatus] = useState("Ready");
+  const [sessionId] = useState(() => `web-${crypto.randomUUID()}`);
+
+  const client = useMemo(
+    () =>
+      new CesClient({
+        projectId: config.projectId,
+        location: config.location,
+        appId: config.appId,
+        deploymentId: config.deploymentId,
+      }),
+    [config.appId, config.deploymentId, config.location, config.projectId]
+  );
+
+  async function submitMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+
+    setDraft("");
+    setStatus("Thinking");
+    setMessages((current) => [...current, { role: "user", text }]);
+
+    try {
+      const response = await client.sendMessage({
+        sessionId,
+        text,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+      const answer =
+        response.outputs
+          ?.map((output) => output.text)
+          .filter((value): value is string => Boolean(value))
+          .join("\n\n") || "I did not receive a text response.";
+      setMessages((current) => [...current, { role: "assistant", text: answer }]);
+      setStatus("Ready");
+    } catch (error) {
+      setMessages((current) => [
+        ...current,
+        { role: "assistant", text: `The assistant request failed: ${String(error)}` },
+      ]);
+      setStatus("Error");
+    }
+  }
+
+  return (
+    <div className="ces-chat" data-testid="ces-chat">
+      <div className="ces-chat-header">
+        <strong>{config.chatTitle}</strong>
+        <span>{status}</span>
+      </div>
+      <div className="ces-chat-log" aria-live="polite">
+        {messages.length ? (
+          messages.map((message, index) => (
+            <div className={`ces-chat-message ${message.role}`} key={`${message.role}-${index}`}>
+              <span>{message.role === "user" ? "You" : "Assistant"}</span>
+              <p>{message.text}</p>
+            </div>
+          ))
+        ) : (
+          <div className="ces-chat-message assistant">
+            <span>Assistant</span>
+            <p>What are you shopping for today?</p>
+          </div>
+        )}
+      </div>
+      <form className="ces-chat-form" onSubmit={submitMessage}>
+        <textarea
+          aria-label="Message Golf Store Assistant"
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="Ask about irons, shipping, financing, or rewards"
+          rows={3}
+          value={draft}
+        />
+        <button disabled={!draft.trim() || status === "Thinking"} type="submit">
+          Send
+        </button>
+      </form>
+    </div>
   );
 }
 

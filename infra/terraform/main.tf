@@ -15,6 +15,7 @@ locals {
   repo_root              = abspath("${path.module}/../..")
   product_api_source_dir = "${local.repo_root}/services/product-api"
   mcp_server_source_dir  = "${local.repo_root}/services/mcp-server"
+  static_site_source_dir = "${local.repo_root}/apps/static-site"
   gecx_tool_python_dir   = "${local.repo_root}/gecx/tools/python"
   agent_instruction_file = "${local.repo_root}/gecx/agents/golf-store-assistant/instruction.txt"
   bigquery_seed_sql_file = "${local.repo_root}/${var.bigquery_seed_sql_file}"
@@ -40,6 +41,43 @@ locals {
   )
 
   agent_instruction = trimspace(file(local.agent_instruction_file))
+
+  static_site_app_files = [
+    for path in fileset(local.static_site_source_dir, "**") : "apps/static-site/${path}"
+    if !contains([".vinext", ".vite", ".wrangler", "coverage", "dist", "node_modules", "playwright-report", "test-results"], split("/", path)[0])
+    && !endswith(path, ".tsbuildinfo")
+    && (path == ".env.example" || !startswith(path, ".env"))
+  ]
+
+  static_site_sdk_files = [
+    for path in fileset("${local.repo_root}/packages/gecx-sdk", "**") : "packages/gecx-sdk/${path}"
+    if !contains(["coverage", "dist", "node_modules"], split("/", path)[0])
+    && !endswith(path, ".tsbuildinfo")
+  ]
+
+  static_site_component_files = [
+    for path in fileset("${local.repo_root}/packages/gecx-components", "**") : "packages/gecx-components/${path}"
+    if !contains([".playwright-browsers", "coverage", "dist", "node_modules", "playwright-report", "test-results"], split("/", path)[0])
+    && !endswith(path, ".tsbuildinfo")
+  ]
+
+  static_site_source_files = sort(concat(
+    [
+      ".dockerignore",
+      ".gcloudignore",
+      "package.json",
+      "package-lock.json",
+    ],
+    local.static_site_app_files,
+    local.static_site_sdk_files,
+    local.static_site_component_files,
+  ))
+
+  static_site_source_hash = substr(sha256(join("", [
+    for path in local.static_site_source_files : filesha256("${local.repo_root}/${path}")
+  ])), 0, 16)
+
+  static_site_image = "${var.static_site_region}-docker.pkg.dev/${var.project_id}/${var.static_site_artifact_repository_id}/${var.static_site_service_name}:${local.static_site_source_hash}"
 
   python_tools = {
     search_products = {
@@ -108,14 +146,41 @@ resource "google_bigquery_dataset" "golf_products" {
   depends_on = [google_project_service.required]
 }
 
-resource "google_bigquery_job" "seed_golf_products" {
-  project  = var.project_id
-  location = var.bigquery_location
-  job_id   = "seed_golf_products_${substr(sha256(local.rendered_seed_sql), 0, 16)}"
+resource "terraform_data" "seed_golf_products" {
+  input = {
+    job_id = "seed_golf_products_cli_${substr(sha256(local.rendered_seed_sql), 0, 16)}"
+  }
 
-  query {
-    query          = local.rendered_seed_sql
-    use_legacy_sql = false
+  triggers_replace = {
+    project_id          = var.project_id
+    dataset_id          = var.bigquery_dataset_id
+    location            = var.bigquery_location
+    rendered_sql_sha256 = sha256(local.rendered_seed_sql)
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      set -euo pipefail
+      tmp_sql="$(mktemp)"
+      cleanup() {
+        rm -f "$tmp_sql"
+      }
+      trap cleanup EXIT
+
+      sed \
+        -e 's|`affable-seat-501018-q0\.golf_products`|`${var.project_id}.${var.bigquery_dataset_id}`|g' \
+        -e "s|location = 'US'|location = '${var.bigquery_location}'|g" \
+        '${local.bigquery_seed_sql_file}' > "$tmp_sql"
+
+      bq query \
+        --project_id='${var.project_id}' \
+        --location='${var.bigquery_location}' \
+        --job_id='${self.input.job_id}' \
+        --use_legacy_sql=false \
+        --format=none \
+        < "$tmp_sql"
+    EOT
   }
 
   depends_on = [google_bigquery_dataset.golf_products]
@@ -133,6 +198,14 @@ resource "google_service_account" "mcp_server" {
   project      = var.project_id
   account_id   = var.mcp_server_service_account_id
   display_name = "Golf Store MCP Server"
+
+  depends_on = [google_project_service.required]
+}
+
+resource "google_service_account" "static_site" {
+  project      = var.project_id
+  account_id   = var.static_site_service_account_id
+  display_name = "Golf Store Static Site"
 
   depends_on = [google_project_service.required]
 }
@@ -216,7 +289,7 @@ resource "google_cloudfunctions2_function" "product_api" {
   }
 
   depends_on = [
-    google_bigquery_job.seed_golf_products,
+    terraform_data.seed_golf_products,
     google_bigquery_dataset_iam_member.product_api_data_viewer,
     google_project_iam_member.product_api_bigquery_job_user,
     google_project_service.required,
@@ -297,6 +370,24 @@ resource "google_cloud_run_v2_service_iam_member" "mcp_server_ces_invoker" {
   name     = google_cloudfunctions2_function.mcp_server.name
   role     = "roles/run.invoker"
   member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ces.iam.gserviceaccount.com"
+}
+
+resource "google_artifact_registry_repository" "static_site" {
+  project       = var.project_id
+  location      = var.static_site_region
+  repository_id = var.static_site_artifact_repository_id
+  description   = "Docker images for the golf store static site."
+  format        = "DOCKER"
+
+  depends_on = [google_project_service.required]
+}
+
+resource "google_project_iam_member" "cloudbuild_static_site_artifact_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+
+  depends_on = [google_project_service.required]
 }
 
 resource "google_ces_app" "golf_store" {
@@ -402,4 +493,166 @@ resource "google_ces_app_root_agent_association" "root" {
   location = google_ces_app.golf_store.location
   app_id   = google_ces_app.golf_store.app_id
   agent_id = google_ces_agent.golf_store_assistant.agent_id
+}
+
+resource "google_ces_app_version" "web" {
+  project        = var.project_id
+  location       = google_ces_app.golf_store.location
+  app            = google_ces_app.golf_store.app_id
+  app_version_id = var.app_version_id
+  display_name   = "Web storefront version"
+  description    = "Snapshot used by the storefront web deployment."
+
+  depends_on = [google_ces_app_root_agent_association.root]
+}
+
+resource "google_ces_deployment" "web" {
+  project      = var.project_id
+  location     = google_ces_app.golf_store.location
+  app          = google_ces_app.golf_store.app_id
+  display_name = var.deployment_display_name
+  app_version  = google_ces_app_version.web.id
+
+  channel_profile {
+    channel_type = "WEB_UI"
+
+    web_widget_config {
+      modality         = "CHAT_ONLY"
+      theme            = "LIGHT"
+      web_widget_title = var.agent_display_name
+
+      security_settings {
+        enable_public_access = true
+        enable_origin_check  = false
+        enable_recaptcha     = false
+      }
+    }
+  }
+}
+
+resource "terraform_data" "build_static_site_image" {
+  input = {
+    image       = local.static_site_image
+    source_hash = local.static_site_source_hash
+  }
+
+  triggers_replace = {
+    image = local.static_site_image
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      set -euo pipefail
+      gcloud builds submit '${local.repo_root}' \
+        --project='${var.project_id}' \
+        --region='${var.static_site_region}' \
+        --config='${local.static_site_source_dir}/cloudbuild.yaml' \
+        --substitutions='_IMAGE=${local.static_site_image}' \
+        --timeout='${var.static_site_build_timeout}'
+    EOT
+  }
+
+  depends_on = [
+    google_artifact_registry_repository.static_site,
+    google_project_iam_member.cloudbuild_static_site_artifact_writer,
+  ]
+}
+
+resource "google_cloud_run_v2_service" "static_site" {
+  project             = var.project_id
+  location            = var.static_site_region
+  name                = var.static_site_service_name
+  deletion_protection = false
+  ingress             = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    service_account = google_service_account.static_site.email
+    timeout         = "${var.static_site_request_timeout_seconds}s"
+
+    scaling {
+      min_instance_count = var.static_site_min_instance_count
+      max_instance_count = var.static_site_max_instance_count
+    }
+
+    containers {
+      image = local.static_site_image
+
+      ports {
+        container_port = 8080
+      }
+
+      env {
+        name  = "VITE_PRODUCT_API_URL"
+        value = google_cloudfunctions2_function.product_api.service_config[0].uri
+      }
+
+      env {
+        name  = "VITE_MCP_SERVER_URL"
+        value = "${google_cloudfunctions2_function.mcp_server.service_config[0].uri}/mcp/"
+      }
+
+      env {
+        name  = "VITE_GECX_ENABLE_WIDGET"
+        value = "true"
+      }
+
+      env {
+        name  = "VITE_GECX_PROJECT_ID"
+        value = var.project_id
+      }
+
+      env {
+        name  = "VITE_GECX_LOCATION"
+        value = google_ces_app.golf_store.location
+      }
+
+      env {
+        name  = "VITE_GECX_APP_ID"
+        value = google_ces_app.golf_store.app_id
+      }
+
+      env {
+        name  = "VITE_GECX_DEPLOYMENT_ID"
+        value = google_ces_deployment.web.name
+      }
+
+      env {
+        name  = "VITE_GECX_AGENT_ID"
+        value = google_ces_agent.golf_store_assistant.agent_id
+      }
+
+      env {
+        name  = "VITE_GECX_LANGUAGE_CODE"
+        value = "en"
+      }
+
+      env {
+        name  = "VITE_GECX_CHAT_TITLE"
+        value = var.agent_display_name
+      }
+
+      resources {
+        limits = {
+          cpu    = var.static_site_cpu
+          memory = var.static_site_memory
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    terraform_data.build_static_site_image,
+    google_ces_deployment.web,
+    google_cloudfunctions2_function.product_api,
+    google_cloudfunctions2_function.mcp_server,
+  ]
+}
+
+resource "google_cloud_run_v2_service_iam_member" "static_site_public_invoker" {
+  project  = var.project_id
+  location = google_cloud_run_v2_service.static_site.location
+  name     = google_cloud_run_v2_service.static_site.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
 }

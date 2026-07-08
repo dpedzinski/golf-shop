@@ -17,8 +17,9 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "site:dev": "npm run dev --workspace apps/static-site",
-    "site:build": "npm run build --workspace apps/static-site"
+    "site:prepare": "npm run build --workspace packages/gecx-sdk && npm run build --workspace packages/gecx-components",
+    "site:dev": "npm run site:prepare && npm run dev --workspace apps/static-site",
+    "site:build": "npm run site:prepare && npm run build --workspace apps/static-site"
   },
   "devDependencies": {
     "concurrently": "latest"

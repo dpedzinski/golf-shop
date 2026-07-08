@@ -10,7 +10,7 @@ output "bigquery_dataset" {
 
 output "bigquery_seed_job_id" {
   description = "BigQuery SQL job that created and loaded the product warehouse."
-  value       = google_bigquery_job.seed_golf_products.id
+  value       = "projects/${var.project_id}/jobs/${terraform_data.seed_golf_products.output.job_id}"
 }
 
 output "agent_name" {
@@ -28,9 +28,24 @@ output "mcp_server_url" {
   value       = "${google_cloudfunctions2_function.mcp_server.service_config[0].uri}/mcp/"
 }
 
+output "static_site_url" {
+  description = "Public Cloud Run URL for the static storefront."
+  value       = google_cloud_run_v2_service.static_site.uri
+}
+
+output "static_site_image" {
+  description = "Artifact Registry image deployed to the static storefront Cloud Run service."
+  value       = terraform_data.build_static_site_image.output.image
+}
+
 output "mcp_toolset_name" {
   description = "Customer Engagement Suite MCP toolset attached to the root agent."
   value       = google_ces_toolset.golf_store_mcp.name
+}
+
+output "web_deployment_name" {
+  description = "Customer Engagement Suite WEB_UI deployment used for website chat sessions."
+  value       = google_ces_deployment.web.name
 }
 
 output "tool_names" {

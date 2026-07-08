@@ -23,7 +23,7 @@ website -> GECX -> MCP -> API -> BigQuery chain.
 
 1. Confirm documented package scripts exist.
 2. Run local typecheck, unit tests, and builds when requested by the user.
-3. Validate static site env values from Terraform outputs.
+3. Validate the Cloud Run static site URL and env values from Terraform outputs.
 4. Smoke test product API endpoints.
 5. Smoke test MCP health, `tools/list`, and `tools/call`.
 6. Validate GECX/CES toolset behavior through the console or website messenger.
@@ -38,6 +38,7 @@ npm run site:build
 npm run test:e2e --workspace apps/static-site
 terraform -chdir=infra/terraform output -raw product_api_url
 terraform -chdir=infra/terraform output -raw mcp_server_url
+terraform -chdir=infra/terraform output -raw static_site_url
 terraform -chdir=infra/terraform output -raw bigquery_dataset
 ```
 

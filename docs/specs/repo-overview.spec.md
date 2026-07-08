@@ -12,7 +12,7 @@ agent assets, and BigQuery seed data.
 - `apps/static-site/`: Vinext/Next-style storefront for the Fairway Supply demo.
   It renders product, comparison, financing, loyalty, and assistant sections.
 - `packages/gecx-sdk/`: Browser SDK with `ProductApiClient`, `McpClient`, and
-  `mountGecxMessenger()`.
+  `CesClient`, plus the `mountGecxMessenger()` fallback.
 - `packages/gecx-components/`: Web components and Dialogflow CX Messenger custom
   template helpers for rich product and purchase-support widgets.
 - `services/product-api/`: Python Cloud Functions Gen 2 REST API that queries
@@ -20,8 +20,9 @@ agent assets, and BigQuery seed data.
 - `services/mcp-server/`: Python Cloud Functions Gen 2 MCP-style JSON-RPC
   endpoint that forwards tool calls to the product API.
 - `infra/terraform/`: Google Cloud infrastructure for APIs, BigQuery, Cloud
-  Functions, service accounts, IAM, Customer Engagement Suite app, agent, Python
-  tools, and MCP toolset.
+  Functions, Cloud Run static site hosting, Artifact Registry, service
+  accounts, IAM, Customer Engagement Suite app, agent, Python tools, and MCP
+  toolset.
 - `gecx/`: Exported GECX/CES app, root agent, guardrails, tools, evaluations,
   and Python demo tool code.
 - `data/bigquery/`: SQL seed file that creates product, inventory, pricing,
@@ -37,7 +38,9 @@ Static site:
 - Reads runtime values from `VITE_*` environment variables.
 - Calls the product API directly for featured product data.
 - Calls the MCP endpoint for tool listing status.
-- Mounts `df-messenger` when GECX project, location, and agent ID are present.
+- Mounts the native CES chat when the GECX deployment ID is present.
+- Falls back to `df-messenger` when only project, location, and agent ID are
+  present.
 - Falls back to local demo products if the product API is not configured or is
   unavailable.
 
@@ -45,6 +48,7 @@ SDK:
 
 - `ProductApiClient` builds product API URLs and wraps REST methods.
 - `McpClient` sends JSON-RPC requests to the MCP endpoint.
+- `CesClient` generates a public web chat token and calls CES `runSession`.
 - `mountGecxMessenger()` injects the Dialogflow CX Messenger script and mounts a
   configured `df-messenger` element.
 
@@ -76,6 +80,7 @@ Terraform:
 
 - Seeds the BigQuery dataset from `data/bigquery/golf_store_option_b_bigquery_fixed.sql`.
 - Deploys the product API and MCP server as Cloud Functions Gen 2.
+- Builds the static site container with Cloud Build and deploys it to Cloud Run.
 - Creates Customer Engagement Suite app and root agent resources.
 - Attaches the MCP toolset to the root agent as the primary deployed tool path.
 
@@ -113,10 +118,13 @@ npm run test:e2e --workspace packages/gecx-components
 
 ## Important Defaults
 
-- `VITE_GECX_LOCATION` defaults to `global` in the static site.
+- `VITE_GECX_LOCATION` defaults to `us` in the static site, matching Terraform's Customer Engagement Suite location default.
+- `VITE_GECX_APP_ID` defaults to `golf-store-customer-service`.
+- `VITE_GECX_DEPLOYMENT_ID` should be set from Terraform's `web_deployment_name` output for the native CES chat path.
 - `VITE_GECX_AGENT_ID` defaults to `golf-store-assistant` in the static site.
 - Terraform `location` defaults to `us` for Customer Engagement Suite resources.
 - Terraform `cloud_functions_region` defaults to `us-central1`.
+- Terraform `static_site_region` defaults to `us-central1`.
 - Terraform `bigquery_dataset_id` defaults to `golf_products`.
 - Terraform `allow_unauthenticated_serverless` defaults to `true`; when false,
   Terraform configures service-to-service and CES service-agent ID-token auth.

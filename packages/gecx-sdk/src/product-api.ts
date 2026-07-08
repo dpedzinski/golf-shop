@@ -82,7 +82,7 @@ export class ProductApiClient {
       throw new Error('ProductApiClient requires a baseUrl.');
     }
     this.baseUrl = options.baseUrl;
-    this.fetchImpl = options.fetch ?? fetch;
+    this.fetchImpl = options.fetch ?? ((input, init) => fetch(input, init));
   }
 
   searchProducts(params: ProductSearchParams = {}): Promise<SearchProductsResponse> {

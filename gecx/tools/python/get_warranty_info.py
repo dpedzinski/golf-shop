@@ -1,4 +1,7 @@
-def get_warranty_info(product_id=None):
+from typing import Any, Optional
+
+
+def get_warranty_info(product_id: Optional[str] = None) -> dict[str, Any]:
     """Retrieves general or product-specific warranty information for golf products."""
     return {
         "product_id": product_id,

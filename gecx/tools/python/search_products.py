@@ -1,12 +1,15 @@
+from typing import Any, Optional
+
+
 def search_products(
-    product_type=None,
-    skill_level=None,
-    budget_range=None,
-    playing_style=None,
-    brand=None,
-    product_category=None,
-    preferences=None,
-):
+    product_type: Optional[str] = None,
+    skill_level: Optional[str] = None,
+    budget_range: Optional[str] = None,
+    playing_style: Optional[str] = None,
+    brand: Optional[str] = None,
+    product_category: Optional[str] = None,
+    preferences: Optional[str] = None,
+) -> dict[str, Any]:
     """Searches golf products using customer needs such as category, skill level, budget, brand, playing style, and preferences."""
     club_image = "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg"
     ball_image = "https://upload.wikimedia.org/wikipedia/commons/e/e6/Golfball.jpg"

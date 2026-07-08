@@ -4,9 +4,10 @@
 
 This repo models a Google Customer Engagement Suite / GECX customer service
 experience for an online golf store. The web storefront embeds Dialogflow CX
-Messenger through the local SDK, and the Terraform deployment creates the
-Customer Engagement Suite app, root agent, and MCP toolset that lets the agent
-retrieve BigQuery-backed product, policy, financing, loyalty, and checkout data.
+Messenger as a fallback and uses the CES WEB_UI deployment for native chat
+sessions when configured. Terraform creates the Customer Engagement Suite app,
+root agent, web deployment, and MCP toolset that lets the agent retrieve
+BigQuery-backed product, policy, financing, loyalty, and checkout data.
 
 Use the term GECX/CES in this repo to mean the Google customer engagement agent
 layer built from Dialogflow CX / Conversational Agents concepts and provisioned
@@ -14,10 +15,10 @@ through `infra/terraform`.
 
 ## Official Concepts To Track
 
-- Dialogflow CX Messenger provides the embeddable website chat surface for an
-  agent. The site uses `mountGecxMessenger()` from `packages/gecx-sdk` to mount
-  a `df-messenger` element with project, location, agent, language, title, and
-  optional OAuth client attributes.
+- CES WEB_UI deployments provide the primary embeddable website chat path in
+  this repo. The site uses `CesClient` from `packages/gecx-sdk` to generate a
+  public chat token and call `runSession`. Dialogflow CX Messenger remains as a
+  fallback when only project, location, and agent IDs are configured.
 - Playbook tools connect generative agents to external systems. In this repo,
   the primary deployed external-system connector is the Terraform-created MCP
   toolset, not the direct Python demo tools.
@@ -56,6 +57,8 @@ Terraform-created GECX/CES resources:
 - `google_ces_toolset.golf_store_mcp`
 - `google_ces_agent.golf_store_assistant`
 - `google_ces_app_root_agent_association.root`
+- `google_ces_app_version.web`
+- `google_ces_deployment.web`
 - `google_ces_tool.python` for demo Python tools, exposed by the `tool_names`
   output but not the root agent's primary BigQuery-backed path.
 

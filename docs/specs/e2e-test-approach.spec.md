@@ -16,13 +16,15 @@ website -> GECX -> MCP -> APIs -> BigQuery.
 - Google Cloud credentials for Terraform, Cloud Functions, BigQuery, and
   Customer Engagement Suite validation.
 - Terraform applied from `infra/terraform`.
-- Static site environment variables populated from Terraform outputs.
+- Static site deployed from Terraform, or local static site environment
+  variables populated from Terraform outputs.
 
 Useful deployed values:
 
 ```bash
 terraform -chdir=infra/terraform output -raw product_api_url
 terraform -chdir=infra/terraform output -raw mcp_server_url
+terraform -chdir=infra/terraform output -raw static_site_url
 terraform -chdir=infra/terraform output -raw bigquery_dataset
 terraform -chdir=infra/terraform output -raw agent_name
 terraform -chdir=infra/terraform output -raw mcp_toolset_name
@@ -57,7 +59,9 @@ VITE_PRODUCT_API_URL=<terraform product_api_url>
 VITE_MCP_SERVER_URL=<terraform mcp_server_url>
 VITE_GECX_ENABLE_WIDGET=true
 VITE_GECX_PROJECT_ID=<google cloud project id>
-VITE_GECX_LOCATION=<GECX location, usually us or global depending on deployment>
+VITE_GECX_LOCATION=<GECX location, usually us for the Terraform stack>
+VITE_GECX_APP_ID=golf-store-customer-service
+VITE_GECX_DEPLOYMENT_ID=<terraform web_deployment_name>
 VITE_GECX_AGENT_ID=golf-store-assistant
 VITE_GECX_LANGUAGE_CODE=en
 VITE_GECX_CHAT_TITLE=Golf Store Assistant
@@ -75,9 +79,32 @@ Expected results:
 - Featured products load from the product API when `VITE_PRODUCT_API_URL` is
   reachable.
 - The MCP tools status lists tool names when `VITE_MCP_SERVER_URL` is reachable.
-- The assistant section mounts `df-messenger` when the GECX values are present.
+- The assistant section mounts the native CES chat when
+  `VITE_GECX_DEPLOYMENT_ID` is present. Without a CES deployment ID, it falls
+  back to the Dialogflow CX Messenger path.
 - If API or MCP endpoints are unavailable, the page degrades to demo product
   data or an MCP status message without crashing.
+
+For the hosted GCP path, open the Cloud Run site:
+
+```bash
+STATIC_SITE_URL=$(terraform -chdir=infra/terraform output -raw static_site_url)
+```
+
+Expected: the same storefront behavior as local development, with runtime
+configuration supplied by Cloud Run environment variables managed in Terraform.
+
+Run the hosted CES chat smoke check:
+
+```bash
+STATIC_SITE_URL=$(terraform -chdir=infra/terraform output -raw static_site_url) \
+SCREENSHOT_PATH=artifacts/static-site-gecx-irons.png \
+node scripts/verify-static-site-gecx.mjs
+```
+
+Expected: the script sends `I am looking for new Irons for my game`, observes
+successful CES `generateChatToken` and `runSession` calls, captures a
+screenshot, and prints the assistant's response.
 
 ## Layer 3: API To BigQuery Smoke Tests
 

@@ -1,4 +1,7 @@
-def get_product_details(product_id):
+from typing import Any
+
+
+def get_product_details(product_id: str) -> dict[str, Any]:
     """Retrieves detailed information for a specific golf product by product ID."""
     club_image = "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg"
     ball_image = "https://upload.wikimedia.org/wikipedia/commons/e/e6/Golfball.jpg"

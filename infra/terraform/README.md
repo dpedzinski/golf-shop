@@ -8,6 +8,7 @@ It creates:
 - A BigQuery dataset seeded from `../../data/bigquery/golf_store_option_b_bigquery_fixed.sql`.
 - A Cloud Functions Gen 2 REST API that queries the seeded BigQuery product views.
 - A Cloud Functions Gen 2 MCP endpoint that calls the REST API.
+- An Artifact Registry repository and Cloud Run service for the static storefront.
 - A `google_ces_app`.
 - A root `google_ces_agent`.
 - A `google_ces_app_root_agent_association`.
@@ -25,10 +26,11 @@ terraform plan
 terraform apply
 ```
 
-The direct CES Python tools return demo data. The MCP toolset calls the deployed serverless REST API, which queries the BigQuery views created by the SQL seed job.
+The direct CES Python tools return demo data. The MCP toolset calls the deployed serverless REST API, which queries the BigQuery views created by the SQL seed script. The seed script is applied with the `bq` CLI because BigQuery multi-statement scripts cannot be run through the Terraform BigQuery job resource's default destination-table settings.
 
 Useful endpoints after `terraform apply`:
 
+- `static_site_url`: public Cloud Run storefront URL
 - `GET <product_api_url>/health`
 - `GET <product_api_url>/products?q=driver&limit=5`
 - `GET <product_api_url>/products/{product_id}`
@@ -49,5 +51,7 @@ Useful endpoints after `terraform apply`:
 If your Google Cloud project uses a different supported Gemini model for Customer Engagement Suite, override `model` in `terraform.tfvars`.
 
 Set `allow_unauthenticated_serverless = false` to keep the functions private. Terraform will grant the MCP runtime service account permission to call the REST API and will configure the CES MCP toolset to use service-agent ID-token auth for the MCP server.
+
+The static storefront is deployed to Cloud Run because the Vinext app has a server runtime in addition to client assets. Terraform submits the repository to Cloud Build, builds `apps/static-site/Dockerfile`, pushes the image to Artifact Registry, and deploys the Cloud Run service with runtime environment variables populated from the Terraform-managed Product API, MCP server, and CES WEB_UI deployment. Keep `allow_unauthenticated_serverless = true` for the current browser-facing storefront path; if the API and MCP services are made private, add a backend proxy before exposing the site publicly.
 
 The seed SQL is written for clean reruns: it drops and recreates the views/tables inside `bigquery_dataset_id` before inserting the fixture data.

@@ -1,4 +1,7 @@
-def get_shipping_info(product_id=None, destination_zip=None):
+from typing import Any, Optional
+
+
+def get_shipping_info(product_id: Optional[str] = None, destination_zip: Optional[str] = None) -> dict[str, Any]:
     """Retrieves shipping options, costs, and delivery estimates for golf-store purchases."""
     return {
         "product_id": product_id,

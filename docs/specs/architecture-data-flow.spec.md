@@ -12,15 +12,20 @@ rendering and status display. Those direct browser calls support the storefront
 experience, but the conversational tool path for deployed GECX is the MCP
 toolset attached by Terraform.
 
+Terraform deploys the website itself to Cloud Run. Cloud Run serves the Vinext
+server/client build and injects the runtime environment variables that point to
+the deployed Product API, MCP endpoint, and CES WEB_UI deployment.
+
 ## Diagram
 
 ```mermaid
 flowchart LR
   Browser["Customer browser"]
-  Site["apps/static-site"]
+  Site["Cloud Run apps/static-site"]
   SDK["packages/gecx-sdk"]
   Components["packages/gecx-components"]
-  Messenger["Dialogflow CX Messenger df-messenger"]
+  CesChat["Native CES chat client"]
+  Messenger["Dialogflow CX Messenger fallback"]
   GECX["GECX / CES root agent"]
   Toolset["CES MCP toolset"]
   MCP["services/mcp-server Cloud Function"]
@@ -31,7 +36,9 @@ flowchart LR
   Browser --> Site
   Site --> SDK
   Site --> Components
+  SDK --> CesChat
   SDK --> Messenger
+  CesChat --> GECX
   Messenger --> GECX
   GECX --> Toolset
   Toolset --> MCP
@@ -51,16 +58,21 @@ flowchart LR
 - `VITE_GECX_ENABLE_WIDGET`
 - `VITE_GECX_PROJECT_ID`
 - `VITE_GECX_LOCATION`
+- `VITE_GECX_APP_ID`
+- `VITE_GECX_DEPLOYMENT_ID`
 - `VITE_GECX_AGENT_ID`
 - `VITE_GECX_LANGUAGE_CODE`
 - `VITE_GECX_CHAT_TITLE`
 - `VITE_GECX_OAUTH_CLIENT_ID`
 
-`apps/static-site/app/storefront-experience.tsx` mounts the messenger only when
-the widget is enabled and project, location, and agent ID are present. If those
-values are missing, the page renders a setup notice instead of mounting chat.
+`apps/static-site/app/storefront-experience.tsx` mounts the native CES chat when
+the widget is enabled and project, location, app ID, deployment ID, and agent ID
+are present. The SDK generates a public chat token for the CES WEB_UI
+deployment, then calls `runSession` for each user message.
 
-The SDK creates a `df-messenger` element and sets:
+If the deployment ID is missing but project, location, and agent ID are present,
+the site falls back to the Dialogflow CX Messenger path. The SDK creates a
+`df-messenger` element and sets:
 
 - `project-id`
 - `location`

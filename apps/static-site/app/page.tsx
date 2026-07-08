@@ -13,7 +13,9 @@ export default function Home() {
     gecx: {
       enabled: envValue("VITE_GECX_ENABLE_WIDGET", "true") !== "false",
       projectId: envValue("VITE_GECX_PROJECT_ID"),
-      location: envValue("VITE_GECX_LOCATION", "global"),
+      location: envValue("VITE_GECX_LOCATION", "us"),
+      appId: envValue("VITE_GECX_APP_ID", "golf-store-customer-service"),
+      deploymentId: envValue("VITE_GECX_DEPLOYMENT_ID"),
       agentId: envValue("VITE_GECX_AGENT_ID", "golf-store-assistant"),
       languageCode: envValue("VITE_GECX_LANGUAGE_CODE", "en"),
       chatTitle: envValue("VITE_GECX_CHAT_TITLE", "Golf Store Assistant"),

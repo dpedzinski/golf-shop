@@ -12,7 +12,9 @@ The page reads these runtime environment variables:
 - `VITE_PRODUCT_API_URL`: Cloud Run/Functions product API base URL
 - `VITE_MCP_SERVER_URL`: MCP server endpoint used to list available tools
 - `VITE_GECX_PROJECT_ID`: Google Cloud project for the GECX/Dialogflow CX agent
-- `VITE_GECX_LOCATION`: agent location, defaults to `global`
+- `VITE_GECX_LOCATION`: agent location, defaults to `us` to match the Terraform stack
+- `VITE_GECX_APP_ID`: Customer Engagement Suite app ID, defaults to `golf-store-customer-service`
+- `VITE_GECX_DEPLOYMENT_ID`: Customer Engagement Suite WEB_UI deployment ID from Terraform
 - `VITE_GECX_AGENT_ID`: agent ID, defaults to `golf-store-assistant`
 - `VITE_GECX_LANGUAGE_CODE`: defaults to `en`
 - `VITE_GECX_CHAT_TITLE`: defaults to `Golf Store Assistant`
@@ -43,9 +45,22 @@ npm run typecheck
 npm run site:build
 ```
 
-## Hosting
+## GCP Hosting
 
-This app is prepared for OpenAI Sites via `.openai/hosting.json`. Once Sites is
-enabled for the workspace, create or reuse the Sites project, set the runtime
-environment variables above in Sites, save a version from the validated build,
-and deploy that saved version to production.
+The Terraform stack in `infra/terraform` deploys this app to Cloud Run. It
+builds `apps/static-site/Dockerfile` with Cloud Build, pushes the image to
+Artifact Registry, and sets the runtime variables from the deployed Product API,
+MCP server, and Customer Engagement Suite WEB_UI deployment.
+
+After `terraform apply`, use the `static_site_url` output as the hosted website.
+
+Run the hosted CES smoke check with:
+
+```bash
+STATIC_SITE_URL=$(terraform -chdir=infra/terraform output -raw static_site_url) \
+SCREENSHOT_PATH=artifacts/static-site-gecx-irons.png \
+node scripts/verify-static-site-gecx.mjs
+```
+
+The script submits `I am looking for new Irons for my game`, verifies successful
+CES `generateChatToken` and `runSession` calls, and writes a screenshot.

@@ -76,21 +76,57 @@ def _search_products(request):
     params = [bigquery.ScalarQueryParameter("limit", "INT64", limit)]
 
     if q:
+        q_lower = q.lower()
+        q_match = q_lower[:-1] if len(q_lower) > 3 and q_lower.endswith("s") else q_lower
         filters.append(
             """
             (
               LOWER(product_name) LIKE @q_like
+              OR LOWER(product_name) LIKE @q_match_like
+              OR LOWER(category_name) LIKE @q_like
+              OR LOWER(category_name) LIKE @q_match_like
+              OR LOWER(parent_category) LIKE @q_like
+              OR LOWER(parent_category) LIKE @q_match_like
               OR LOWER(short_description) LIKE @q_like
+              OR LOWER(short_description) LIKE @q_match_like
               OR LOWER(long_description) LIKE @q_like
+              OR LOWER(long_description) LIKE @q_match_like
               OR EXISTS (
                 SELECT 1
                 FROM UNNEST(tags) AS tag
-                WHERE LOWER(tag) LIKE @q_like
+                WHERE LOWER(tag) LIKE @q_like OR LOWER(tag) LIKE @q_match_like
               )
             )
             """
         )
-        params.append(bigquery.ScalarQueryParameter("q_like", "STRING", f"%{q.lower()}%"))
+        params.append(bigquery.ScalarQueryParameter("q_lower", "STRING", q_lower))
+        params.append(bigquery.ScalarQueryParameter("q_match", "STRING", q_match))
+        params.append(bigquery.ScalarQueryParameter("q_like", "STRING", f"%{q_lower}%"))
+        params.append(bigquery.ScalarQueryParameter("q_match_like", "STRING", f"%{q_match}%"))
+
+    relevance_sql = """
+        MAX(
+          CASE
+            WHEN @q_lower IS NULL THEN 0
+            WHEN LOWER(category_name) IN (@q_lower, @q_match) OR LOWER(parent_category) IN (@q_lower, @q_match) THEN 100
+            WHEN LOWER(category_name) LIKE @q_like OR LOWER(category_name) LIKE @q_match_like OR LOWER(parent_category) LIKE @q_like OR LOWER(parent_category) LIKE @q_match_like THEN 95
+            WHEN LOWER(product_name) LIKE @q_like OR LOWER(product_name) LIKE @q_match_like THEN 90
+            WHEN EXISTS (
+              SELECT 1
+              FROM UNNEST(tags) AS tag
+              WHERE LOWER(tag) IN (@q_lower, @q_match)
+            ) THEN 80
+            WHEN EXISTS (
+              SELECT 1
+              FROM UNNEST(tags) AS tag
+              WHERE LOWER(tag) LIKE @q_like OR LOWER(tag) LIKE @q_match_like
+            ) THEN 70
+            WHEN LOWER(short_description) LIKE @q_like OR LOWER(short_description) LIKE @q_match_like THEN 60
+            WHEN LOWER(long_description) LIKE @q_like OR LOWER(long_description) LIKE @q_match_like THEN 30
+            ELSE 0
+          END
+        ) AS relevance_score,
+    """ if q else "0 AS relevance_score,"
 
     if category:
         filters.append("(LOWER(category_name) = @category OR LOWER(parent_category) = @category)")
@@ -129,6 +165,7 @@ def _search_products(request):
         SUM(IFNULL(stock_quantity, 0)) AS total_stock_quantity,
         ROUND(AVG(average_rating), 2) AS average_rating,
         MAX(review_count) AS review_count,
+        {relevance_sql}
         ANY_VALUE(short_description) AS short_description,
         ANY_VALUE(image_url) AS image_url,
         ANY_VALUE(image_alt) AS image_alt,
@@ -151,7 +188,7 @@ def _search_products(request):
       FROM {_table("vw_product_catalog_current")}
       {where_sql}
       GROUP BY product_id
-      ORDER BY average_rating DESC, product_name
+      ORDER BY relevance_score DESC, average_rating DESC, product_name
       LIMIT @limit
     """
 
