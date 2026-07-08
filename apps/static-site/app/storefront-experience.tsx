@@ -420,19 +420,32 @@ function CesChat({
             text,
             timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           });
-      const widgets = extractWidgetPayloads(response.outputs);
-      const answer =
-        response.outputs
-          ?.map((output) => output.text)
-          .filter((value): value is string => Boolean(value))
-          .join("\n\n") || (widgets.length ? "" : "I did not receive a text response.");
-      setMessages((current) => [...current, { role: "assistant", text: answer, widgets }]);
-      setStatus("Ready");
+      appendAssistantResponse(response);
     } catch (error) {
+      const message = String(error);
+      if (!config.mockAssistant && isCesQuotaError(message)) {
+        appendAssistantResponse(
+          mockAssistantResponse(text),
+          "The live assistant quota is temporarily exhausted, so I’m showing the demo product response for this request."
+        );
+        return;
+      }
       setError(`The assistant request failed: ${String(error)}`);
       setFailedPrompt(text);
       setStatus("Error");
     }
+  }
+
+  function appendAssistantResponse(response: CesRunSessionResponse, prefix?: string) {
+    const widgets = extractWidgetPayloads(response.outputs);
+    const responseText =
+      response.outputs
+        ?.map((output) => output.text)
+        .filter((value): value is string => Boolean(value))
+        .join("\n\n") || (widgets.length ? "" : "I did not receive a text response.");
+    const answer = [prefix, responseText].filter(Boolean).join("\n\n");
+    setMessages((current) => [...current, { role: "assistant", text: answer, widgets }]);
+    setStatus("Ready");
   }
 
   function selectPrompt(prompt: string) {
@@ -660,6 +673,10 @@ function normalizeWidgetPayloads(value: unknown, depth = 0): CxWidgetPayload[] {
 
 function isWidgetPayload(value: unknown): value is CxWidgetPayload {
   return isRecord(value) && typeof value.kind === "string" && widgetKinds.has(value.kind);
+}
+
+function isCesQuotaError(message: string): boolean {
+  return /\b429\b/.test(message) || /RESOURCE_EXHAUSTED/i.test(message) || /quota/i.test(message);
 }
 
 function normalizeProducts(value: unknown): CxProductSummary[] {

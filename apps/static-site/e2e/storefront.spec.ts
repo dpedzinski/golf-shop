@@ -106,6 +106,45 @@ test("renders storefront widgets and two-turn irons product carousel", async ({ 
   expect(prompts).toEqual(["I want to shop for irons", "I want to see irons for experienced players"]);
 });
 
+test("falls back to demo irons flow when CES quota is exhausted", async ({ page }) => {
+  await page.route("https://ces.googleapis.com/v1/**:generateChatToken", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({ chatToken: "test-chat-token" }),
+    });
+  });
+
+  await page.route("https://ces.googleapis.com/v1/**:runSession", async (route) => {
+    await route.fulfill({
+      status: 429,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: {
+          code: 429,
+          message: "Resource has been exhausted (e.g. check quota).",
+          status: "RESOURCE_EXHAUSTED",
+        },
+      }),
+    });
+  });
+
+  await page.goto("/");
+
+  const input = page.getByLabel("Message Golf Store Assistant");
+  await input.fill("I want to shop for irons");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText("The live assistant quota is temporarily exhausted")).toBeVisible();
+  await expect(page.getByText("I can help you shop for irons")).toBeVisible();
+
+  await input.fill("I want to see irons for experienced players");
+  await page.getByRole("button", { name: "Send" }).click();
+
+  const carousel = page.locator(".ces-chat-message.assistant cx-product-carousel");
+  await expect(carousel).toHaveCount(1);
+  await expect(page.getByText("NorthLake Forge SoftStrike Forged Iron Set")).toBeVisible();
+  await expect(page.getByText("NorthLake Forge TourPocket Pro Iron Set")).toBeVisible();
+});
+
 test("renders product listing and category routes", async ({ page }) => {
   await page.goto("/shop?q=driver");
 
