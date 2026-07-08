@@ -1,5 +1,5 @@
-import { ELEMENT_NAMES } from '../src';
-import type { CxElementName, CxWidgetPayload } from '../src';
+import { ELEMENT_NAMES } from '../../src';
+import type { CxElementName, CxWidgetPayload } from '../../src';
 
 export interface CxGallerySample {
   id: string;

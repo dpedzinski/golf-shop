@@ -15,7 +15,6 @@ structure and runtime wiring.
 - `apps/static-site/.env.example`
 - `packages/gecx-sdk/src/product-api.ts`
 - `packages/gecx-sdk/src/mcp.ts`
-- `packages/gecx-sdk/src/messenger.ts`
 - `packages/gecx-components/src/`
 - `services/product-api/main.py`
 - `services/mcp-server/main.py`

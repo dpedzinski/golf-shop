@@ -6,7 +6,6 @@ import {
   CesClient,
   McpClient,
   ProductApiClient,
-  mountGecxMessenger,
   type CesRunSessionResponse,
   type CesSessionOutput,
   type ProductSummary,
@@ -32,7 +31,6 @@ type StorefrontConfig = {
     agentId: string;
     languageCode: string;
     chatTitle: string;
-    oauthClientId: string;
     mockAssistant: boolean;
   };
 };
@@ -156,7 +154,6 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   const compareRef = useRef<HTMLDivElement>(null);
   const financeRef = useRef<HTMLDivElement>(null);
   const loyaltyRef = useRef<HTMLDivElement>(null);
-  const messengerRef = useRef<HTMLDivElement>(null);
   const focusChatRef = useRef<(() => void) | null>(null);
 
   const widgetReady =
@@ -256,23 +253,6 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
     renderWidget(renderCxWidget, loyaltyRef.current, loyaltyPayload);
   }, [apiStatus, comparisonPayload, products, renderCxWidget]);
 
-  useEffect(() => {
-    if (!widgetReady || cesChatReady || !messengerRef.current) return;
-    const mounted = mountGecxMessenger({
-      projectId: config.gecx.projectId,
-      location: config.gecx.location,
-      agentId: config.gecx.agentId,
-      languageCode: config.gecx.languageCode,
-      chatTitle: config.gecx.chatTitle,
-      oauthClientId: config.gecx.oauthClientId || undefined,
-      container: messengerRef.current,
-    });
-
-    return () => {
-      mounted.element.remove();
-    };
-  }, [cesChatReady, config.gecx, widgetReady]);
-
   return (
     <>
       <section className="section" id="shop">
@@ -327,18 +307,17 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
             Start chat
           </button>
         </div>
-        {!widgetReady ? (
+        {!cesChatReady ? (
           <div className="config-panel">
             <h3>GECX widget configuration needed</h3>
             <p>
-              Set <code>VITE_GECX_PROJECT_ID</code>, <code>VITE_GECX_LOCATION</code>, and{" "}
-              <code>VITE_GECX_AGENT_ID</code> after Terraform finishes.
+              Set <code>VITE_GECX_PROJECT_ID</code>, <code>VITE_GECX_LOCATION</code>,{" "}
+              <code>VITE_GECX_AGENT_ID</code>, and <code>VITE_GECX_DEPLOYMENT_ID</code> after
+              Terraform finishes, or enable <code>VITE_GECX_MOCK_ASSISTANT</code> for local testing.
             </p>
           </div>
-        ) : cesChatReady ? (
-          <CesChat config={config.gecx} registerFocus={registerChatFocus} renderCxWidget={renderCxWidget} />
         ) : (
-          <div ref={messengerRef} data-testid="gecx-messenger-container" />
+          <CesChat config={config.gecx} registerFocus={registerChatFocus} renderCxWidget={renderCxWidget} />
         )}
       </section>
     </>

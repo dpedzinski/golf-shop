@@ -12,7 +12,7 @@ agent assets, and BigQuery seed data.
 - `apps/static-site/`: Vinext/Next-style storefront for the Fairway Supply demo.
   It renders product, comparison, financing, loyalty, and assistant sections.
 - `packages/gecx-sdk/`: Browser SDK with `ProductApiClient`, `McpClient`, and
-  `CesClient`, plus the `mountGecxMessenger()` fallback.
+  `CesClient`.
 - `packages/gecx-components/`: Web components and Dialogflow CX Messenger custom
   template helpers for rich product and purchase-support widgets.
 - `services/product-api/`: Python Cloud Functions Gen 2 REST API that queries
@@ -29,7 +29,6 @@ agent assets, and BigQuery seed data.
   sales, financing, loyalty, promotion, policy, and checkout support tables and
   views.
 - Legacy Vertex AI Studio `frontend/` and `backend/` demo directories have been removed; `apps/static-site` is the canonical storefront.
-  These are separate from the newer `apps/static-site` GECX storefront path.
 
 ## Runtime Responsibilities
 
@@ -39,8 +38,6 @@ Static site:
 - Calls the product API directly for featured product data.
 - Calls the MCP endpoint for tool listing status.
 - Mounts the native CES chat when the GECX deployment ID is present.
-- Falls back to `df-messenger` when only project, location, and agent ID are
-  present.
 - Falls back to local demo products if the product API is not configured or is
   unavailable.
 
@@ -49,8 +46,6 @@ SDK:
 - `ProductApiClient` builds product API URLs and wraps REST methods.
 - `McpClient` sends JSON-RPC requests to the MCP endpoint.
 - `CesClient` generates a public web chat token and calls CES `runSession`.
-- `mountGecxMessenger()` injects the Dialogflow CX Messenger script and mounts a
-  configured `df-messenger` element.
 
 Components:
 
@@ -114,7 +109,6 @@ npm run build --workspace packages/gecx-sdk
 npm run test --workspace packages/gecx-sdk
 npm run build --workspace packages/gecx-components
 npm run test --workspace packages/gecx-components
-npm run test:e2e --workspace packages/gecx-components
 ```
 
 ## Important Defaults

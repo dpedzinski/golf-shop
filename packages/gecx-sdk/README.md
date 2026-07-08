@@ -6,7 +6,7 @@ Typed browser clients for the Fairway Supply storefront.
 
 - `ProductApiClient` for the serverless product REST API.
 - `McpClient` for the MCP JSON-RPC endpoint.
-- `mountGecxMessenger()` for the Dialogflow CX Messenger-style GECX web agent embed.
+- `CesClient` for Customer Engagement Suite chat token generation and `runSession` calls.
 
 ## Build
 

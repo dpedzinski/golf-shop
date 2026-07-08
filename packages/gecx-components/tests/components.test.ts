@@ -11,7 +11,7 @@ import {
   productListPayload,
   productOffersPayload,
   ctaGroupPayload,
-} from '../demo/sample-payloads';
+} from './fixtures/sample-payloads';
 
 describe('CX web components', () => {
   it('renders direct injection payloads', () => {
