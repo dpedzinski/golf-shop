@@ -1,0 +1,164 @@
+name: Terraform Apply
+
+on:
+  workflow_run:
+    workflows: ["Terraform Plan"]
+    types:
+      - completed
+    branches:
+      - main
+
+# Ensure only one apply runs at a time
+concurrency:
+  group: terraform-apply-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    environment: production
+    # Only run if the plan workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    defaults:
+      run:
+        working-directory: infra/terraform
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+          terraform_wrapper: false
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=golf-shop/state"
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -out=tfplan \
+            -detailed-exitcode || EXIT_CODE=$?
+
+          # Exit codes: 0 = no changes, 1 = error, 2 = changes present
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+          if [ "$EXIT_CODE" = "1" ]; then
+            echo "❌ Terraform plan failed"
+            exit 1
+          elif [ "$EXIT_CODE" = "2" ]; then
+            echo "✅ Terraform plan completed - changes detected"
+            exit 0
+          else
+            echo "✅ Terraform plan completed - no changes"
+            exit 0
+          fi
+
+      - name: Terraform Apply
+        id: apply
+        if: steps.plan.outputs.exit_code == '2'
+        run: |
+          echo "🚀 Applying Terraform changes..."
+          terraform apply -auto-approve tfplan
+
+          echo "✅ Terraform apply completed successfully"
+
+      - name: Get Terraform Outputs
+        id: outputs
+        if: steps.apply.outcome == 'success'
+        run: |
+          echo "📊 Terraform Outputs:"
+          terraform output -json > outputs.json
+          cat outputs.json
+
+          # Extract key outputs for summary
+          STATIC_SITE_URL=$(terraform output -raw static_site_url 2>/dev/null || echo "N/A")
+          PRODUCT_API_URL=$(terraform output -raw product_api_url 2>/dev/null || echo "N/A")
+
+          echo "static_site_url=$STATIC_SITE_URL" >> $GITHUB_OUTPUT
+          echo "product_api_url=$PRODUCT_API_URL" >> $GITHUB_OUTPUT
+
+      - name: Post-deployment Validation
+        if: steps.apply.outcome == 'success'
+        run: |
+          echo "🔍 Validating deployment..."
+
+          STATIC_SITE_URL="${{ steps.outputs.outputs.static_site_url }}"
+
+          if [ "$STATIC_SITE_URL" != "N/A" ] && [ -n "$STATIC_SITE_URL" ]; then
+            echo "Testing static site: $STATIC_SITE_URL"
+
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$STATIC_SITE_URL" || echo "000")
+
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "301" ] || [ "$HTTP_CODE" = "302" ]; then
+              echo "✅ Static site is accessible (HTTP $HTTP_CODE)"
+            else
+              echo "⚠️ WARNING: Static site returned HTTP $HTTP_CODE"
+            fi
+          else
+            echo "ℹ️ Static site URL not available for validation"
+          fi
+
+          echo "✅ Post-deployment validation completed"
+
+      - name: Create Deployment Summary
+        if: always()
+        run: |
+          echo "## 🚀 Terraform Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`main\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.plan.outputs.exit_code }}" = "0" ]; then
+            echo "### ℹ️ No Changes Detected" >> $GITHUB_STEP_SUMMARY
+            echo "No infrastructure changes were needed." >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.apply.outcome }}" = "success" ]; then
+            echo "### ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Resources:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Static Site: ${{ steps.outputs.outputs.static_site_url }}" >> $GITHUB_STEP_SUMMARY
+            echo "- Product API: ${{ steps.outputs.outputs.product_api_url }}" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.apply.outcome }}" = "failure" ]; then
+            echo "### ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Check the logs above for error details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Terraform Outputs
+        uses: actions/upload-artifact@v4
+        if: steps.apply.outcome == 'success'
+        with:
+          name: terraform-outputs-${{ github.sha }}
+          path: infra/terraform/outputs.json
+          retention-days: 30
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Terraform apply failed!"
+          echo "Please check the logs and fix any issues."
+          exit 1
