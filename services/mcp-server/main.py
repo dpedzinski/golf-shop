@@ -66,9 +66,20 @@ TOOLS = [
             "properties": {
                 "q": {"type": "string", "description": "Keyword such as driver, wedge, shoes, beginner, waterproof."},
                 "category": {"type": "string", "description": "Category or parent category."},
+                "category_id": {"type": "string", "description": "Stable category ID such as CAT_DRIVERS."},
+                "category_slug": {"type": "string", "description": "URL category slug such as drivers or golf-balls."},
                 "brand": {"type": "string", "description": "Brand name."},
                 "skill_level": {"type": "string", "description": "Skill level or handicap range."},
+                "min_price": {"type": "number", "description": "Minimum current sale price."},
                 "max_price": {"type": "number", "description": "Maximum current sale price."},
+                "in_stock": {"type": "boolean", "description": "Only include products with available inventory."},
+                "sort": {
+                    "type": "string",
+                    "enum": ["relevance", "price_asc", "price_desc", "rating", "newest", "popular"],
+                    "description": "Sort order for product results.",
+                },
+                "page": {"type": "integer", "minimum": 1, "default": 1},
+                "page_size": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
                 "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
             },
         },
@@ -99,8 +110,31 @@ TOOLS = [
     },
     {
         "name": "get_category_margin_summary",
-        "description": "List category-level product counts, average sale price, margin, sales, returns, and ratings.",
+        "description": "List category navigation data plus category-level product counts, average sale price, margin, sales, returns, and ratings.",
         "inputSchema": {"type": "object", "properties": {}},
+    },
+    {
+        "name": "estimate_cart",
+        "description": "Estimate cart line availability, current pricing, subtotal, rewards points, financing hints, and shipping hints.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "product_id": {"type": "string"},
+                            "variant_id": {"type": "string"},
+                            "quantity": {"type": "integer", "minimum": 1, "maximum": 99},
+                        },
+                        "required": ["variant_id", "quantity"],
+                    },
+                    "minItems": 1,
+                }
+            },
+            "required": ["items"],
+        },
     },
     {
         "name": "get_low_stock_best_sellers",
@@ -196,7 +230,21 @@ def _call_tool(name, arguments):
     if name == "search_products":
         params = {
             key: arguments[key]
-            for key in ["q", "category", "brand", "skill_level", "max_price", "limit"]
+            for key in [
+                "q",
+                "category",
+                "category_id",
+                "category_slug",
+                "brand",
+                "skill_level",
+                "min_price",
+                "max_price",
+                "in_stock",
+                "sort",
+                "page",
+                "page_size",
+                "limit",
+            ]
             if arguments.get(key) is not None
         }
         return _tool_result(_api_get("/products", params))
@@ -206,6 +254,8 @@ def _call_tool(name, arguments):
         return _tool_result(_api_post("/compare", {"product_ids": arguments["product_ids"]}))
     if name == "get_category_margin_summary":
         return _tool_result(_api_get("/categories"))
+    if name == "estimate_cart":
+        return _tool_result(_api_post("/cart/estimate", {"items": arguments["items"]}))
     if name == "get_low_stock_best_sellers":
         return _tool_result(_api_get("/low-stock", {"limit": arguments.get("limit", 20)}))
     if name == "get_financing_options":

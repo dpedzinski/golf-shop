@@ -16,6 +16,7 @@ export const ELEMENT_NAMES = {
   'financing-disclosure': 'cx-financing-disclosure',
   'cta-group': 'cx-cta-group',
   'product-list': 'cx-product-list',
+  'product-carousel': 'cx-product-carousel',
   'product-offers': 'cx-product-offers',
   'product-comparison': 'cx-product-comparison',
   'loyalty-tiers': 'cx-loyalty-tiers',

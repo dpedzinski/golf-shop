@@ -7,6 +7,7 @@ import {
   formPayload,
   monthlyEstimatePayload,
   paymentPlanPayload,
+  productCarouselPayload,
   productListPayload,
   productOffersPayload,
   ctaGroupPayload,
@@ -118,6 +119,7 @@ describe('CX web components', () => {
     document.body.append(host);
 
     renderCxWidget(host, productListPayload);
+    renderCxWidget(host, productCarouselPayload);
     renderCxWidget(host, {
       kind: 'loyalty-tiers',
       title: 'Rewards',
@@ -132,9 +134,12 @@ describe('CX web components', () => {
     });
 
     const productList = host.querySelector(ELEMENT_NAMES['product-list']);
+    const productCarousel = host.querySelector(ELEMENT_NAMES['product-carousel']);
     const loyalty = host.querySelector(ELEMENT_NAMES['loyalty-tiers']);
     expect(productList?.shadowRoot?.textContent).toContain('Strata Ultimate Complete Golf Set');
     expect(productList?.shadowRoot?.textContent).toContain('Check financing');
+    expect(productCarousel?.shadowRoot?.textContent).toContain('NorthLake Forge SoftStrike Forged Iron Set');
+    expect(productCarousel?.shadowRoot?.querySelector('.cx-carousel-track')).not.toBeNull();
     expect(loyalty?.shadowRoot?.textContent).toContain('Member pricing');
   });
 

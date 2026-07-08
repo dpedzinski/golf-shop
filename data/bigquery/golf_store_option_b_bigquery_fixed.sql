@@ -17,6 +17,11 @@ OPTIONS(
 -- Clean reruns: drop dependent views and tables first.
 DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_category_margin_summary`;
 DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_low_stock_best_sellers`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_cart_pricing_current`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_category_navigation`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_facets`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_detail_current`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_listing_current`;
 DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_catalog_current`;
 DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_checkout_support`;
 DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_purchase_support_policies`;
@@ -2597,12 +2602,15 @@ SELECT
   v.upc,
   p.product_name,
   b.brand_name,
+  p.category_id,
+  REGEXP_REPLACE(LOWER(c.category_name), r'[^a-z0-9]+', '-') AS category_slug,
   c.category_name,
   c.parent_category,
   p.model_year,
   p.release_season,
   p.product_status,
   p.lifecycle_stage,
+  v.variant_status,
   p.target_player_profile,
   p.handicap_range,
   v.gender,
@@ -2706,6 +2714,222 @@ LEFT JOIN latest_inventory AS li
   ON v.variant_id = li.variant_id
 LEFT JOIN `affable-seat-501018-q0.golf_products.fact_product_reviews` AS r
   ON p.product_id = r.product_id;
+
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_listing_current` AS
+WITH latest_performance AS (
+  SELECT * EXCEPT(row_num)
+  FROM (
+    SELECT
+      perf.*,
+      ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY metric_as_of_date DESC) AS row_num
+    FROM `affable-seat-501018-q0.golf_products.fact_product_performance_90d` AS perf
+  )
+  WHERE row_num = 1
+)
+SELECT
+  catalog.product_id,
+  ANY_VALUE(catalog.product_name) AS product_name,
+  ANY_VALUE(catalog.brand_name) AS brand_name,
+  ANY_VALUE(catalog.category_id) AS category_id,
+  ANY_VALUE(catalog.category_slug) AS category_slug,
+  ANY_VALUE(catalog.category_name) AS category_name,
+  ANY_VALUE(catalog.parent_category) AS parent_category,
+  ANY_VALUE(catalog.model_year) AS model_year,
+  ANY_VALUE(catalog.release_season) AS release_season,
+  ANY_VALUE(catalog.product_status) AS product_status,
+  ANY_VALUE(catalog.target_player_profile) AS target_player_profile,
+  ANY_VALUE(catalog.handicap_range) AS handicap_range,
+  ANY_VALUE(catalog.short_description) AS short_description,
+  ANY_VALUE(catalog.long_description) AS long_description,
+  MIN(catalog.current_sale_price) AS min_current_sale_price,
+  MAX(catalog.current_sale_price) AS max_current_sale_price,
+  MAX(catalog.msrp) AS max_msrp,
+  COUNT(DISTINCT catalog.variant_id) AS variant_count,
+  SUM(IFNULL(catalog.stock_quantity, 0)) AS total_stock_quantity,
+  CASE
+    WHEN SUM(IFNULL(catalog.stock_quantity, 0)) <= 0 THEN 'Out of stock'
+    WHEN SUM(IFNULL(catalog.stock_quantity, 0)) <= SUM(IFNULL(catalog.reorder_level, 0)) THEN 'Limited stock'
+    ELSE 'In stock'
+  END AS inventory_status,
+  ROUND(AVG(catalog.average_rating), 2) AS average_rating,
+  MAX(catalog.review_count) AS review_count,
+  ANY_VALUE(catalog.sample_positive_review) AS sample_positive_review,
+  ANY_VALUE(catalog.sample_negative_review) AS sample_negative_review,
+  ANY_VALUE(catalog.image_url) AS image_url,
+  ANY_VALUE(catalog.image_alt) AS image_alt,
+  ARRAY_AGG(DISTINCT catalog.image_url IGNORE NULLS LIMIT 3) AS image_uris,
+  ANY_VALUE(catalog.specs) AS specs,
+  ANY_VALUE(catalog.tags) AS tags,
+  ANY_VALUE(perf.units_sold_30d) AS units_sold_30d,
+  ANY_VALUE(perf.units_sold_90d) AS units_sold_90d,
+  ANY_VALUE(perf.net_revenue_90d) AS net_revenue_90d,
+  ANY_VALUE(perf.return_rate) AS return_rate,
+  ANY_VALUE(perf.wishlist_count) AS wishlist_count,
+  ANY_VALUE(perf.cart_add_count) AS cart_add_count,
+  ANY_VALUE(perf.conversion_rate) AS conversion_rate,
+  ANY_VALUE(perf.views_90d) AS views_90d
+FROM `affable-seat-501018-q0.golf_products.vw_product_catalog_current` AS catalog
+LEFT JOIN latest_performance AS perf
+  ON catalog.product_id = perf.product_id
+GROUP BY catalog.product_id;
+
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_detail_current` AS
+WITH latest_performance AS (
+  SELECT * EXCEPT(row_num)
+  FROM (
+    SELECT
+      perf.*,
+      ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY metric_as_of_date DESC) AS row_num
+    FROM `affable-seat-501018-q0.golf_products.fact_product_performance_90d` AS perf
+  )
+  WHERE row_num = 1
+)
+SELECT
+  catalog.product_id,
+  ANY_VALUE(catalog.product_name) AS product_name,
+  ANY_VALUE(catalog.brand_name) AS brand_name,
+  ANY_VALUE(catalog.category_id) AS category_id,
+  ANY_VALUE(catalog.category_slug) AS category_slug,
+  ANY_VALUE(catalog.category_name) AS category_name,
+  ANY_VALUE(catalog.parent_category) AS parent_category,
+  ANY_VALUE(catalog.model_year) AS model_year,
+  ANY_VALUE(catalog.release_season) AS release_season,
+  ANY_VALUE(catalog.product_status) AS product_status,
+  ANY_VALUE(catalog.lifecycle_stage) AS lifecycle_stage,
+  ANY_VALUE(catalog.target_player_profile) AS target_player_profile,
+  ANY_VALUE(catalog.handicap_range) AS handicap_range,
+  ANY_VALUE(catalog.short_description) AS short_description,
+  ANY_VALUE(catalog.long_description) AS long_description,
+  MIN(catalog.current_sale_price) AS min_current_sale_price,
+  MAX(catalog.current_sale_price) AS max_current_sale_price,
+  MAX(catalog.msrp) AS max_msrp,
+  SUM(IFNULL(catalog.stock_quantity, 0)) AS total_stock_quantity,
+  CASE
+    WHEN SUM(IFNULL(catalog.stock_quantity, 0)) <= 0 THEN 'Out of stock'
+    WHEN SUM(IFNULL(catalog.stock_quantity, 0)) <= SUM(IFNULL(catalog.reorder_level, 0)) THEN 'Limited stock'
+    ELSE 'In stock'
+  END AS inventory_status,
+  ROUND(AVG(catalog.average_rating), 2) AS average_rating,
+  MAX(catalog.review_count) AS review_count,
+  ANY_VALUE(catalog.sample_positive_review) AS sample_positive_review,
+  ANY_VALUE(catalog.sample_negative_review) AS sample_negative_review,
+  ANY_VALUE(catalog.image_url) AS image_url,
+  ANY_VALUE(catalog.image_alt) AS image_alt,
+  ARRAY_AGG(DISTINCT catalog.image_url IGNORE NULLS LIMIT 5) AS image_uris,
+  ANY_VALUE(catalog.specs) AS specs,
+  ANY_VALUE(catalog.tags) AS tags,
+  ANY_VALUE(perf.units_sold_30d) AS units_sold_30d,
+  ANY_VALUE(perf.units_sold_90d) AS units_sold_90d,
+  ANY_VALUE(perf.net_revenue_90d) AS net_revenue_90d,
+  ANY_VALUE(perf.return_rate) AS return_rate,
+  ANY_VALUE(perf.wishlist_count) AS wishlist_count,
+  ANY_VALUE(perf.cart_add_count) AS cart_add_count,
+  ANY_VALUE(perf.conversion_rate) AS conversion_rate,
+  ANY_VALUE(perf.views_90d) AS views_90d,
+  ARRAY_AGG(
+    STRUCT(
+      catalog.variant_id,
+      catalog.sku,
+      catalog.upc,
+      catalog.variant_status,
+      catalog.gender,
+      catalog.handedness,
+      catalog.color,
+      catalog.size,
+      catalog.loft,
+      catalog.bounce,
+      catalog.grind,
+      catalog.shaft_flex,
+      catalog.shaft_material,
+      catalog.ball_color,
+      catalog.pack_size,
+      catalog.shoe_size,
+      catalog.shoe_width,
+      catalog.apparel_fit,
+      catalog.weight_grams,
+      catalog.msrp,
+      catalog.current_sale_price,
+      catalog.stock_quantity,
+      catalog.reserved_quantity,
+      catalog.inventory_status
+    )
+    ORDER BY catalog.current_sale_price, catalog.variant_id
+  ) AS variants
+FROM `affable-seat-501018-q0.golf_products.vw_product_catalog_current` AS catalog
+LEFT JOIN latest_performance AS perf
+  ON catalog.product_id = perf.product_id
+GROUP BY catalog.product_id;
+
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_facets` AS
+SELECT 'category' AS facet_type, category_id AS facet_value, category_slug AS facet_slug, category_name AS facet_label, COUNT(*) AS result_count, MIN(min_current_sale_price) AS min_price, MAX(max_current_sale_price) AS max_price
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
+GROUP BY category_id, category_slug, category_name
+UNION ALL
+SELECT 'brand', brand_name, REGEXP_REPLACE(LOWER(brand_name), r'[^a-z0-9]+', '-'), brand_name, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
+WHERE brand_name IS NOT NULL
+GROUP BY brand_name
+UNION ALL
+SELECT 'player_profile', target_player_profile, REGEXP_REPLACE(LOWER(target_player_profile), r'[^a-z0-9]+', '-'), target_player_profile, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
+WHERE target_player_profile IS NOT NULL
+GROUP BY target_player_profile
+UNION ALL
+SELECT 'stock', inventory_status, REGEXP_REPLACE(LOWER(inventory_status), r'[^a-z0-9]+', '-'), inventory_status, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
+WHERE inventory_status IS NOT NULL
+GROUP BY inventory_status
+UNION ALL
+SELECT 'price', 'price', 'price', 'Price range', COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`;
+
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_category_navigation` AS
+SELECT
+  category_id,
+  category_slug,
+  category_name,
+  parent_category,
+  COUNT(*) AS product_count,
+  MIN(min_current_sale_price) AS min_current_sale_price,
+  MAX(max_current_sale_price) AS max_current_sale_price,
+  ROUND(AVG(average_rating), 2) AS average_rating,
+  ANY_VALUE(image_url) AS image_url,
+  ANY_VALUE(image_alt) AS image_alt
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
+GROUP BY category_id, category_slug, category_name, parent_category;
+
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_cart_pricing_current` AS
+SELECT
+  product_id,
+  variant_id,
+  sku,
+  product_name,
+  brand_name,
+  category_id,
+  category_slug,
+  category_name,
+  image_url,
+  image_alt,
+  variant_status,
+  handedness,
+  color,
+  size,
+  loft,
+  shaft_flex,
+  ball_color,
+  pack_size,
+  shoe_size,
+  shoe_width,
+  apparel_fit,
+  msrp,
+  current_sale_price,
+  stock_quantity,
+  inventory_status,
+  current_sale_price IS NOT NULL
+    AND IFNULL(stock_quantity, 0) > 0
+    AND LOWER(IFNULL(variant_status, 'active')) NOT IN ('discontinued', 'inactive')
+    AS is_purchasable
+FROM `affable-seat-501018-q0.golf_products.vw_product_catalog_current`;
 
 CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_low_stock_best_sellers` AS
 WITH latest_inventory AS (
@@ -2903,7 +3127,7 @@ JOIN `affable-seat-501018-q0.golf_products.dim_payment_methods` AS pm
   ON co.payment_method_id = pm.payment_method_id
 WHERE co.is_active
   AND pm.is_active
-  AND DATE '2026-07-08' BETWEEN co.effective_start_date AND COALESCE(co.effective_end_date, DATE '9999-12-31')
+  AND CURRENT_DATE() BETWEEN co.effective_start_date AND COALESCE(co.effective_end_date, DATE '9999-12-31')
 UNION ALL
 SELECT
   'INSTALLMENT' AS option_type,
@@ -2939,7 +3163,7 @@ JOIN `affable-seat-501018-q0.golf_products.dim_payment_methods` AS pm
   ON io.payment_method_id = pm.payment_method_id
 WHERE io.is_active
   AND pm.is_active
-  AND DATE '2026-07-08' BETWEEN io.effective_start_date AND COALESCE(io.effective_end_date, DATE '9999-12-31');
+  AND CURRENT_DATE() BETWEEN io.effective_start_date AND COALESCE(io.effective_end_date, DATE '9999-12-31');
 
 CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_loyalty_benefits` AS
 SELECT
@@ -2992,7 +3216,7 @@ LEFT JOIN `affable-seat-501018-q0.golf_products.dim_categories` AS c
 LEFT JOIN `affable-seat-501018-q0.golf_products.dim_products` AS p
   ON pr.applies_to_product_id = p.product_id
 WHERE pr.is_active
-  AND DATE '2026-07-08' BETWEEN pr.start_date AND COALESCE(pr.end_date, DATE '9999-12-31');
+  AND CURRENT_DATE() BETWEEN pr.start_date AND COALESCE(pr.end_date, DATE '9999-12-31');
 
 CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_purchase_support_policies` AS
 SELECT

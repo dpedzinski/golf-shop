@@ -12,7 +12,7 @@ export default defineConfig({
   testDir: "./e2e",
   webServer: {
     command:
-      `XDG_CONFIG_HOME=${wranglerStateDir}/config WRANGLER_LOG_PATH=${wranglerStateDir}/logs/playwright.log WRANGLER_REGISTRY_PATH=${wranglerStateDir}/registry VITE_GECX_PROJECT_ID=demo-project VITE_GECX_LOCATION=global VITE_GECX_AGENT_ID=demo-agent npm run dev -- --port 4180`,
+      `XDG_CONFIG_HOME=${wranglerStateDir}/config WRANGLER_LOG_PATH=${wranglerStateDir}/logs/playwright.log WRANGLER_REGISTRY_PATH=${wranglerStateDir}/registry VITE_GECX_PROJECT_ID=demo-project VITE_GECX_LOCATION=global VITE_GECX_APP_ID=demo-app VITE_GECX_DEPLOYMENT_ID=demo-deployment VITE_GECX_AGENT_ID=demo-agent npm run dev -- --port 4180`,
     url: "http://localhost:4180",
     reuseExistingServer: !process.env.CI,
     stdout: "pipe",

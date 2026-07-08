@@ -8,9 +8,16 @@ export interface ProductApiClientOptions {
 export interface ProductSearchParams {
   q?: string;
   category?: string;
+  category_id?: string;
+  category_slug?: string;
   brand?: string;
   skill_level?: string;
+  min_price?: number;
   max_price?: number;
+  in_stock?: boolean;
+  sort?: 'relevance' | 'price_asc' | 'price_desc' | 'rating' | 'newest' | 'popular';
+  page?: number;
+  page_size?: number;
   limit?: number;
 }
 
@@ -20,21 +27,35 @@ export interface ProductSummary {
   product_name?: string;
   name?: string;
   brand_name?: string;
+  category_id?: string;
+  category_slug?: string;
   category_name?: string;
   parent_category?: string;
+  model_year?: number;
+  release_season?: string;
+  product_status?: string;
+  lifecycle_stage?: string;
   target_player_profile?: string;
   handicap_range?: string;
   min_current_sale_price?: number;
   max_current_sale_price?: number;
+  max_msrp?: number;
+  msrp?: number;
   current_sale_price?: number;
   total_stock_quantity?: number;
   average_rating?: number;
   review_count?: number;
   short_description?: string;
+  long_description?: string;
   description?: string;
   sample_positive_review?: string;
   sample_negative_review?: string;
   inventory_status?: string;
+  image_url?: string;
+  image_alt?: string;
+  image_uris?: string[];
+  specs?: Array<Record<string, unknown>>;
+  tags?: string[];
   variants?: Array<Record<string, unknown>>;
   [key: string]: unknown;
 }
@@ -42,11 +63,118 @@ export interface ProductSummary {
 export interface SearchProductsResponse {
   products: ProductSummary[];
   count: number;
+  total_count?: number;
+  page?: number;
+  page_size?: number;
 }
 
-export interface ProductDetailsResponse {
+export interface ProductVariant {
+  product_id?: string;
+  variant_id?: string;
+  sku?: string;
+  current_sale_price?: number;
+  msrp?: number;
+  stock_quantity?: number;
+  inventory_status?: string;
+  [key: string]: unknown;
+}
+
+export interface ProductDetailResponse {
   product_id: string;
-  variants: ProductSummary[];
+  product?: ProductSummary;
+  variants: ProductVariant[];
+}
+
+export type ProductDetailsResponse = ProductDetailResponse;
+
+export interface CategoryNavigationItem {
+  category_id: string;
+  category_slug?: string;
+  category_name: string;
+  parent_category?: string;
+  product_count?: number;
+  min_current_sale_price?: number;
+  max_current_sale_price?: number;
+  average_rating?: number;
+  image_url?: string;
+  image_alt?: string;
+  [key: string]: unknown;
+}
+
+export interface CategoriesResponse {
+  categories: CategoryNavigationItem[];
+  count?: number;
+}
+
+export interface ProductFacet {
+  facet_type: string;
+  facet_value: string;
+  facet_slug?: string;
+  facet_label: string;
+  result_count: number;
+  min_price?: number;
+  max_price?: number;
+}
+
+export interface ProductFacetResponse {
+  facets: ProductFacet[];
+  categories: ProductFacet[];
+  brands: ProductFacet[];
+  player_profiles: ProductFacet[];
+  stock: ProductFacet[];
+  price?: ProductFacet;
+  count: number;
+}
+
+export interface CartEstimateLineInput {
+  product_id?: string;
+  productId?: string;
+  variant_id?: string;
+  variantId?: string;
+  quantity: number;
+}
+
+export interface CartEstimateRequest {
+  items: CartEstimateLineInput[];
+}
+
+export interface CartEstimateLine {
+  product_id: string;
+  variant_id: string;
+  sku?: string;
+  product_name: string;
+  brand_name?: string;
+  category_id?: string;
+  category_slug?: string;
+  category_name?: string;
+  image_url?: string;
+  image_alt?: string;
+  quantity: number;
+  unit_price: number;
+  line_subtotal: number;
+  stock_quantity?: number;
+  inventory_status?: string;
+  is_available: boolean;
+  options?: Record<string, unknown>;
+}
+
+export interface CartUnavailableItem {
+  product_id?: string | null;
+  variant_id?: string;
+  quantity?: number;
+  reason: string;
+  stock_quantity?: number;
+  index?: number;
+}
+
+export interface CartEstimateResponse {
+  lines: CartEstimateLine[];
+  unavailable_items: CartUnavailableItem[];
+  subtotal: number;
+  rewards_points_estimate: number;
+  financing_hints?: Array<Record<string, unknown>>;
+  shipping_hints?: Array<Record<string, unknown>>;
+  currency?: string;
 }
 
 export interface CompareProductsResponse {
@@ -86,7 +214,7 @@ export class ProductApiClient {
   }
 
   searchProducts(params: ProductSearchParams = {}): Promise<SearchProductsResponse> {
-    return this.get('/products', params as Record<string, string | number | undefined>);
+    return this.get('/products', params as Record<string, string | number | boolean | undefined>);
   }
 
   getProductDetails(productId: string): Promise<ProductDetailsResponse> {
@@ -95,6 +223,18 @@ export class ProductApiClient {
 
   compareProducts(productIds: string[]): Promise<CompareProductsResponse> {
     return this.post('/compare', { product_ids: productIds });
+  }
+
+  getCategories(): Promise<CategoriesResponse> {
+    return this.get('/categories');
+  }
+
+  getFacets(): Promise<ProductFacetResponse> {
+    return this.get('/facets');
+  }
+
+  estimateCart(request: CartEstimateRequest): Promise<CartEstimateResponse> {
+    return this.post('/cart/estimate', request);
   }
 
   getFinancingOptions(amount?: number): Promise<CollectionResponse> {
@@ -111,6 +251,10 @@ export class ProductApiClient {
 
   getLoyalty(): Promise<CollectionResponse> {
     return this.get('/loyalty');
+  }
+
+  getPromotions(params: { category?: string; product_id?: string } = {}): Promise<CollectionResponse> {
+    return this.get('/promotions', params);
   }
 
   getShipping(): Promise<CollectionResponse> {

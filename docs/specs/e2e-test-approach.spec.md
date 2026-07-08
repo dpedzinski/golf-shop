@@ -46,8 +46,9 @@ Expected results:
 - TypeScript type checks pass across workspaces that define `typecheck`.
 - Vitest tests pass for `packages/gecx-sdk` and `packages/gecx-components`.
 - Static site builds successfully.
-- Playwright confirms storefront widgets render and a configured messenger gets
-  the expected `project-id` and `agent-id` attributes.
+- Playwright confirms storefront widgets render, a configured messenger gets
+  the expected `project-id` and `agent-id` attributes, and route-backed shop,
+  category, product detail, cart, checkout, and compare pages render.
 
 ## Layer 2: Website Runtime Configuration
 
@@ -149,6 +150,19 @@ curl -sS "$PRODUCT_API_URL/compare" \
 
 Expected: JSON with `products` and `missing_product_ids`.
 
+Check listing facets and cart estimate:
+
+```bash
+curl -sS "$PRODUCT_API_URL/facets"
+curl -sS "$PRODUCT_API_URL/cart/estimate" \
+  -H "Content-Type: application/json" \
+  -d '{"items":[{"product_id":"P001","variant_id":"V0001","quantity":1}]}'
+```
+
+Expected: facets include category/brand/player profile/stock/price groupings,
+and cart estimate returns `lines`, `subtotal`, `rewards_points_estimate`,
+`financing_hints`, and `shipping_hints`.
+
 Purchase support checks:
 
 ```bash
@@ -180,6 +194,21 @@ bq query --use_legacy_sql=false "
 SELECT 'vw_product_catalog_current' AS object_name, COUNT(*) AS row_count
 FROM \`$BIGQUERY_SQL_DATASET.vw_product_catalog_current\`
 UNION ALL
+SELECT 'vw_product_listing_current', COUNT(*)
+FROM \`$BIGQUERY_SQL_DATASET.vw_product_listing_current\`
+UNION ALL
+SELECT 'vw_product_detail_current', COUNT(*)
+FROM \`$BIGQUERY_SQL_DATASET.vw_product_detail_current\`
+UNION ALL
+SELECT 'vw_product_facets', COUNT(*)
+FROM \`$BIGQUERY_SQL_DATASET.vw_product_facets\`
+UNION ALL
+SELECT 'vw_category_navigation', COUNT(*)
+FROM \`$BIGQUERY_SQL_DATASET.vw_category_navigation\`
+UNION ALL
+SELECT 'vw_cart_pricing_current', COUNT(*)
+FROM \`$BIGQUERY_SQL_DATASET.vw_cart_pricing_current\`
+UNION ALL
 SELECT 'vw_active_financing_options', COUNT(*)
 FROM \`$BIGQUERY_SQL_DATASET.vw_active_financing_options\`
 UNION ALL
@@ -192,6 +221,21 @@ FROM \`$BIGQUERY_SQL_DATASET.vw_checkout_support\`
 ```
 
 Expected: each view returns a nonzero row count for the seeded demo dataset.
+
+Confirm active financing and promotion views use dynamic date filters:
+
+```bash
+bq query --use_legacy_sql=false "
+SELECT 'financing' AS object_name, COUNT(*) AS active_count
+FROM \`$BIGQUERY_SQL_DATASET.vw_active_financing_options\`
+UNION ALL
+SELECT 'promotions', COUNT(*)
+FROM \`$BIGQUERY_SQL_DATASET.vw_active_promotions\`
+"
+```
+
+Expected: rows reflect records active on the query execution date, not a
+hard-coded seed date.
 
 Check a product API query against the same view:
 

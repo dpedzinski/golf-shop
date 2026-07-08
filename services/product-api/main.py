@@ -64,16 +64,61 @@ def _int_arg(request, name, default, minimum=1, maximum=100):
     return max(minimum, min(maximum, value))
 
 
+def _bool_arg(request, name):
+    raw = request.args.get(name)
+    if raw is None:
+        return None
+    return str(raw).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _skill_level_terms(raw):
+    value = str(raw or "").strip().lower()
+    if not value:
+        return []
+    terms = {value}
+    if any(token in value for token in ["experienced", "advanced", "expert", "low handicap", "low-handicap", "skilled"]):
+        terms.update(
+            [
+                "advanced",
+                "expert",
+                "skilled",
+                "ball striker",
+                "compact control",
+                "forged feel",
+                "low handicap",
+                "0-8",
+                "4-12",
+                "5-15",
+            ]
+        )
+    if any(token in value for token in ["beginner", "new golfer", "high handicap"]):
+        terms.update(["beginner", "new golfer", "forgiving", "10-25", "12-30", "all handicaps"])
+    if any(token in value for token in ["intermediate", "improving", "mid handicap", "mid-handicap"]):
+        terms.update(["intermediate", "improving", "mid-handicap", "8-20", "10-25", "5-15"])
+    return sorted(terms)
+
+
 def _search_products(request):
-    limit = _int_arg(request, "limit", 10, 1, 50)
+    page_size_default = request.args.get("page_size") or request.args.get("limit") or 10
+    page_size = _int_arg(request, "page_size", page_size_default, 1, 50)
+    page = _int_arg(request, "page", 1, 1, 500)
+    offset = (page - 1) * page_size
     q = request.args.get("q")
     category = request.args.get("category")
+    category_id = request.args.get("category_id")
+    category_slug = request.args.get("category_slug")
     brand = request.args.get("brand")
     skill_level = request.args.get("skill_level")
+    min_price = request.args.get("min_price")
     max_price = request.args.get("max_price")
+    in_stock = _bool_arg(request, "in_stock")
+    sort = (request.args.get("sort") or "relevance").lower()
 
     filters = []
-    params = [bigquery.ScalarQueryParameter("limit", "INT64", limit)]
+    params = [
+        bigquery.ScalarQueryParameter("page_size", "INT64", page_size),
+        bigquery.ScalarQueryParameter("offset", "INT64", offset),
+    ]
 
     if q:
         q_lower = q.lower()
@@ -85,6 +130,8 @@ def _search_products(request):
               OR LOWER(product_name) LIKE @q_match_like
               OR LOWER(category_name) LIKE @q_like
               OR LOWER(category_name) LIKE @q_match_like
+              OR LOWER(category_slug) LIKE @q_like
+              OR LOWER(category_slug) LIKE @q_match_like
               OR LOWER(parent_category) LIKE @q_like
               OR LOWER(parent_category) LIKE @q_match_like
               OR LOWER(short_description) LIKE @q_like
@@ -108,8 +155,8 @@ def _search_products(request):
         MAX(
           CASE
             WHEN @q_lower IS NULL THEN 0
-            WHEN LOWER(category_name) IN (@q_lower, @q_match) OR LOWER(parent_category) IN (@q_lower, @q_match) THEN 100
-            WHEN LOWER(category_name) LIKE @q_like OR LOWER(category_name) LIKE @q_match_like OR LOWER(parent_category) LIKE @q_like OR LOWER(parent_category) LIKE @q_match_like THEN 95
+            WHEN LOWER(category_name) IN (@q_lower, @q_match) OR LOWER(category_slug) IN (@q_lower, @q_match) OR LOWER(parent_category) IN (@q_lower, @q_match) THEN 100
+            WHEN LOWER(category_name) LIKE @q_like OR LOWER(category_name) LIKE @q_match_like OR LOWER(category_slug) LIKE @q_like OR LOWER(category_slug) LIKE @q_match_like OR LOWER(parent_category) LIKE @q_like OR LOWER(parent_category) LIKE @q_match_like THEN 95
             WHEN LOWER(product_name) LIKE @q_like OR LOWER(product_name) LIKE @q_match_like THEN 90
             WHEN EXISTS (
               SELECT 1
@@ -132,82 +179,95 @@ def _search_products(request):
         filters.append("(LOWER(category_name) = @category OR LOWER(parent_category) = @category)")
         params.append(bigquery.ScalarQueryParameter("category", "STRING", category.lower()))
 
+    if category_id:
+        filters.append("LOWER(category_id) = @category_id")
+        params.append(bigquery.ScalarQueryParameter("category_id", "STRING", category_id.lower()))
+
+    if category_slug:
+        filters.append("LOWER(category_slug) = @category_slug")
+        params.append(bigquery.ScalarQueryParameter("category_slug", "STRING", category_slug.lower()))
+
     if brand:
         filters.append("LOWER(brand_name) = @brand")
         params.append(bigquery.ScalarQueryParameter("brand", "STRING", brand.lower()))
 
     if skill_level:
         filters.append(
-            "(LOWER(target_player_profile) LIKE @skill_level OR LOWER(handicap_range) LIKE @skill_level)"
+            """
+            EXISTS (
+              SELECT 1
+              FROM UNNEST(@skill_level_terms) AS skill_level_term
+              WHERE LOWER(target_player_profile) LIKE CONCAT('%', skill_level_term, '%')
+                OR LOWER(handicap_range) LIKE CONCAT('%', skill_level_term, '%')
+                OR EXISTS (
+                  SELECT 1
+                  FROM UNNEST(tags) AS tag
+                  WHERE LOWER(tag) LIKE CONCAT('%', skill_level_term, '%')
+                )
+            )
+            """
         )
-        params.append(bigquery.ScalarQueryParameter("skill_level", "STRING", f"%{skill_level.lower()}%"))
+        params.append(bigquery.ArrayQueryParameter("skill_level_terms", "STRING", _skill_level_terms(skill_level)))
+
+    if min_price:
+        try:
+            min_price_value = float(min_price)
+        except ValueError:
+            return {"error": "min_price must be numeric"}, 400
+        filters.append("CAST(min_current_sale_price AS FLOAT64) >= @min_price")
+        params.append(bigquery.ScalarQueryParameter("min_price", "FLOAT64", min_price_value))
 
     if max_price:
         try:
             max_price_value = float(max_price)
         except ValueError:
             return {"error": "max_price must be numeric"}, 400
-        filters.append("CAST(current_sale_price AS FLOAT64) <= @max_price")
+        filters.append("CAST(min_current_sale_price AS FLOAT64) <= @max_price")
         params.append(bigquery.ScalarQueryParameter("max_price", "FLOAT64", max_price_value))
+
+    if in_stock is True:
+        filters.append("total_stock_quantity > 0")
+
+    order_sql = {
+        "price_asc": "min_current_sale_price ASC, product_name",
+        "price_desc": "min_current_sale_price DESC, product_name",
+        "rating": "average_rating DESC, review_count DESC, product_name",
+        "newest": "model_year DESC, release_season DESC, product_name",
+        "popular": "units_sold_90d DESC, review_count DESC, product_name",
+        "relevance": "relevance_score DESC, average_rating DESC, product_name",
+    }.get(sort, "relevance_score DESC, average_rating DESC, product_name")
 
     where_sql = f"WHERE {' AND '.join(filters)}" if filters else ""
     sql = f"""
       SELECT
-        product_id,
-        ANY_VALUE(product_name) AS product_name,
-        ANY_VALUE(brand_name) AS brand_name,
-        ANY_VALUE(category_name) AS category_name,
-        ANY_VALUE(parent_category) AS parent_category,
-        ANY_VALUE(target_player_profile) AS target_player_profile,
-        ANY_VALUE(handicap_range) AS handicap_range,
-        MIN(current_sale_price) AS min_current_sale_price,
-        MAX(current_sale_price) AS max_current_sale_price,
-        SUM(IFNULL(stock_quantity, 0)) AS total_stock_quantity,
-        ROUND(AVG(average_rating), 2) AS average_rating,
-        MAX(review_count) AS review_count,
+        *,
         {relevance_sql}
-        ANY_VALUE(short_description) AS short_description,
-        ANY_VALUE(image_url) AS image_url,
-        ANY_VALUE(image_alt) AS image_alt,
-        ARRAY_AGG(DISTINCT image_url IGNORE NULLS LIMIT 3) AS image_uris,
-        ARRAY_AGG(
-          STRUCT(
-            variant_id,
-            sku,
-            color,
-            size,
-            handedness,
-            shaft_flex,
-            current_sale_price,
-            stock_quantity,
-            inventory_status
-          )
-          ORDER BY current_sale_price
-          LIMIT 5
-        ) AS variants
-      FROM {_table("vw_product_catalog_current")}
+        COUNT(*) OVER() AS total_count
+      FROM {_table("vw_product_listing_current")}
       {where_sql}
-      GROUP BY product_id
-      ORDER BY relevance_score DESC, average_rating DESC, product_name
-      LIMIT @limit
+      ORDER BY {order_sql}
+      LIMIT @page_size OFFSET @offset
     """
 
     rows = _query(sql, params)
-    return {"products": rows, "count": len(rows)}, 200
+    total_count = rows[0].get("total_count", 0) if rows else 0
+    for row in rows:
+        row.pop("total_count", None)
+    return {"products": rows, "count": len(rows), "total_count": total_count, "page": page, "page_size": page_size}, 200
 
 
 def _product_details(product_id):
     sql = f"""
       SELECT *
-      FROM {_table("vw_product_catalog_current")}
+      FROM {_table("vw_product_detail_current")}
       WHERE product_id = @product_id
-      ORDER BY current_sale_price, variant_id
-      LIMIT 100
+      LIMIT 1
     """
     rows = _query(sql, [bigquery.ScalarQueryParameter("product_id", "STRING", product_id)])
     if not rows:
         return {"error": "product_not_found", "product_id": product_id}, 404
-    return {"product_id": product_id, "variants": rows}, 200
+    product = rows[0]
+    return {"product_id": product_id, "product": product, "variants": product.get("variants", [])}, 200
 
 
 def _compare_products(request):
@@ -249,13 +309,167 @@ def _compare_products(request):
     return {"products": rows, "missing_product_ids": missing_ids}, 200
 
 
-def _categories():
+def _facets():
     sql = f"""
       SELECT *
-      FROM {_table("vw_category_margin_summary")}
-      ORDER BY category_name
+      FROM {_table("vw_product_facets")}
+      ORDER BY facet_type, facet_label
     """
-    return {"categories": _query(sql)}, 200
+    rows = _query(sql)
+    return {
+        "facets": rows,
+        "categories": [row for row in rows if row.get("facet_type") == "category"],
+        "brands": [row for row in rows if row.get("facet_type") == "brand"],
+        "player_profiles": [row for row in rows if row.get("facet_type") == "player_profile"],
+        "stock": [row for row in rows if row.get("facet_type") == "stock"],
+        "price": next((row for row in rows if row.get("facet_type") == "price"), None),
+        "count": len(rows),
+    }, 200
+
+
+def _categories():
+    sql = f"""
+      SELECT
+        nav.*,
+        margin.variant_count,
+        margin.avg_current_sale_price,
+        margin.avg_margin_percent,
+        margin.units_sold_30d,
+        margin.units_sold_90d,
+        margin.net_revenue_90d,
+        margin.avg_return_rate
+      FROM {_table("vw_category_navigation")} AS nav
+      LEFT JOIN {_table("vw_category_margin_summary")} AS margin
+        ON nav.category_id = margin.category_id
+      ORDER BY nav.category_name
+    """
+    rows = _query(sql)
+    return {"categories": rows, "count": len(rows)}, 200
+
+
+def _cart_estimate(request):
+    payload = request.get_json(silent=True) or {}
+    raw_items = payload.get("items")
+    if not isinstance(raw_items, list) or not raw_items:
+        return {"error": "items must be a non-empty array"}, 400
+
+    requested_items = []
+    invalid_items = []
+    for index, raw_item in enumerate(raw_items):
+        if not isinstance(raw_item, dict):
+            invalid_items.append({"index": index, "reason": "item must be an object"})
+            continue
+        variant_id = raw_item.get("variant_id") or raw_item.get("variantId")
+        product_id = raw_item.get("product_id") or raw_item.get("productId")
+        try:
+            quantity = int(raw_item.get("quantity", 1))
+        except (TypeError, ValueError):
+            quantity = 1
+        if not variant_id:
+            invalid_items.append({"index": index, "product_id": product_id, "reason": "variant_id is required"})
+            continue
+        requested_items.append({
+            "product_id": str(product_id) if product_id is not None else None,
+            "variant_id": str(variant_id),
+            "quantity": max(1, min(99, quantity)),
+        })
+
+    if not requested_items:
+        return {"lines": [], "unavailable_items": invalid_items, "subtotal": 0, "rewards_points_estimate": 0}, 200
+
+    rows = _query(
+        f"""
+          SELECT *
+          FROM {_table("vw_cart_pricing_current")}
+          WHERE variant_id IN UNNEST(@variant_ids)
+        """,
+        [bigquery.ArrayQueryParameter("variant_ids", "STRING", [item["variant_id"] for item in requested_items])],
+    )
+    rows_by_variant = {row["variant_id"]: row for row in rows}
+    lines = []
+    unavailable_items = list(invalid_items)
+    subtotal = 0.0
+
+    for item in requested_items:
+        row = rows_by_variant.get(item["variant_id"])
+        if not row:
+            unavailable_items.append({**item, "reason": "variant_not_found"})
+            continue
+        unit_price = float(row.get("current_sale_price") or 0)
+        stock_quantity = int(row.get("stock_quantity") or 0)
+        is_available = bool(row.get("is_purchasable")) and stock_quantity >= item["quantity"]
+        line_subtotal = round(unit_price * item["quantity"], 2) if is_available else 0
+        if is_available:
+            subtotal += line_subtotal
+        else:
+            unavailable_items.append({**item, "reason": "insufficient_stock" if row.get("is_purchasable") else "not_purchasable", "stock_quantity": stock_quantity})
+        lines.append({
+            "product_id": row.get("product_id"),
+            "variant_id": row.get("variant_id"),
+            "sku": row.get("sku"),
+            "product_name": row.get("product_name"),
+            "brand_name": row.get("brand_name"),
+            "category_id": row.get("category_id"),
+            "category_slug": row.get("category_slug"),
+            "category_name": row.get("category_name"),
+            "image_url": row.get("image_url"),
+            "image_alt": row.get("image_alt"),
+            "quantity": item["quantity"],
+            "unit_price": unit_price,
+            "line_subtotal": line_subtotal,
+            "stock_quantity": stock_quantity,
+            "inventory_status": row.get("inventory_status"),
+            "is_available": is_available,
+            "options": {
+                "handedness": row.get("handedness"),
+                "color": row.get("color"),
+                "size": row.get("size"),
+                "loft": row.get("loft"),
+                "shaft_flex": row.get("shaft_flex"),
+                "ball_color": row.get("ball_color"),
+                "pack_size": row.get("pack_size"),
+                "shoe_size": row.get("shoe_size"),
+                "shoe_width": row.get("shoe_width"),
+                "apparel_fit": row.get("apparel_fit"),
+            },
+        })
+
+    subtotal = round(subtotal, 2)
+    return {
+        "lines": lines,
+        "unavailable_items": unavailable_items,
+        "subtotal": subtotal,
+        "rewards_points_estimate": int(subtotal),
+        "financing_hints": _cart_financing_hints(subtotal) if subtotal > 0 else [],
+        "shipping_hints": _cart_shipping_hints(),
+        "currency": "USD",
+    }, 200
+
+
+def _cart_financing_hints(amount):
+    return _query(
+        f"""
+          SELECT *
+          FROM {_table("vw_active_financing_options")}
+          WHERE (min_purchase_amount IS NULL OR min_purchase_amount <= @amount)
+            AND (max_purchase_amount IS NULL OR @amount <= max_purchase_amount)
+          ORDER BY option_type, min_purchase_amount, offer_name
+          LIMIT 3
+        """,
+        [bigquery.ScalarQueryParameter("amount", "FLOAT64", amount)],
+    )
+
+
+def _cart_shipping_hints():
+    return _query(
+        f"""
+          SELECT *
+          FROM {_table("vw_purchase_support_policies")}
+          WHERE policy_type = 'SHIPPING'
+          ORDER BY base_fee, estimated_max_business_days
+          LIMIT 3
+        """
+    )
 
 
 def _low_stock(request):
@@ -402,7 +616,9 @@ def _openapi(request):
             "/products": {"get": {"summary": "Search products"}},
             "/products/{product_id}": {"get": {"summary": "Get product details"}},
             "/compare": {"post": {"summary": "Compare products"}},
-            "/categories": {"get": {"summary": "Category margin summary"}},
+            "/categories": {"get": {"summary": "Category navigation and margin summary"}},
+            "/facets": {"get": {"summary": "Product listing facets"}},
+            "/cart/estimate": {"post": {"summary": "Estimate cart pricing, availability, rewards, financing, and shipping"}},
             "/low-stock": {"get": {"summary": "Low-stock best sellers"}},
             "/financing": {"get": {"summary": "Financing options"}},
             "/card-offers": {"get": {"summary": "Store and co-branded card offers"}},
@@ -441,6 +657,12 @@ def handle_request(request):
             return _response(body, status)
         if path == "/categories" and request.method == "GET":
             body, status = _categories()
+            return _response(body, status)
+        if path == "/facets" and request.method == "GET":
+            body, status = _facets()
+            return _response(body, status)
+        if path == "/cart/estimate" and request.method == "POST":
+            body, status = _cart_estimate(request)
             return _response(body, status)
         if path == "/low-stock" and request.method == "GET":
             body, status = _low_stock(request)

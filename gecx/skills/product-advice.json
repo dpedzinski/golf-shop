@@ -24,6 +24,7 @@
   ],
   "storefrontComponents": [
     "cx-product-list",
+    "cx-product-carousel",
     "cx-product-comparison",
     "cx-product-offers",
     "cx-rich-card",
@@ -35,4 +36,3 @@
     "Explain why each recommendation fits and what tradeoff the shopper is making."
   ]
 }
-

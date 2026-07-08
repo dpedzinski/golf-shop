@@ -5,6 +5,21 @@ Sites/Vinext storefront for the golf customer-service prototype. It consumes
 `@bread-prototype/gecx-components` for reusable product, comparison, financing,
 and loyalty widgets.
 
+## Storefront Routes
+
+- `/`: homepage with featured gear, comparison, purchase support, and assistant
+  entry points.
+- `/shop`: product listing page with BigQuery-backed filters, sorting, search,
+  stock filtering, and pagination.
+- `/category/[slug]`: category landing/listing page.
+- `/products/[productId]`: product detail page with variants, specs, reviews,
+  promotions, financing, loyalty, shipping, returns, warranties, and cart entry.
+- `/cart`: device-local cart stored under `fairway-cart-v1` with API-backed cart
+  estimates when `VITE_PRODUCT_API_URL` is configured.
+- `/checkout`: non-payment checkout demo that surfaces checkout guidance and
+  purchase-support policies.
+- `/compare`: product comparison page driven by `ids=P001,P002` query params.
+
 ## Runtime Configuration
 
 The page reads these runtime environment variables:
@@ -20,6 +35,7 @@ The page reads these runtime environment variables:
 - `VITE_GECX_CHAT_TITLE`: defaults to `Golf Store Assistant`
 - `VITE_GECX_ENABLE_WIDGET`: defaults to `true`; set `false` to hide chat
 - `VITE_GECX_OAUTH_CLIENT_ID`: optional for authenticated messenger setups
+- `VITE_GECX_MOCK_ASSISTANT`: set `true` for local demo responses without CES
 
 If the GECX project, location, or agent ID is missing, the page renders a setup
 notice instead of mounting the chat widget.
@@ -62,5 +78,7 @@ SCREENSHOT_PATH=artifacts/gcp-deployment/static-site-gecx-irons.png \
 node scripts/verify-static-site-gecx.mjs
 ```
 
-The script submits `I am looking for new Irons for my game`, verifies successful
-CES `generateChatToken` and `runSession` calls, and writes a screenshot.
+The script submits `I want to shop for irons`, follows with
+`I want to see irons for experienced players`, verifies successful CES
+`generateChatToken` and `runSession` calls, waits for an iron product carousel,
+and writes a screenshot.

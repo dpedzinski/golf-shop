@@ -173,6 +173,31 @@ export const baseStyles = `
     align-content: start;
   }
 
+  .cx-product-carousel {
+    overflow: hidden;
+  }
+
+  .cx-carousel-track {
+    display: grid;
+    gap: 12px;
+    grid-auto-columns: minmax(240px, 78%);
+    grid-auto-flow: column;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 4px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .cx-carousel-slide {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .cx-carousel-slide.selected .cx-card {
+    border-color: var(--cx-color-primary);
+    box-shadow: 0 0 0 2px rgba(21, 94, 239, 0.16);
+  }
+
   .cx-offer-list {
     display: grid;
     gap: 8px;

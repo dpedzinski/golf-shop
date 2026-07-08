@@ -18,6 +18,7 @@ import type {
   CxMonthlyPaymentEstimatePayload,
   CxPaymentPlanPayload,
   CxProductComparisonPayload,
+  CxProductCarouselPayload,
   CxProductListPayload,
   CxProductOffer,
   CxProductOffersPayload,
@@ -557,6 +558,31 @@ export class CxProductListElement extends CxElement<CxProductListPayload> {
   }
 }
 
+export class CxProductCarouselElement extends CxElement<CxProductCarouselPayload> {
+  protected renderPayload(payload: CxProductCarouselPayload): Node {
+    const shell = createElement('section', { className: 'cx-stack cx-product-carousel' });
+    appendIf(shell, createHeader(payload ?? {}));
+    appendIf(shell, createBody(payload?.body));
+    const products = payload?.products ?? [];
+    if (!products.length) shell.append(renderEmpty(payload?.emptyMessage ?? 'No product details are currently available.'));
+    const track = createElement('div', {
+      className: 'cx-carousel-track',
+      attrs: { role: 'list', 'aria-label': payload?.title ?? 'Product details' },
+    });
+    for (const product of products) {
+      const slide = createElement('div', {
+        className: `cx-carousel-slide ${payload?.selectedProductId === product.id ? 'selected' : ''}`.trim(),
+        attrs: { role: 'listitem' },
+      });
+      slide.append(renderProduct(product, (action, source) => this.dispatchAction(action, source)));
+      track.append(slide);
+    }
+    if (products.length) shell.append(track);
+    appendIf(shell, createActions(payload?.actions, (action) => this.dispatchAction(action)));
+    return shell;
+  }
+}
+
 export class CxProductOffersElement extends CxElement<CxProductOffersPayload> {
   protected renderPayload(payload: CxProductOffersPayload): Node {
     const shell = createElement('section', { className: 'cx-stack' });
@@ -659,6 +685,7 @@ export const componentDefinitions = {
   [ELEMENT_NAMES['financing-disclosure']]: CxFinancingDisclosureElement,
   [ELEMENT_NAMES['cta-group']]: CxCtaGroupElement,
   [ELEMENT_NAMES['product-list']]: CxProductListElement,
+  [ELEMENT_NAMES['product-carousel']]: CxProductCarouselElement,
   [ELEMENT_NAMES['product-offers']]: CxProductOffersElement,
   [ELEMENT_NAMES['product-comparison']]: CxProductComparisonElement,
   [ELEMENT_NAMES['loyalty-tiers']]: CxLoyaltyTiersElement,

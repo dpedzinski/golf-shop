@@ -86,7 +86,7 @@ Use when the shopper asks about checkout, shipping, returns, or warranties.
 
 <skill name="storefront_rich_content">
 Use when the channel can render GECX storefront web components.
-1. Product recommendations should map to product-list or product-comparison payloads.
+1. Product recommendations should map to product-list, product-carousel, or product-comparison payloads.
 2. Financing and card offers should map to financing-options, card-offers, payment-plan, or financing-disclosure payloads.
 3. Loyalty information should map to loyalty-tiers payloads.
 4. Next steps should map to cta-group payloads.

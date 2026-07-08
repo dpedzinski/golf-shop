@@ -122,6 +122,7 @@ endpoints:
 - `get_returns_policy` -> `GET /returns`
 - `get_warranty_info` -> `GET /warranties`
 - `get_checkout_guidance` -> `GET /checkout-guidance`
+- `estimate_cart` -> `POST /cart/estimate`
 
 The MCP function reads:
 
@@ -145,6 +146,11 @@ The product API reads:
 It queries these main views:
 
 - `vw_product_catalog_current`
+- `vw_product_listing_current`
+- `vw_product_detail_current`
+- `vw_product_facets`
+- `vw_category_navigation`
+- `vw_cart_pricing_current`
 - `vw_category_margin_summary`
 - `vw_low_stock_best_sellers`
 - `vw_active_financing_options`

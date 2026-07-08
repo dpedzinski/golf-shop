@@ -220,6 +220,13 @@ export interface CxProductListPayload extends CxWidgetPayloadBase {
   emptyMessage?: string;
 }
 
+export interface CxProductCarouselPayload extends CxWidgetPayloadBase {
+  kind: 'product-carousel';
+  products: CxProductSummary[];
+  selectedProductId?: string;
+  emptyMessage?: string;
+}
+
 export interface CxProductOffersPayload extends CxWidgetPayloadBase {
   kind: 'product-offers';
   product?: CxProductSummary;
@@ -266,6 +273,7 @@ export type CxWidgetPayload =
   | CxFinancingDisclosurePayload
   | CxCtaGroupPayload
   | CxProductListPayload
+  | CxProductCarouselPayload
   | CxProductOffersPayload
   | CxProductComparisonPayload
   | CxLoyaltyTiersPayload;

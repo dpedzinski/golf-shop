@@ -7,6 +7,8 @@ import {
   McpClient,
   ProductApiClient,
   mountGecxMessenger,
+  type CesRunSessionResponse,
+  type CesSessionOutput,
   type ProductSummary,
 } from "@bread-prototype/gecx-sdk";
 import type {
@@ -15,6 +17,8 @@ import type {
   CxProductSummary,
   CxWidgetPayload,
 } from "@bread-prototype/gecx-components";
+
+type RenderCxWidget = typeof import("@bread-prototype/gecx-components")["renderCxWidget"];
 
 type StorefrontConfig = {
   productApiUrl: string;
@@ -29,6 +33,7 @@ type StorefrontConfig = {
     languageCode: string;
     chatTitle: string;
     oauthClientId: string;
+    mockAssistant: boolean;
   };
 };
 
@@ -146,8 +151,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   const [products, setProducts] = useState<CxProductSummary[]>(fallbackProducts);
   const [apiStatus, setApiStatus] = useState(config.productApiUrl ? "Connecting to product API" : "Using local demo data");
   const [mcpTools, setMcpTools] = useState<string[]>([]);
-  const [renderCxWidget, setRenderCxWidget] =
-    useState<typeof import("@bread-prototype/gecx-components")["renderCxWidget"] | null>(null);
+  const [renderCxWidget, setRenderCxWidget] = useState<RenderCxWidget | null>(null);
   const productRef = useRef<HTMLDivElement>(null);
   const compareRef = useRef<HTMLDivElement>(null);
   const financeRef = useRef<HTMLDivElement>(null);
@@ -157,7 +161,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
 
   const widgetReady =
     config.gecx.enabled && config.gecx.projectId && config.gecx.location && config.gecx.agentId;
-  const cesChatReady = Boolean(widgetReady && config.gecx.appId && config.gecx.deploymentId);
+  const cesChatReady = Boolean(widgetReady && config.gecx.appId && (config.gecx.deploymentId || config.gecx.mockAssistant));
 
   const registerChatFocus = useCallback((focusChat: (() => void) | null) => {
     focusChatRef.current = focusChat;
@@ -332,7 +336,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
             </p>
           </div>
         ) : cesChatReady ? (
-          <CesChat config={config.gecx} registerFocus={registerChatFocus} />
+          <CesChat config={config.gecx} registerFocus={registerChatFocus} renderCxWidget={renderCxWidget} />
         ) : (
           <div ref={messengerRef} data-testid="gecx-messenger-container" />
         )}
@@ -344,6 +348,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
 type ChatMessage = {
   role: "user" | "assistant";
   text: string;
+  widgets?: CxWidgetPayload[];
 };
 
 const promptChips = ["Find forgiving irons", "Compare iron sets", "Shipping options", "Financing plans"];
@@ -351,9 +356,11 @@ const promptChips = ["Find forgiving irons", "Compare iron sets", "Shipping opti
 function CesChat({
   config,
   registerFocus,
+  renderCxWidget,
 }: {
   config: StorefrontConfig["gecx"];
   registerFocus: (focusChat: (() => void) | null) => void;
+  renderCxWidget: RenderCxWidget | null;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
@@ -364,16 +371,15 @@ function CesChat({
   const logRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const client = useMemo(
-    () =>
-      new CesClient({
-        projectId: config.projectId,
-        location: config.location,
-        appId: config.appId,
-        deploymentId: config.deploymentId,
-      }),
-    [config.appId, config.deploymentId, config.location, config.projectId]
-  );
+  const client = useMemo(() => {
+    if (config.mockAssistant) return null;
+    return new CesClient({
+      projectId: config.projectId,
+      location: config.location,
+      appId: config.appId,
+      deploymentId: config.deploymentId,
+    });
+  }, [config.appId, config.deploymentId, config.location, config.mockAssistant, config.projectId]);
 
   const focusInput = useCallback(() => {
     textareaRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -407,17 +413,20 @@ function CesChat({
     }
 
     try {
-      const response = await client.sendMessage({
-        sessionId,
-        text,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
+      const response = config.mockAssistant
+        ? mockAssistantResponse(text)
+        : await client!.sendMessage({
+            sessionId,
+            text,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          });
+      const widgets = extractWidgetPayloads(response.outputs);
       const answer =
         response.outputs
           ?.map((output) => output.text)
           .filter((value): value is string => Boolean(value))
-          .join("\n\n") || "I did not receive a text response.";
-      setMessages((current) => [...current, { role: "assistant", text: answer }]);
+          .join("\n\n") || (widgets.length ? "" : "I did not receive a text response.");
+      setMessages((current) => [...current, { role: "assistant", text: answer, widgets }]);
       setStatus("Ready");
     } catch (error) {
       setError(`The assistant request failed: ${String(error)}`);
@@ -456,9 +465,23 @@ function CesChat({
       <div className="ces-chat-log" aria-live="polite" ref={logRef}>
         {messages.length ? (
           messages.map((message, index) => (
-            <div className={`ces-chat-message ${message.role}`} key={`${message.role}-${index}`}>
+            <div
+              className={`ces-chat-message ${message.role}${message.widgets?.length ? " has-widgets" : ""}`}
+              key={`${message.role}-${index}`}
+            >
               <span>{message.role === "user" ? "You" : "AI"}</span>
-              <div className="ces-chat-message-text">{renderChatText(message.text)}</div>
+              {message.text ? <div className="ces-chat-message-text">{renderChatText(message.text)}</div> : null}
+              {message.widgets?.length ? (
+                <div className="ces-chat-widgets" data-testid="ces-chat-widgets">
+                  {message.widgets.map((payload, widgetIndex) => (
+                    <ChatWidgetRenderer
+                      key={`${message.role}-${index}-${payload.kind}-${widgetIndex}`}
+                      payload={payload}
+                      renderCxWidget={renderCxWidget}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
           ))
         ) : (
@@ -517,6 +540,23 @@ function CesChat({
   );
 }
 
+function ChatWidgetRenderer({
+  payload,
+  renderCxWidget,
+}: {
+  payload: CxWidgetPayload;
+  renderCxWidget: RenderCxWidget | null;
+}) {
+  const targetRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!renderCxWidget || !targetRef.current) return;
+    renderWidget(renderCxWidget, targetRef.current, payload);
+  }, [payload, renderCxWidget]);
+
+  return <div className="ces-chat-widget" data-widget-kind={payload.kind} ref={targetRef} />;
+}
+
 function renderChatText(text: string) {
   return text
     .split(/\n+/)
@@ -535,7 +575,7 @@ function renderChatText(text: string) {
 }
 
 function renderWidget(
-  renderCxWidget: typeof import("@bread-prototype/gecx-components")["renderCxWidget"],
+  renderCxWidget: RenderCxWidget,
   target: HTMLElement | null,
   payload: CxWidgetPayload
 ): void {
@@ -544,29 +584,228 @@ function renderWidget(
   renderCxWidget(target, payload);
 }
 
+const widgetKinds = new Set([
+  "rich-card",
+  "choice-list",
+  "data-table",
+  "form-panel",
+  "status-banner",
+  "card-offers",
+  "card-info",
+  "card-compare",
+  "financing-options",
+  "payment-plan",
+  "monthly-payment-estimate",
+  "financing-disclosure",
+  "cta-group",
+  "product-list",
+  "product-carousel",
+  "product-offers",
+  "product-comparison",
+  "loyalty-tiers",
+]);
+
+function extractWidgetPayloads(outputs: CesSessionOutput[] | undefined): CxWidgetPayload[] {
+  return outputs?.flatMap((output) => normalizeWidgetPayloads(output.payload)) ?? [];
+}
+
+function normalizeWidgetPayloads(value: unknown, depth = 0): CxWidgetPayload[] {
+  if (depth > 4 || value === null || value === undefined) return [];
+  if (Array.isArray(value)) return value.flatMap((item) => normalizeWidgetPayloads(item, depth + 1));
+  if (!isRecord(value)) return [];
+  if (isWidgetPayload(value)) return [value as unknown as CxWidgetPayload];
+
+  const customTemplatePayload = value.type === "custom_template" ? value.payload : undefined;
+  const nested = [
+    customTemplatePayload,
+    value.payload,
+    value.widget,
+    value.widgets,
+    value.richContent,
+    value.rich_content,
+    value.data,
+    value.content,
+  ];
+  const nestedWidgets = nested.flatMap((item) => normalizeWidgetPayloads(item, depth + 1));
+  if (nestedWidgets.length) return nestedWidgets;
+
+  const products = normalizeProducts(value.products);
+  if (products.length) {
+    return [
+      {
+        kind: "product-carousel",
+        title: stringValue(value.title) ?? "Product details",
+        body: stringValue(value.body ?? value.message),
+        products,
+        emptyMessage: "No product details are currently available.",
+      },
+    ];
+  }
+
+  const product = isRecord(value.product) ? mapApiProduct(value.product as ProductSummary) : null;
+  if (product) {
+    return [
+      {
+        kind: "product-carousel",
+        title: stringValue(value.title) ?? product.name,
+        body: stringValue(value.body ?? value.message),
+        products: [product],
+        selectedProductId: product.id,
+      },
+    ];
+  }
+
+  return [];
+}
+
+function isWidgetPayload(value: unknown): value is CxWidgetPayload {
+  return isRecord(value) && typeof value.kind === "string" && widgetKinds.has(value.kind);
+}
+
+function normalizeProducts(value: unknown): CxProductSummary[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => (isRecord(item) ? mapApiProduct(item as ProductSummary) : null))
+    .filter((product): product is CxProductSummary => product !== null);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function mockAssistantResponse(text: string): CesRunSessionResponse {
+  if (/experienced|advanced|low.?handicap|skilled/i.test(text) && /iron/i.test(text)) {
+    return {
+      outputs: [
+        {
+          text: "Here are iron sets that fit experienced players who want compact control and forged feel.",
+          payload: {
+            kind: "product-carousel",
+            title: "Irons for experienced players",
+            body: "Product detail cards from the catalog.",
+            selectedProductId: "P027",
+            products: [
+              {
+                id: "P027",
+                name: "NorthLake Forge SoftStrike Forged Iron Set",
+                brand: "NorthLake Forge",
+                category: "Iron Sets",
+                description: "Compact forged iron set for skilled ball strikers who want controlled launch.",
+                image: {
+                  src: "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg",
+                  alt: "Golf irons in a bag on a golf course.",
+                },
+                price: 1299,
+                rating: 4.46,
+                reviewCount: 432,
+                inventoryStatus: "In stock",
+                fit: "Experienced players and low-handicap ball strikers.",
+                tags: ["Iron set", "Forged feel", "Distance control"],
+              },
+              {
+                id: "P024",
+                name: "NorthLake Forge TourPocket Pro Iron Set",
+                brand: "NorthLake Forge",
+                category: "Iron Sets",
+                description: "Player-focused irons with forged construction and practical forgiveness.",
+                image: {
+                  src: "https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg",
+                  alt: "Golf irons in a bag on a golf course.",
+                },
+                price: 1199,
+                rating: 4.02,
+                reviewCount: 415,
+                inventoryStatus: "Limited stock",
+                fit: "Confident iron players who want tour flight with a little launch help.",
+                tags: ["Iron set", "Tour flight", "Custom fit"],
+              },
+            ],
+          },
+        },
+      ],
+    };
+  }
+
+  if (/iron/i.test(text)) {
+    return {
+      outputs: [
+        {
+          text: "I can help you shop for irons. Are these for a newer player, an improving player, or an experienced player?",
+        },
+      ],
+    };
+  }
+
+  return {
+    outputs: [
+      {
+        text: "Tell me what golf gear you are shopping for, plus skill level and any budget or fit preferences.",
+      },
+    ],
+  };
+}
+
 function mapApiProduct(product: ProductSummary): CxProductSummary | null {
+  if (!isRecord(product)) return null;
   const id = String(product.product_id ?? product.id ?? "");
   const name = String(product.product_name ?? product.name ?? "");
   if (!id || !name) return null;
+  const imageSrc =
+    stringValue(product.image_url ?? product.imageUrl) ??
+    firstString(product.image_uris) ??
+    firstString(product.imageUris);
+  const tags = [
+    ...stringArray(product.tags),
+    stringValue(product.parent_category),
+    stringValue(product.handicap_range),
+  ].filter((value): value is string => Boolean(value));
+
   return {
     id,
     name,
-    brand: stringValue(product.brand_name),
-    category: stringValue(product.category_name ?? product.parent_category),
-    description: stringValue(product.short_description ?? product.description),
-    price: numberValue(product.min_current_sale_price ?? product.current_sale_price),
+    brand: stringValue(product.brand_name ?? product.brand),
+    category: stringValue(product.category_name ?? product.parent_category ?? product.category ?? product.product_category),
+    description: stringValue(product.short_description ?? product.description ?? product.long_description),
+    image: imageSrc
+      ? {
+          src: imageSrc,
+          alt: stringValue(product.image_alt ?? product.imageAlt) ?? `${name} product image`,
+        }
+      : undefined,
+    price: priceValue(product.min_current_sale_price ?? product.current_sale_price ?? product.price),
     rating: numberValue(product.average_rating),
     reviewCount: numberValue(product.review_count),
-    inventoryStatus: stringValue(product.inventory_status) ?? stockLabel(product.total_stock_quantity),
-    fit: stringValue(product.target_player_profile ?? product.handicap_range),
-    tags: [stringValue(product.parent_category), stringValue(product.handicap_range)].filter(
-      (value): value is string => Boolean(value)
-    ),
+    inventoryStatus: stringValue(product.inventory_status ?? product.availability) ?? stockLabel(product.total_stock_quantity),
+    fit: stringValue(product.target_player_profile ?? product.handicap_range ?? product.best_for ?? product.fit),
+    tags: tags.length ? tags : undefined,
+    actions: [
+      {
+        id: `view-${id}`,
+        label: "View details",
+        kind: "event",
+        eventName: "view_product_details",
+        payload: { productId: id },
+      },
+    ],
   };
 }
 
 function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+function stringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && Boolean(item.trim()));
+}
+
+function firstString(value: unknown): string | undefined {
+  return stringArray(value)[0];
+}
+
+function priceValue(value: unknown): string | number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  return stringValue(value);
 }
 
 function numberValue(value: unknown): number | undefined {

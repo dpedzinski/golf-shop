@@ -106,6 +106,7 @@ registerDialogflowBridge(dfMessenger, {
 - `cx-financing-disclosure`
 - `cx-cta-group`
 - `cx-product-list`
+- `cx-product-carousel`
 - `cx-product-offers`
 - `cx-product-comparison`
 - `cx-loyalty-tiers`

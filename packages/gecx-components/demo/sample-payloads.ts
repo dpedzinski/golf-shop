@@ -336,6 +336,58 @@ export const productListPayload: CxWidgetPayload = {
   ],
 };
 
+export const productCarouselPayload: CxWidgetPayload = {
+  kind: 'product-carousel',
+  title: 'Irons for experienced players',
+  body: 'Detailed iron cards for players who want compact control, forged feel, and predictable gapping.',
+  selectedProductId: 'P027',
+  products: [
+    {
+      id: 'P027',
+      name: 'NorthLake Forge SoftStrike Forged Iron Set',
+      brand: 'NorthLake Forge',
+      category: 'Iron Sets',
+      description: 'Compact forged iron set with controlled launch and responsive feel.',
+      price: 1299,
+      rating: 4.46,
+      reviewCount: 432,
+      inventoryStatus: 'In stock',
+      fit: 'Skilled ball strikers and low-handicap players who want workability.',
+      image: {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg',
+        alt: 'Golf irons in a bag on a golf course.',
+      },
+      tags: ['Iron set', 'Forged feel', 'Distance control'],
+      actions: [
+        {
+          id: 'view-p027',
+          label: 'View details',
+          kind: 'event',
+          eventName: 'view_product_details',
+          payload: { productId: 'P027' },
+        },
+      ],
+    },
+    {
+      id: 'P024',
+      name: 'NorthLake Forge TourPocket Pro Iron Set',
+      brand: 'NorthLake Forge',
+      category: 'Iron Sets',
+      description: 'Player-focused irons with forged construction and practical forgiveness.',
+      price: 1199,
+      rating: 4.02,
+      reviewCount: 415,
+      inventoryStatus: 'Limited stock',
+      fit: 'Experienced players who want forged feel with a little launch help.',
+      image: {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/0/03/Golf_clubs.jpg',
+        alt: 'Golf irons in a bag on a golf course.',
+      },
+      tags: ['Iron set', 'Tour flight', 'Custom fit'],
+    },
+  ],
+};
+
 export const productOffersPayload: CxWidgetPayload = {
   kind: 'product-offers',
   title: 'Offers for Strata Ultimate Complete Golf Set',
@@ -460,6 +512,7 @@ export const demoPayloads: CxWidgetPayload[] = [
   paymentPlanPayload,
   monthlyEstimatePayload,
   productListPayload,
+  productCarouselPayload,
   productOffersPayload,
   ctaGroupPayload,
   formPayload,
@@ -500,6 +553,7 @@ export const componentGallerySamples: CxGallerySample[] = [
   gallerySample(monthlyEstimatePayload, 'Monthly payment estimate', 'Single monthly payment estimate with financing disclosure.'),
   gallerySample(ctaGroupPayload, 'CTA group', 'Action-only response with row or stacked button layout.'),
   gallerySample(productListPayload, 'Product list', 'Catalog cards with images, metadata, offers, and CTAs.'),
+  gallerySample(productCarouselPayload, 'Product carousel', 'Carousel-style product recommendations with selected product state.'),
   gallerySample(productOffersPayload, 'Product offers', 'Offers scoped to one product.'),
   gallerySample(productComparisonPayload, 'Product comparison', 'Side-by-side product comparison rendered through an inner table widget.'),
   gallerySample(loyaltyTiersPayload, 'Loyalty tiers', 'Rewards tiers with benefits and caveats.'),

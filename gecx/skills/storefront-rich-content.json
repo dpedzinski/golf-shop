@@ -17,6 +17,7 @@
   "storefrontPath": "apps/static-site",
   "storefrontComponents": [
     "cx-product-list",
+    "cx-product-carousel",
     "cx-product-comparison",
     "cx-financing-options",
     "cx-card-offers",
@@ -40,7 +41,8 @@
     "VITE_GECX_LANGUAGE_CODE",
     "VITE_GECX_CHAT_TITLE",
     "VITE_GECX_ENABLE_WIDGET",
-    "VITE_GECX_OAUTH_CLIENT_ID"
+    "VITE_GECX_OAUTH_CLIENT_ID",
+    "VITE_GECX_MOCK_ASSISTANT"
   ],
   "guidance": [
     "Use component payloads for structured product, comparison, financing, loyalty, offer, and CTA responses.",

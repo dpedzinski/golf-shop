@@ -61,9 +61,10 @@ Components:
 Product API:
 
 - Exposes `/health`, `/openapi.json`, `/products`, `/products/{product_id}`,
-  `/compare`, `/categories`, `/low-stock`, `/financing`, `/card-offers`,
-  `/installment-plans`, `/loyalty`, `/promotions`, `/shipping`, `/returns`,
-  `/warranties`, and `/checkout-guidance`.
+  `/compare`, `/categories`, `/facets`, `/cart/estimate`, `/low-stock`,
+  `/financing`, `/card-offers`, `/installment-plans`, `/loyalty`,
+  `/promotions`, `/shipping`, `/returns`, `/warranties`, and
+  `/checkout-guidance`.
 - Reads `BIGQUERY_PROJECT`, `BIGQUERY_DATASET`, and `ALLOWED_ORIGINS`.
 - Uses parameterized BigQuery queries.
 

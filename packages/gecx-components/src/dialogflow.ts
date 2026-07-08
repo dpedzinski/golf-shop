@@ -15,6 +15,7 @@ import type {
   CxMonthlyPaymentEstimatePayload,
   CxPaymentPlanPayload,
   CxProductComparisonPayload,
+  CxProductCarouselPayload,
   CxProductListPayload,
   CxProductOffer,
   CxProductOffersPayload,
@@ -78,6 +79,8 @@ export function toRichContentFallback(payload: CxWidgetPayload): DialogflowRichC
       return { richContent: [ctaGroupFallback(payload)] };
     case 'product-list':
       return { richContent: productListFallback(payload) };
+    case 'product-carousel':
+      return { richContent: productCarouselFallback(payload) };
     case 'product-offers':
       return { richContent: productOffersFallback(payload) };
     case 'product-comparison':
@@ -231,6 +234,13 @@ function ctaGroupFallback(payload: CxCtaGroupPayload): RichItem[] {
 function productListFallback(payload: CxProductListPayload): RichItem[][] {
   const cards = payload.products.map((product) => productInfoFallback(product));
   return cards.length ? cards : [[descriptionItem(payload.title ?? 'Products', [payload.emptyMessage ?? 'No products are currently available.'])]];
+}
+
+function productCarouselFallback(payload: CxProductCarouselPayload): RichItem[][] {
+  const cards = payload.products.map((product) => productInfoFallback(product));
+  return cards.length
+    ? cards
+    : [[descriptionItem(payload.title ?? 'Product details', [payload.emptyMessage ?? 'No product details are currently available.'])]];
 }
 
 function productOffersFallback(payload: CxProductOffersPayload): RichItem[][] {

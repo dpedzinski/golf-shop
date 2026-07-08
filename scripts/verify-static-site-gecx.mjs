@@ -8,7 +8,8 @@ const { chromium } = await import("@playwright/test");
 
 const siteUrl = process.env.STATIC_SITE_URL;
 const screenshotPath = resolve(process.env.SCREENSHOT_PATH ?? "artifacts/gcp-deployment/static-site-gecx-irons.png");
-const prompt = process.env.CES_TEST_PROMPT ?? "I am looking for new Irons for my game";
+const firstPrompt = process.env.CES_TEST_PROMPT ?? "I want to shop for irons";
+const secondPrompt = process.env.CES_TEST_FOLLOWUP_PROMPT ?? "I want to see irons for experienced players";
 const viewportWidth = Number(process.env.VIEWPORT_WIDTH ?? "1440");
 const viewportHeight = Number(process.env.VIEWPORT_HEIGHT ?? "1100");
 
@@ -35,15 +36,25 @@ try {
   await page.goto(siteUrl, { waitUntil: "networkidle" });
 
   await page.getByTestId("ces-chat").waitFor({ state: "visible", timeout: 30_000 });
-  await page.getByLabel("Message Golf Store Assistant").fill(prompt);
+  await page.getByLabel("Message Golf Store Assistant").fill(firstPrompt);
   await page.getByRole("button", { name: "Send" }).click();
 
-  const assistantResponse = page.locator(".ces-chat-message.assistant").filter({
+  const firstAssistantResponse = page.locator(".ces-chat-message.assistant").filter({
     hasText: /handicap|skill|budget|miss|preference|dexterity|iron/i,
   });
-  await assistantResponse.last().waitFor({ state: "visible", timeout: 90_000 });
+  await firstAssistantResponse.last().waitFor({ state: "visible", timeout: 90_000 });
 
-  const answer = (await assistantResponse.last().innerText()).replace(/\s+/g, " ").trim();
+  await page.getByLabel("Message Golf Store Assistant").fill(secondPrompt);
+  await page.getByRole("button", { name: "Send" }).click();
+
+  const secondAssistantResponse = page.locator(".ces-chat-message.assistant").filter({
+    hasText: /experienced|advanced|low-handicap|skilled|iron/i,
+  });
+  await secondAssistantResponse.last().waitFor({ state: "visible", timeout: 90_000 });
+  await page.locator(".ces-chat-message.assistant cx-product-carousel").last().waitFor({ state: "visible", timeout: 90_000 });
+
+  const firstAnswer = (await firstAssistantResponse.last().innerText()).replace(/\s+/g, " ").trim();
+  const secondAnswer = (await secondAssistantResponse.last().innerText()).replace(/\s+/g, " ").trim();
   await page.screenshot({ fullPage: true, path: screenshotPath });
 
   const missingSuccessfulCalls = [":generateChatToken", ":runSession"].filter(
@@ -57,9 +68,10 @@ try {
   console.log(
     JSON.stringify(
       {
-        answer,
+        firstAnswer,
+        secondAnswer,
         cesResponses,
-        prompt,
+        prompts: [firstPrompt, secondPrompt],
         screenshotPath,
         siteUrl,
         viewport: { height: viewportHeight, width: viewportWidth },

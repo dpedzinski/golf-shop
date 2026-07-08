@@ -30,6 +30,8 @@ Keep docs aligned with these current REST routes:
 - `GET /products/{product_id}`
 - `POST /compare`
 - `GET /categories`
+- `GET /facets`
+- `POST /cart/estimate`
 - `GET /low-stock`
 - `GET /financing`
 - `GET /card-offers`
@@ -59,12 +61,18 @@ Keep docs aligned with `services/mcp-server/main.py`:
 - `get_returns_policy` -> `GET /returns`
 - `get_warranty_info` -> `GET /warranties`
 - `get_checkout_guidance` -> `GET /checkout-guidance`
+- `estimate_cart` -> `POST /cart/estimate`
 
 ## BigQuery Views
 
 Keep docs aligned with the seed SQL views:
 
 - `vw_product_catalog_current`
+- `vw_product_listing_current`
+- `vw_product_detail_current`
+- `vw_product_facets`
+- `vw_category_navigation`
+- `vw_cart_pricing_current`
 - `vw_low_stock_best_sellers`
 - `vw_category_margin_summary`
 - `vw_active_financing_options`
@@ -83,6 +91,8 @@ curl -sS "$PRODUCT_API_URL/health"
 curl -sS "$PRODUCT_API_URL/products?q=driver&limit=5"
 curl -sS "$PRODUCT_API_URL/products/P001"
 curl -sS "$PRODUCT_API_URL/compare" -H "Content-Type: application/json" -d '{"product_ids":["P001","P002"]}'
+curl -sS "$PRODUCT_API_URL/facets"
+curl -sS "$PRODUCT_API_URL/cart/estimate" -H "Content-Type: application/json" -d '{"items":[{"product_id":"P001","variant_id":"V0001","quantity":1}]}'
 ```
 
 MCP:
@@ -100,6 +110,7 @@ BigQuery:
 BIGQUERY_DATASET_RESOURCE=$(terraform -chdir=infra/terraform output -raw bigquery_dataset)
 BIGQUERY_SQL_DATASET=$(printf "%s" "$BIGQUERY_DATASET_RESOURCE" | sed 's#^projects/##; s#/datasets/#.#')
 bq query --use_legacy_sql=false "SELECT COUNT(*) AS row_count FROM \`$BIGQUERY_SQL_DATASET.vw_product_catalog_current\`"
+bq query --use_legacy_sql=false "SELECT COUNT(*) AS row_count FROM \`$BIGQUERY_SQL_DATASET.vw_product_listing_current\`"
 ```
 
 ## Acceptance Checklist

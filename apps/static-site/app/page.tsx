@@ -20,6 +20,7 @@ export default function Home() {
       languageCode: envValue("VITE_GECX_LANGUAGE_CODE", "en"),
       chatTitle: envValue("VITE_GECX_CHAT_TITLE", "Golf Store Assistant"),
       oauthClientId: envValue("VITE_GECX_OAUTH_CLIENT_ID"),
+      mockAssistant: envValue("VITE_GECX_MOCK_ASSISTANT", "false") === "true",
     },
   };
 
