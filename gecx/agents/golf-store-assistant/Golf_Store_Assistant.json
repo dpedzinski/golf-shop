@@ -1,6 +1,43 @@
 {
   "name": "d6998116-9233-40f0-9ee2-573b0382527e",
+  "agentId": "golf-store-assistant",
   "displayName": "Golf Store Assistant",
+  "description": "Friendly Fairway Supply golf-store customer service assistant for product guidance, purchase support, financing, loyalty, and storefront rich content.",
   "instruction": "gecx/agents/golf-store-assistant/instruction.txt",
-  "tools": ["compare_products", "customize_response", "end_session", "get_financing_options", "get_loyalty_program_details", "get_product_details", "get_returns_policy", "get_shipping_info", "get_warranty_info", "search_product_catalog"]
+  "toolset": "golf-store-bigquery-mcp",
+  "tools": [
+    "search_products",
+    "get_product_details",
+    "compare_products",
+    "get_category_margin_summary",
+    "get_low_stock_best_sellers",
+    "get_financing_options",
+    "get_card_offers",
+    "get_installment_plans",
+    "get_loyalty_program_details",
+    "get_active_promotions",
+    "get_shipping_info",
+    "get_returns_policy",
+    "get_warranty_info",
+    "get_checkout_guidance"
+  ],
+  "skills": [
+    "gecx/skills/product-advice.json",
+    "gecx/skills/offers-and-financing.json",
+    "gecx/skills/loyalty-and-promotions.json",
+    "gecx/skills/purchase-support.json",
+    "gecx/skills/storefront-rich-content.json"
+  ],
+  "channels": {
+    "staticStorefront": {
+      "path": "apps/static-site",
+      "requiredEnvironmentVariables": [
+        "VITE_PRODUCT_API_URL",
+        "VITE_MCP_SERVER_URL",
+        "VITE_GECX_PROJECT_ID",
+        "VITE_GECX_LOCATION",
+        "VITE_GECX_AGENT_ID"
+      ]
+    }
+  }
 }

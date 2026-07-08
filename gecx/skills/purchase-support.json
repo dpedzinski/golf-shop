@@ -1,0 +1,35 @@
+{
+  "id": "purchase-support",
+  "displayName": "Purchase Support",
+  "agent": "golf-store-assistant",
+  "description": "Guide shoppers through checkout, shipping, returns, warranties, category-specific policy constraints, and order readiness.",
+  "customerIntents": [
+    "ask about checkout",
+    "ask about shipping",
+    "ask about returns",
+    "ask about warranties",
+    "understand policy restrictions before buying"
+  ],
+  "requiredTools": [
+    "get_checkout_guidance",
+    "get_shipping_info",
+    "get_returns_policy",
+    "get_warranty_info"
+  ],
+  "dataSources": [
+    "BigQuery vw_checkout_support",
+    "BigQuery vw_purchase_support_policies"
+  ],
+  "storefrontComponents": [
+    "cx-rich-card",
+    "cx-status-banner",
+    "cx-data-table",
+    "cx-cta-group"
+  ],
+  "guidance": [
+    "Filter return and warranty policies by product category when known.",
+    "Call out return windows, condition requirements, shipping responsibility, exclusions, and warranty coverage plainly.",
+    "Use checkout guidance to remind customers to review fit, discounts, loyalty, financing, shipping, and confirmation details."
+  ]
+}
+

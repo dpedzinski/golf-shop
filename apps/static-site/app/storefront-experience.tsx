@@ -7,13 +7,11 @@ import {
   mountGecxMessenger,
   type ProductSummary,
 } from "@bread-prototype/gecx-sdk";
-import {
-  defineCxComponents,
-  renderCxWidget,
-  type CxFinancingOptionsPayload,
-  type CxLoyaltyTiersPayload,
-  type CxProductSummary,
-  type CxWidgetPayload,
+import type {
+  CxFinancingOptionsPayload,
+  CxLoyaltyTiersPayload,
+  CxProductSummary,
+  CxWidgetPayload,
 } from "@bread-prototype/gecx-components";
 
 type StorefrontConfig = {
@@ -144,6 +142,8 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   const [products, setProducts] = useState<CxProductSummary[]>(fallbackProducts);
   const [apiStatus, setApiStatus] = useState(config.productApiUrl ? "Connecting to product API" : "Using local demo data");
   const [mcpTools, setMcpTools] = useState<string[]>([]);
+  const [renderCxWidget, setRenderCxWidget] =
+    useState<typeof import("@bread-prototype/gecx-components")["renderCxWidget"] | null>(null);
   const productRef = useRef<HTMLDivElement>(null);
   const compareRef = useRef<HTMLDivElement>(null);
   const financeRef = useRef<HTMLDivElement>(null);
@@ -164,7 +164,17 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   );
 
   useEffect(() => {
-    defineCxComponents();
+    let active = true;
+
+    import("@bread-prototype/gecx-components").then((module) => {
+      if (!active) return;
+      module.defineCxComponents();
+      setRenderCxWidget(() => module.renderCxWidget);
+    });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -176,7 +186,9 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
       .searchProducts({ limit: 3 })
       .then((response) => {
         if (!active) return;
-        const mapped = response.products.map(mapApiProduct).filter(Boolean);
+        const mapped = response.products
+          .map(mapApiProduct)
+          .filter((product): product is CxProductSummary => product !== null);
         if (mapped.length) {
           setProducts(mapped);
           setApiStatus(`Loaded ${mapped.length} products from the product API`);
@@ -214,16 +226,17 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   }, [config.mcpServerUrl]);
 
   useEffect(() => {
-    renderWidget(productRef.current, {
+    if (!renderCxWidget) return;
+    renderWidget(renderCxWidget, productRef.current, {
       kind: "product-list",
       title: "Featured gear",
       body: apiStatus,
       products,
     });
-    renderWidget(compareRef.current, comparisonPayload);
-    renderWidget(financeRef.current, financingPayload);
-    renderWidget(loyaltyRef.current, loyaltyPayload);
-  }, [apiStatus, comparisonPayload, products]);
+    renderWidget(renderCxWidget, compareRef.current, comparisonPayload);
+    renderWidget(renderCxWidget, financeRef.current, financingPayload);
+    renderWidget(renderCxWidget, loyaltyRef.current, loyaltyPayload);
+  }, [apiStatus, comparisonPayload, products, renderCxWidget]);
 
   useEffect(() => {
     if (!widgetReady || !messengerRef.current) return;
@@ -304,7 +317,11 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   );
 }
 
-function renderWidget(target: HTMLElement | null, payload: CxWidgetPayload): void {
+function renderWidget(
+  renderCxWidget: typeof import("@bread-prototype/gecx-components")["renderCxWidget"],
+  target: HTMLElement | null,
+  payload: CxWidgetPayload
+): void {
   if (!target) return;
   target.replaceChildren();
   renderCxWidget(target, payload);

@@ -1,0 +1,33 @@
+{
+  "id": "loyalty-and-promotions",
+  "displayName": "Loyalty And Promotions",
+  "agent": "golf-store-assistant",
+  "description": "Help shoppers understand loyalty tiers, points earning, redemption, member discounts, exclusive offers, and active product or category promotions.",
+  "customerIntents": [
+    "ask about points",
+    "ask about loyalty tiers",
+    "ask about member discounts",
+    "find active promotions",
+    "redeem rewards"
+  ],
+  "requiredTools": [
+    "get_loyalty_program_details",
+    "get_active_promotions"
+  ],
+  "dataSources": [
+    "BigQuery vw_loyalty_benefits",
+    "BigQuery vw_active_promotions"
+  ],
+  "storefrontComponents": [
+    "cx-loyalty-tiers",
+    "cx-product-offers",
+    "cx-rich-card",
+    "cx-cta-group"
+  ],
+  "guidance": [
+    "Explain how points are earned and redeemed in concrete terms.",
+    "Mention restrictions, expiration, category exclusions, and member-tier requirements when present.",
+    "Do not encourage unnecessary purchases just to earn rewards."
+  ]
+}
+

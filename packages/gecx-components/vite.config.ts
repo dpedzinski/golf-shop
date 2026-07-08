@@ -9,6 +9,7 @@ export default defineConfig({
         format === 'umd' ? 'gecx-components.umd.cjs' : 'gecx-components.js',
       formats: ['es', 'umd'],
     },
+    emptyOutDir: false,
     sourcemap: true,
   },
   test: {

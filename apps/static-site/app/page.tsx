@@ -2,7 +2,8 @@ import Image from "next/image";
 import { StorefrontExperience } from "./storefront-experience";
 
 function envValue(name: string, fallback = ""): string {
-  return process.env[name] ?? fallback;
+  const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+  return process.env[name] ?? viteEnv?.[name] ?? fallback;
 }
 
 export default function Home() {

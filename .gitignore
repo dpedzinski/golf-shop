@@ -8,7 +8,9 @@ gecx/tools/python/__pycache__/
 **/dist/
 **/coverage/
 **/.vite/
+**/.vinext/
 **/.npm-cache/
 **/.playwright-browsers/
 **/playwright-report/
 **/test-results/
+**/tsconfig.tsbuildinfo

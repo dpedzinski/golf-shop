@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from 'vitest';
 import { McpClient } from '../src';
 
 describe('McpClient', () => {
@@ -19,7 +20,7 @@ describe('McpClient', () => {
 
     await client.callTool('search_products', { q: 'putter', limit: 3 });
 
-    const [, init] = fetchMock.mock.calls[0];
+    const [, init] = fetchMock.mock.calls[0] as unknown as Parameters<typeof fetch>;
     expect(JSON.parse(String(init?.body))).toEqual({
       jsonrpc: '2.0',
       id: 1,

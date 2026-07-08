@@ -1,0 +1,50 @@
+{
+  "id": "storefront-rich-content",
+  "displayName": "Storefront Rich Content",
+  "agent": "golf-store-assistant",
+  "description": "Render assistant responses as reusable storefront web components and Dialogflow CX Messenger custom templates when the web channel supports them.",
+  "customerIntents": [
+    "show product cards",
+    "show product comparison",
+    "show payment options",
+    "show loyalty tiers",
+    "show next steps"
+  ],
+  "requiredPackages": [
+    "@bread-prototype/gecx-components",
+    "@bread-prototype/gecx-sdk"
+  ],
+  "storefrontPath": "apps/static-site",
+  "storefrontComponents": [
+    "cx-product-list",
+    "cx-product-comparison",
+    "cx-financing-options",
+    "cx-card-offers",
+    "cx-card-compare",
+    "cx-payment-plan",
+    "cx-monthly-payment-estimate",
+    "cx-financing-disclosure",
+    "cx-loyalty-tiers",
+    "cx-product-offers",
+    "cx-cta-group",
+    "cx-rich-card",
+    "cx-status-banner",
+    "cx-data-table"
+  ],
+  "runtimeEnvironment": [
+    "VITE_PRODUCT_API_URL",
+    "VITE_MCP_SERVER_URL",
+    "VITE_GECX_PROJECT_ID",
+    "VITE_GECX_LOCATION",
+    "VITE_GECX_AGENT_ID",
+    "VITE_GECX_LANGUAGE_CODE",
+    "VITE_GECX_CHAT_TITLE",
+    "VITE_GECX_ENABLE_WIDGET",
+    "VITE_GECX_OAUTH_CLIENT_ID"
+  ],
+  "guidance": [
+    "Use component payloads for structured product, comparison, financing, loyalty, offer, and CTA responses.",
+    "Use plain text fallback when the channel cannot render custom templates.",
+    "Do not include sensitive payment or identity data in component payloads."
+  ]
+}

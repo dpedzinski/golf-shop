@@ -1,0 +1,36 @@
+{
+  "id": "offers-and-financing",
+  "displayName": "Offers And Financing",
+  "agent": "golf-store-assistant",
+  "description": "Explain financing options, store card offers, installment plans, promotional APRs, fees, eligibility notes, repayment periods, and responsible purchase tradeoffs.",
+  "customerIntents": [
+    "ask about financing",
+    "ask about store credit cards",
+    "compare installment plans",
+    "understand promotional APR",
+    "estimate payment options"
+  ],
+  "requiredTools": [
+    "get_financing_options",
+    "get_card_offers",
+    "get_installment_plans"
+  ],
+  "dataSources": [
+    "BigQuery vw_active_financing_options"
+  ],
+  "storefrontComponents": [
+    "cx-financing-options",
+    "cx-card-offers",
+    "cx-card-compare",
+    "cx-payment-plan",
+    "cx-monthly-payment-estimate",
+    "cx-financing-disclosure",
+    "cx-cta-group"
+  ],
+  "responsibleFinanceRules": [
+    "Do not guarantee approval, final APR, rewards value, savings, or financial outcomes.",
+    "Explain promotional APR expiration, deferred-interest risk, fees, repayment obligations, and eligibility conditions.",
+    "Offer lower-cost products or pay-in-full alternatives when they may better fit the shopper's budget."
+  ]
+}
+

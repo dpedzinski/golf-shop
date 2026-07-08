@@ -242,6 +242,9 @@ function productOffersFallback(payload: CxProductOffersPayload): RichItem[][] {
 }
 
 function productInfoFallback(product: CxProductSummary): RichItem[] {
+  const offerCtas = (product.offers ?? []).flatMap((offer) =>
+    [offer.action, ...(offer.actions ?? [])].filter((action): action is CxAction => Boolean(action))
+  );
   const lines = [
     product.description,
     product.brand ? `Brand: ${product.brand}` : undefined,
@@ -259,7 +262,7 @@ function productInfoFallback(product: CxProductSummary): RichItem[] {
   return [
     ...image,
     descriptionItem(product.name, lines),
-    ...actionsAsChips([product.action, ...(product.actions ?? [])].filter((action): action is CxAction => Boolean(action))),
+    ...actionsAsChips([product.action, ...(product.actions ?? []), ...offerCtas].filter((action): action is CxAction => Boolean(action))),
   ];
 }
 
