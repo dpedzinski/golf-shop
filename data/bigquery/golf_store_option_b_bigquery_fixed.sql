@@ -2627,6 +2627,7 @@ SELECT
   v.shoe_size,
   v.shoe_width,
   v.apparel_fit,
+  v.weight_grams,
   cp.msrp,
   cp.sale_price AS current_sale_price,
   v.cost,
