@@ -1,13 +1,12 @@
 name: Terraform Apply
 
 on:
-  push:
-    paths:
-      - 'infra/terraform/**'
-      - '.github/workflows/terraform-*.yml'
+  workflow_run:
+    workflows: ["Terraform Plan"]
+    types:
+      - completed
     branches:
       - main
-      - 'feature/terraform-cicd-pipeline'  # Temporary: for testing only
 
 # Ensure only one apply runs at a time
 concurrency:
@@ -22,7 +21,9 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     runs-on: ubuntu-latest
-    # environment: production  # Disabled for testing on feature branch
+    environment: production
+    # Only run if the plan workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     defaults:
       run:
