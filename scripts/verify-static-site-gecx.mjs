@@ -9,6 +9,8 @@ const { chromium } = await import("@playwright/test");
 const siteUrl = process.env.STATIC_SITE_URL;
 const screenshotPath = resolve(process.env.SCREENSHOT_PATH ?? "artifacts/gcp-deployment/static-site-gecx-irons.png");
 const prompt = process.env.CES_TEST_PROMPT ?? "I am looking for new Irons for my game";
+const viewportWidth = Number(process.env.VIEWPORT_WIDTH ?? "1440");
+const viewportHeight = Number(process.env.VIEWPORT_HEIGHT ?? "1100");
 
 if (!siteUrl) {
   throw new Error("Set STATIC_SITE_URL to the deployed storefront URL.");
@@ -18,7 +20,7 @@ await mkdir(dirname(screenshotPath), { recursive: true });
 
 const browser = await chromium.launch();
 const page = await browser.newPage({
-  viewport: { width: 1440, height: 1100 },
+  viewport: { width: viewportWidth, height: viewportHeight },
 });
 
 const cesResponses = [];
@@ -52,7 +54,20 @@ try {
     throw new Error(`Missing successful CES calls: ${missingSuccessfulCalls.join(", ")}`);
   }
 
-  console.log(JSON.stringify({ answer, cesResponses, prompt, screenshotPath, siteUrl }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        answer,
+        cesResponses,
+        prompt,
+        screenshotPath,
+        siteUrl,
+        viewport: { height: viewportHeight, width: viewportWidth },
+      },
+      null,
+      2
+    )
+  );
 } finally {
   await browser.close();
 }

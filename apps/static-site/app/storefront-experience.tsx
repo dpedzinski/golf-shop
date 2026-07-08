@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
   CesClient,
@@ -153,10 +153,19 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
   const financeRef = useRef<HTMLDivElement>(null);
   const loyaltyRef = useRef<HTMLDivElement>(null);
   const messengerRef = useRef<HTMLDivElement>(null);
+  const focusChatRef = useRef<(() => void) | null>(null);
 
   const widgetReady =
     config.gecx.enabled && config.gecx.projectId && config.gecx.location && config.gecx.agentId;
   const cesChatReady = Boolean(widgetReady && config.gecx.appId && config.gecx.deploymentId);
+
+  const registerChatFocus = useCallback((focusChat: (() => void) | null) => {
+    focusChatRef.current = focusChat;
+  }, []);
+
+  const startChat = useCallback(() => {
+    focusChatRef.current?.();
+  }, []);
 
   const comparisonPayload = useMemo<CxWidgetPayload>(
     () => ({
@@ -298,13 +307,21 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
       </section>
 
       <section className="assistant-section" id="assistant">
-        <div>
+        <div className="assistant-intro-card">
+          <span className="assistant-beta-pill">Beta</span>
           <p className="eyebrow">Connected customer experience</p>
-          <h2>Golf Store Assistant</h2>
+          <h2>Ask Fairway AI</h2>
           <p>
-            Use the chat surface for product guidance, comparisons, shipping questions,
-            returns, warranties, financing, rewards, and checkout support.
+            Get gear recommendations, compare products, and find purchase support in seconds.
           </p>
+          <ul className="assistant-proof-list" aria-label="Fairway AI can help with">
+            <li>Club guidance matched to budget, miss, and skill level</li>
+            <li>Side-by-side product comparisons from the live catalog</li>
+            <li>Shipping, returns, rewards, and checkout answers</li>
+          </ul>
+          <button className="assistant-start-button" disabled={!cesChatReady} onClick={startChat} type="button">
+            Start chat
+          </button>
         </div>
         {!widgetReady ? (
           <div className="config-panel">
@@ -315,7 +332,7 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
             </p>
           </div>
         ) : cesChatReady ? (
-          <CesChat config={config.gecx} />
+          <CesChat config={config.gecx} registerFocus={registerChatFocus} />
         ) : (
           <div ref={messengerRef} data-testid="gecx-messenger-container" />
         )}
@@ -329,11 +346,23 @@ type ChatMessage = {
   text: string;
 };
 
-function CesChat({ config }: { config: StorefrontConfig["gecx"] }) {
+const promptChips = ["Find forgiving irons", "Compare iron sets", "Shipping options", "Financing plans"];
+
+function CesChat({
+  config,
+  registerFocus,
+}: {
+  config: StorefrontConfig["gecx"];
+  registerFocus: (focusChat: (() => void) | null) => void;
+}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [error, setError] = useState("");
+  const [failedPrompt, setFailedPrompt] = useState("");
   const [status, setStatus] = useState("Ready");
   const [sessionId] = useState(() => `web-${crypto.randomUUID()}`);
+  const logRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const client = useMemo(
     () =>
@@ -346,14 +375,36 @@ function CesChat({ config }: { config: StorefrontConfig["gecx"] }) {
     [config.appId, config.deploymentId, config.location, config.projectId]
   );
 
+  const focusInput = useCallback(() => {
+    textareaRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    textareaRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
+    registerFocus(focusInput);
+    return () => registerFocus(null);
+  }, [focusInput, registerFocus]);
+
+  useEffect(() => {
+    logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
+  }, [error, messages, status]);
+
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
     if (!text) return;
 
+    await sendMessage(text, true);
+  }
+
+  async function sendMessage(text: string, includeUserMessage: boolean) {
     setDraft("");
+    setError("");
+    setFailedPrompt("");
     setStatus("Thinking");
-    setMessages((current) => [...current, { role: "user", text }]);
+    if (includeUserMessage) {
+      setMessages((current) => [...current, { role: "user", text }]);
+    }
 
     try {
       const response = await client.sendMessage({
@@ -369,49 +420,118 @@ function CesChat({ config }: { config: StorefrontConfig["gecx"] }) {
       setMessages((current) => [...current, { role: "assistant", text: answer }]);
       setStatus("Ready");
     } catch (error) {
-      setMessages((current) => [
-        ...current,
-        { role: "assistant", text: `The assistant request failed: ${String(error)}` },
-      ]);
+      setError(`The assistant request failed: ${String(error)}`);
+      setFailedPrompt(text);
       setStatus("Error");
     }
   }
 
+  function selectPrompt(prompt: string) {
+    setDraft(prompt);
+    requestAnimationFrame(focusInput);
+  }
+
+  function retryMessage() {
+    if (failedPrompt) {
+      void sendMessage(failedPrompt, false);
+    }
+  }
+
+  const isThinking = status === "Thinking";
+  const statusLabel = status === "Thinking" ? "Thinking" : status === "Error" ? "Needs attention" : "Ready";
+
   return (
-    <div className="ces-chat" data-testid="ces-chat">
+    <div className="ces-chat" data-testid="ces-chat" id="assistant-chat">
       <div className="ces-chat-header">
-        <strong>{config.chatTitle}</strong>
-        <span>{status}</span>
+        <div>
+          <span className="assistant-beta-pill">Beta</span>
+          <strong>Fairway AI</strong>
+          <p>{config.chatTitle}</p>
+        </div>
+        <span className={`ces-chat-status ${status.toLowerCase()}`}>
+          <span aria-hidden="true" />
+          {statusLabel}
+        </span>
       </div>
-      <div className="ces-chat-log" aria-live="polite">
+      <div className="ces-chat-log" aria-live="polite" ref={logRef}>
         {messages.length ? (
           messages.map((message, index) => (
             <div className={`ces-chat-message ${message.role}`} key={`${message.role}-${index}`}>
-              <span>{message.role === "user" ? "You" : "Assistant"}</span>
-              <p>{message.text}</p>
+              <span>{message.role === "user" ? "You" : "AI"}</span>
+              <div className="ces-chat-message-text">{renderChatText(message.text)}</div>
             </div>
           ))
         ) : (
-          <div className="ces-chat-message assistant">
-            <span>Assistant</span>
-            <p>What are you shopping for today?</p>
+          <div className="ces-chat-welcome">
+            <span className="assistant-beta-pill">Beta</span>
+            <h3>What are you shopping for today?</h3>
+            <p>Start with a goal and Fairway AI can narrow products, policies, and purchase options.</p>
+            <div className="ces-chat-prompts" aria-label="Suggested prompts">
+              {promptChips.map((prompt) => (
+                <button key={prompt} onClick={() => selectPrompt(prompt)} type="button">
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
         )}
+        {isThinking ? (
+          <div className="ces-chat-typing" role="status">
+            <span>AI is working</span>
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+          </div>
+        ) : null}
+        {error ? (
+          <div className="ces-chat-error">
+            <span>Needs attention</span>
+            <p>{error}</p>
+            <button disabled={!failedPrompt || isThinking} onClick={retryMessage} type="button">
+              Try again
+            </button>
+          </div>
+        ) : null}
       </div>
       <form className="ces-chat-form" onSubmit={submitMessage}>
+        <div className="ces-chat-prompts compact" aria-label="Suggested prompts">
+          {promptChips.map((prompt) => (
+            <button key={prompt} disabled={isThinking} onClick={() => selectPrompt(prompt)} type="button">
+              {prompt}
+            </button>
+          ))}
+        </div>
         <textarea
           aria-label="Message Golf Store Assistant"
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Ask about irons, shipping, financing, or rewards"
+          ref={textareaRef}
           rows={3}
           value={draft}
         />
-        <button disabled={!draft.trim() || status === "Thinking"} type="submit">
+        <button disabled={!draft.trim() || isThinking} type="submit">
           Send
         </button>
       </form>
     </div>
   );
+}
+
+function renderChatText(text: string) {
+  return text
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, lineIndex) => (
+      <p key={`${line}-${lineIndex}`}>
+        {line.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            return <strong key={`${part}-${partIndex}`}>{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        })}
+      </p>
+    ));
 }
 
 function renderWidget(
