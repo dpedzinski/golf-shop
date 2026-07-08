@@ -3,10 +3,13 @@ name: Terraform Apply
 on:
   push:
     paths:
+      - 'frontend/**'
       - 'infra/terraform/**'
       - '.github/workflows/terraform-*.yml'
     branches:
       - main
+      - 'feat/**'
+      - cleanup-static-site-surface
 
 # Ensure only one apply runs at a time
 concurrency:
