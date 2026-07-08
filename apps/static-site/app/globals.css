@@ -512,10 +512,6 @@ h3 {
   font-weight: 900;
 }
 
-.ces-chat-message.user .ces-chat-message-text {
-  color: #ffffff;
-}
-
 .ces-chat-message.user .ces-chat-message-text,
 .ces-chat-message.user .ces-chat-message-text p,
 .ces-chat-message.user .ces-chat-message-text strong {
