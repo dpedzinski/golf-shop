@@ -1,18 +1,26 @@
 {
-  "name": "bread-prototype",
+  "name": "fairwayiq-golf-shop",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "workspaces": [
+    "frontend",
+    "backend",
     "packages/gecx-sdk",
     "packages/gecx-components",
     "apps/static-site"
   ],
   "scripts": {
+    "dev-frontend": "npm run dev --prefix frontend",
+    "dev-backend": "npm run dev --prefix backend",
+    "dev": "concurrently \"npm run dev-frontend\" \"npm run dev-backend\"",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "site:dev": "npm run dev --workspace apps/static-site",
     "site:build": "npm run build --workspace apps/static-site"
+  },
+  "devDependencies": {
+    "concurrently": "latest"
   }
 }
