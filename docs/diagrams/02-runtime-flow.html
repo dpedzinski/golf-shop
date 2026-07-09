@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 2: Runtime Request Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .slide {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1400px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .step-number {
+            min-width: 50px;
+            height: 50px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .step-content {
+            flex: 1;
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        .step-content:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        .step-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        .step-details {
+            color: #4a5568;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            margin-top: 8px;
+            overflow-x: auto;
+        }
+        .arrow-down {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.8em;
+            margin: -8px 0;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .highlight {
+            background: #fef5e7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #e67e22;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <h1>🔄 Runtime Request Flow</h1>
+        <div class="subtitle">"I want to shop for irons for experienced players"</div>
+
+        <div class="flow-container">
+            <div class="flow-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">👤 User Browser</div>
+                    <div class="step-details">
+                        User types message and clicks "Send" in chat widget
+                        <div class="code-block">POST /sessions/web-UUID:runSession<br>{ "inputs": [{ "text": "I want irons for experienced players" }] }</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">🤖 GECX Root Agent (Gemini LLM)</div>
+                    <div class="step-details">
+                        <strong>Analyzes:</strong> User wants irons + experienced skill level<br>
+                        <strong>Instruction says:</strong> Call <span class="highlight">search_products</span> when category + skill provided<br>
+                        <strong>Decision:</strong> Prepare tool call
+                        <div class="code-block">tool: "search_products"<br>args: { q: "irons", skill_level: "experienced", limit: 5 }</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">🔀 CES Toolset Router</div>
+                    <div class="step-details">
+                        Looks up tool in <span class="highlight">golf-store-mcp</span> toolset<br>
+                        Routes to MCP Server endpoint with JSON-RPC format
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">🔌 MCP Server (Cloud Function)</div>
+                    <div class="step-details">
+                        <strong>Receives:</strong> JSON-RPC tool call<br>
+                        <strong>Translates to:</strong> REST API call
+                        <div class="code-block">GET /products?q=irons&skill_level=experienced&limit=5</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <div class="step-title">⚡ Product API (Cloud Function)</div>
+                    <div class="step-details">
+                        Receives REST request and builds BigQuery SQL query
+                        <div class="code-block">SELECT * FROM vw_product_listing_current<br>WHERE product_name LIKE '%irons%' AND<br>      target_player_profile LIKE '%experienced%'<br>LIMIT 5</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <div class="step-title">📊 BigQuery</div>
+                    <div class="step-details">
+                        Executes query on <span class="highlight">golf_products</span> dataset<br>
+                        <strong>Returns:</strong> 2 iron sets matching criteria (P027, P024)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↑ Results flow back up</div>
+
+            <div class="flow-step">
+                <div class="step-number">7</div>
+                <div class="step-content">
+                    <div class="step-title">🤖 Agent Processes Tool Result</div>
+                    <div class="step-details">
+                        <strong>Gemini receives:</strong> 2 products from catalog<br>
+                        <strong>Generates:</strong> Response text + rich content payload<br>
+                        <strong>Creates:</strong> product-carousel widget with product cards
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div class="flow-step">
+                <div class="step-number">8</div>
+                <div class="step-content">
+                    <div class="step-title">🌐 User Browser Renders</div>
+                    <div class="step-details">
+                        <strong>Text:</strong> "Here are iron sets that fit experienced players..."<br>
+                        <strong>Widget:</strong> &lt;cx-product-carousel&gt; with 2 interactive product cards
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

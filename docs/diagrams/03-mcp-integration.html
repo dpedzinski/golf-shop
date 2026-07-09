@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 3: MCP Integration Deep Dive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .slide {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1400px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+        .column {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            min-height: 600px;
+        }
+        .column-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+        .component {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .component:hover {
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+            transform: scale(1.02);
+        }
+        .component-name {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .component-desc {
+            color: #718096;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .arrow-right {
+            font-size: 3em;
+            color: #667eea;
+            animation: slideRight 2s infinite;
+        }
+        @keyframes slideRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+        .protocol-box {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .highlight-box {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+        .highlight-title {
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 8px;
+        }
+        .benefit-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        .benefit-list li {
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 3px solid #48bb78;
+        }
+        .benefit-list li:before {
+            content: "✓ ";
+            color: #48bb78;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <h1>🔌 MCP Integration: The Translation Layer</h1>
+
+        <div class="three-column">
+            <!-- Left Column: GECX Side -->
+            <div class="column">
+                <div class="column-title">🤖 GECX Agent Side</div>
+
+                <div class="component">
+                    <div class="component-name">Tool Call Request</div>
+                    <div class="component-desc">Agent decides to call a tool based on conversation</div>
+                    <div class="protocol-box">{
+  "tool": "search_products",
+  "args": {
+    "q": "irons",
+    "skill_level": "experienced",
+    "limit": 5
+  }
+}</div>
+                </div>
+
+                <div class="component">
+                    <div class="component-name">Tool Definitions</div>
+                    <div class="component-desc">
+                        14 tools registered in CES:<br>
+                        • search_products<br>
+                        • get_product_details<br>
+                        • compare_products<br>
+                        • get_financing_options<br>
+                        • get_loyalty_program_details<br>
+                        • ...and 9 more
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-name">Toolset Configuration</div>
+                    <div class="component-desc">
+                        <strong>Type:</strong> MCP Toolset<br>
+                        <strong>ID:</strong> golf-store-mcp<br>
+                        <strong>Server:</strong> MCP Cloud Function URL
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <div class="highlight-title">Agent doesn't know:</div>
+                    ❌ How to query BigQuery<br>
+                    ❌ REST API endpoints<br>
+                    ❌ Database schema<br>
+                    ✅ Just calls tools by name!
+                </div>
+            </div>
+
+            <div class="arrow-right">→</div>
+
+            <!-- Middle Column: MCP Server -->
+            <div class="column">
+                <div class="column-title">🔌 MCP Server</div>
+
+                <div class="component">
+                    <div class="component-name">JSON-RPC Interface</div>
+                    <div class="component-desc">Receives standardized protocol</div>
+                    <div class="protocol-box">{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "search_products",
+    "arguments": {...}
+  }
+}</div>
+                </div>
+
+                <div class="component">
+                    <div class="component-name">🔄 Translation Logic</div>
+                    <div class="component-desc">
+                        Maps tool calls to REST endpoints:<br><br>
+                        <strong>search_products</strong> →<br>
+                        GET /products?q=...&skill_level=...<br><br>
+                        <strong>get_financing_options</strong> →<br>
+                        GET /financing?amount=...
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-name">Environment Config</div>
+                    <div class="component-desc">
+                        <strong>PRODUCT_API_BASE_URL:</strong><br>
+                        Cloud Function URL<br><br>
+                        <strong>PRODUCT_API_AUTH_MODE:</strong><br>
+                        id_token or none
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <div class="highlight-title">🎯 Key Role:</div>
+                    Decouples agent protocol from backend implementation
+                </div>
+            </div>
+
+            <div class="arrow-right">→</div>
+
+            <!-- Right Column: Backend Side -->
+            <div class="column">
+                <div class="column-title">⚡ Backend APIs</div>
+
+                <div class="component">
+                    <div class="component-name">REST API Call</div>
+                    <div class="component-desc">Standard HTTP request</div>
+                    <div class="protocol-box">GET /products?q=irons&skill_level=experienced&limit=5
+
+Headers:
+  Authorization: Bearer ...
+  Content-Type: application/json</div>
+                </div>
+
+                <div class="component">
+                    <div class="component-name">Product API (Cloud Function)</div>
+                    <div class="component-desc">
+                        • Receives REST request<br>
+                        • Validates parameters<br>
+                        • Builds BigQuery SQL<br>
+                        • Executes query<br>
+                        • Returns JSON response
+                    </div>
+                </div>
+
+                <div class="component">
+                    <div class="component-name">📊 BigQuery</div>
+                    <div class="component-desc">
+                        <strong>Dataset:</strong> golf_products<br>
+                        <strong>View:</strong> vw_product_listing_current<br>
+                        <strong>Returns:</strong> Product rows as JSON
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <div class="highlight-title">Backend doesn't know:</div>
+                    ❌ About GECX/CES<br>
+                    ❌ About MCP protocol<br>
+                    ❌ About AI agents<br>
+                    ✅ Just standard REST API!
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: #e6fffa; padding: 20px; border-radius: 15px; border: 2px solid #38b2ac;">
+            <h3 style="color: #234e52; margin-bottom: 15px;">💡 Why MCP Architecture?</h3>
+            <ul class="benefit-list">
+                <li><strong>Decoupling:</strong> Agent and backend evolve independently</li>
+                <li><strong>Reusability:</strong> Same Product API serves web, mobile, and agent</li>
+                <li><strong>Flexibility:</strong> Swap BigQuery for PostgreSQL without changing agent</li>
+                <li><strong>Testing:</strong> Test components in isolation with mocks</li>
+                <li><strong>Security:</strong> MCP layer adds auth, rate limiting, validation</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

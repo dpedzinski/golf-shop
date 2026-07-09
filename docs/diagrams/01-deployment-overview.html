@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 1: Terraform Deployment Overview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .slide {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .layer {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .layer:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .layer-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .layer-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+        }
+        .resources {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .resource {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .resource:hover {
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+        .resource-name {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        .resource-desc {
+            font-size: 0.9em;
+            color: #718096;
+        }
+        .arrow {
+            text-align: center;
+            font-size: 2em;
+            color: #667eea;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #718096;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <h1>🚀 Terraform Deployment Overview</h1>
+
+        <div class="diagram">
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-number">1</span>
+                    Data Layer
+                </div>
+                <div class="resources">
+                    <div class="resource">
+                        <div class="resource-name">📊 BigQuery Dataset</div>
+                        <div class="resource-desc">golf_products - Product catalog, inventory, pricing</div>
+                    </div>
+                    <div class="resource">
+                        <div class="resource-name">📈 14 Views</div>
+                        <div class="resource-desc">vw_product_listing_current, vw_active_financing_options, etc.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-number">2</span>
+                    API Layer
+                </div>
+                <div class="resources">
+                    <div class="resource">
+                        <div class="resource-name">⚡ Product API</div>
+                        <div class="resource-desc">Cloud Function - REST endpoints for product data</div>
+                    </div>
+                    <div class="resource">
+                        <div class="resource-name">🔌 MCP Server</div>
+                        <div class="resource-desc">Cloud Function - JSON-RPC translation layer</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-number">3</span>
+                    AI Agent Layer
+                </div>
+                <div class="resources">
+                    <div class="resource">
+                        <div class="resource-name">🤖 CES App</div>
+                        <div class="resource-desc">golf-store-customer-service</div>
+                    </div>
+                    <div class="resource">
+                        <div class="resource-name">💬 Root Agent</div>
+                        <div class="resource-desc">golf-store-assistant with Gemini 3.0 Flash</div>
+                    </div>
+                    <div class="resource">
+                        <div class="resource-name">🛠️ MCP Toolset</div>
+                        <div class="resource-desc">14 tools linked to MCP Server</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-number">4</span>
+                    Frontend Layer
+                </div>
+                <div class="resources">
+                    <div class="resource">
+                        <div class="resource-name">🌐 Static Site</div>
+                        <div class="resource-desc">Cloud Run - Next.js storefront with chat widget</div>
+                    </div>
+                    <div class="resource">
+                        <div class="resource-name">🎨 Web Deployment</div>
+                        <div class="resource-desc">WEB_UI deployment for browser integration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <strong>All deployed via: </strong><code>terraform apply</code> • <strong>State stored in:</strong> GCS bucket
+        </div>
+    </div>
+</body>
+</html>
