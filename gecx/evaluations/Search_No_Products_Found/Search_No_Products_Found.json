@@ -6,7 +6,7 @@
     "scenarioExpectations": [{
       "toolExpectation": {
         "expectedToolCall": {
-          "tool": "search_products",
+          "tool": "searchProducts",
           "args": {
             "budget_range": {
               "$matchType": "ignore",
@@ -24,15 +24,15 @@
               "$originalValue": "advanced"
             }
           },
-          "displayName": "search_products"
+          "displayName": "searchProducts"
         },
         "mockToolResponse": {
-          "tool": "search_products",
+          "tool": "searchProducts",
           "response": {
             "message": "No products found matching your criteria. Please try adjusting your search.",
             "products": []
           },
-          "displayName": "search_products"
+          "displayName": "searchProducts"
         }
       }
     }],

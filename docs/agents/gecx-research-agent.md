@@ -33,9 +33,12 @@ research-only update.
 
 ## Update Rules
 
-- Verify whether the root agent still attaches `google_ces_toolset.golf_store_mcp`.
-- Keep the MCP toolset documented as the primary deployed path when it remains
-  attached to the root agent.
+- Verify whether the root agent still attaches
+  `google_ces_toolset.golf_store_product_openapi` and
+  `google_ces_toolset.golf_store_mcp`.
+- Keep the product OpenAPI toolset documented as the primary product search/detail
+  path and the MCP toolset documented as the primary support-tool path when they
+  remain attached to the root agent.
 - Mark direct Python tools as demo/reference assets unless the root agent or
   deployment explicitly uses them.
 - Keep financing safety requirements visible: no credit approval guarantees, no
@@ -47,5 +50,6 @@ research-only update.
 
 - Research claims have official source URLs.
 - Repo-specific claims cite real local paths.
-- Tool-path wording distinguishes MCP toolset from Python demo tools.
+- Tool-path wording distinguishes product OpenAPI, MCP support tools, and Python
+  demo tools.
 - The spec remains docs-only and does not require code changes.

@@ -18,7 +18,7 @@ describe('McpClient', () => {
       fetch: fetchMock as typeof fetch,
     });
 
-    await client.callTool('search_products', { q: 'putter', limit: 3 });
+    await client.callTool('compare_products', { product_ids: ['P001', 'P002'] });
 
     const [, init] = fetchMock.mock.calls[0] as unknown as Parameters<typeof fetch>;
     expect(JSON.parse(String(init?.body))).toEqual({
@@ -26,8 +26,8 @@ describe('McpClient', () => {
       id: 1,
       method: 'tools/call',
       params: {
-        name: 'search_products',
-        arguments: { q: 'putter', limit: 3 },
+        name: 'compare_products',
+        arguments: { product_ids: ['P001', 'P002'] },
       },
     });
   });
@@ -38,7 +38,7 @@ describe('McpClient', () => {
         jsonrpc: '2.0',
         id: 1,
         result: {
-          tools: [{ name: 'search_products' }],
+          tools: [{ name: 'compare_products' }],
         },
       })
     );
@@ -47,6 +47,6 @@ describe('McpClient', () => {
       fetch: fetchMock as typeof fetch,
     });
 
-    await expect(client.listTools()).resolves.toEqual([{ name: 'search_products' }]);
+    await expect(client.listTools()).resolves.toEqual([{ name: 'compare_products' }]);
   });
 });

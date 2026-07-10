@@ -130,7 +130,7 @@ Turn the canonical `apps/static-site` Fairway Supply storefront into a fuller e-
 
 ### MCP
 
-- [x] Update `services/mcp-server/main.py` `search_products` tool schema with new search/filter params.
+- [x] Superseded the former MCP product search tool with the Product API OpenAPI toolset for `/products` paths.
 - [x] Add `estimate_cart` tool.
 - [x] Map `estimate_cart` to `/cart/estimate`.
 - [x] Preserve existing product and purchase-support tools.

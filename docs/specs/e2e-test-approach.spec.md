@@ -110,9 +110,9 @@ irons regressions are also checked inside CES as golden evaluations:
 
 - `Storefront Irons Experienced Player`: sends `I want to shop for irons`, then
   `I want to see irons for experienced players`, and expects a
-  CES `search_products` tool call plus NorthLake iron products in the answer.
+  CES `searchProducts` OpenAPI tool call plus NorthLake iron products in the answer.
 - `Storefront Irons Yes Retry`: sends `I want to shop for irons`, then `yes`,
-  and expects the agent to keep irons context, call `search_products`, and show
+  and expects the agent to keep irons context, call `searchProducts`, and show
   iron products instead of resetting the gear-selection question.
 
 Validate the local evaluation JSON:
@@ -307,12 +307,12 @@ curl -sS "$MCP_SERVER_URL" \
 
 Expected: JSON-RPC result with a `tools` array.
 
-Call `search_products`:
+Call `compare_products`:
 
 ```bash
 curl -sS "$MCP_SERVER_URL" \
   -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_products","arguments":{"q":"driver","limit":3}}}'
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"compare_products","arguments":{"product_ids":["P001","P002"]}}}'
 ```
 
 Expected: JSON-RPC result whose `content[0].text` is a JSON string containing
@@ -344,12 +344,13 @@ Test prompts:
 Expected results:
 
 - The agent asks clarifying questions when customer needs are incomplete.
-- Product and comparison answers use MCP-backed product data.
+- Product search/detail answers use OpenAPI-backed product data; comparison answers use MCP-backed product data.
 - Financing answers include responsible-use language and avoid approval
   guarantees.
 - Shipping, returns, warranties, loyalty, and checkout answers map to the
   corresponding MCP tools.
-- Tool traces or console validation show the MCP toolset, not only the direct
+- Tool traces or console validation show the product OpenAPI toolset for product
+  search/details and the MCP toolset for support tools, not only the direct
   Python demo tools, for deployed BigQuery-backed answers.
 
 ## Failure Triage

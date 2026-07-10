@@ -9,10 +9,10 @@ prototype. Read them in this order when onboarding or validating the system:
 4. [End-To-End Test Approach](./e2e-test-approach.spec.md)
 
 The deployed path is the Terraform-created Customer Engagement Suite / GECX app
-with an MCP toolset attached to the root agent. The Python tools and exported
-evaluation files under `gecx/` are useful reference assets, but they are not the
-primary runtime path unless Terraform or the agent configuration explicitly wires
-them in.
+with a product OpenAPI toolset and an MCP support toolset attached to the root
+agent. The Python tools and exported evaluation files under `gecx/` are useful
+reference assets, but they are not the primary runtime path unless Terraform or
+the agent configuration explicitly wires them in.
 
 ## Runtime Inputs
 
