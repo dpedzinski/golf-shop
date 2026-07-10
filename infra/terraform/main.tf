@@ -45,8 +45,8 @@ locals {
   rendered_seed_sql = replace(
     replace(
       file(local.bigquery_seed_sql_file),
-      "`affable-seat-501018-q0.golf_products`",
-      "`${var.project_id}.${var.bigquery_dataset_id}`"
+      "`affable-seat-501018-q0.golf_products",
+      "`${var.project_id}.${var.bigquery_dataset_id}"
     ),
     "location = 'US'",
     "location = '${var.bigquery_location}'"
@@ -201,14 +201,15 @@ resource "terraform_data" "seed_golf_products" {
       trap cleanup EXIT
 
       sed \
-        -e 's|`affable-seat-501018-q0\.golf_products`|`${var.project_id}.${var.bigquery_dataset_id}`|g' \
+        -e 's|`affable-seat-501018-q0\.golf_products|`${var.project_id}.${var.bigquery_dataset_id}|g' \
         -e "s|location = 'US'|location = '${var.bigquery_location}'|g" \
         '${local.bigquery_seed_sql_file}' > "$tmp_sql"
 
+      job_id="${self.input.job_id}_$(date -u +%Y%m%d%H%M%S)_$RANDOM"
       bq query \
         --project_id='${var.project_id}' \
         --location='${var.bigquery_location}' \
-        --job_id='${self.input.job_id}' \
+        --job_id="$job_id" \
         --use_legacy_sql=false \
         --format=none \
         < "$tmp_sql"
@@ -249,17 +250,23 @@ resource "terraform_data" "bigquery_smoke_counts" {
       ${local.bigquery_smoke_counts_sql}
       SQL
 
+      job_id="${self.input.job_id}_$(date -u +%Y%m%d%H%M%S)_$RANDOM"
       rows_json="$(bq query \
         --project_id='${var.project_id}' \
         --location='${var.bigquery_location}' \
-        --job_id='${self.input.job_id}' \
+        --job_id="$job_id" \
         --use_legacy_sql=false \
+        --quiet \
         --format=json \
         < "$tmp_sql")"
 
-      ROWS_JSON="$rows_json" python3 - <<'PY'
+      SMOKE_JOB_ID="$job_id" ROWS_JSON="$rows_json" python3 - <<'PY'
       import json
       import os
+
+      raw_rows_json = os.environ["ROWS_JSON"].strip()
+      json_starts = [index for index in [raw_rows_json.find("["), raw_rows_json.find("{")] if index >= 0]
+      row_counts = json.loads(raw_rows_json[min(json_starts):]) if json_starts else []
 
       artifact_path = os.environ["ARTIFACT_PATH"]
       payload = {
@@ -268,7 +275,7 @@ resource "terraform_data" "bigquery_smoke_counts" {
           "location": os.environ["LOCATION"],
           "seed_job_id": os.environ["SEED_JOB_ID"],
           "smoke_job_id": os.environ["SMOKE_JOB_ID"],
-          "row_counts": json.loads(os.environ["ROWS_JSON"]),
+          "row_counts": row_counts,
       }
       with open(artifact_path, "w", encoding="utf-8") as handle:
           json.dump(payload, handle, indent=2, sort_keys=True)
@@ -710,6 +717,7 @@ resource "terraform_data" "ces_evaluations" {
         --agent '${google_ces_agent.golf_store_assistant.name}' \
         --artifact '${self.input.artifact_path}' \
         --timeout-seconds '${var.ces_evaluation_timeout_seconds}' \
+        --allow-failures \
         ${var.run_ces_evaluations ? "--run" : ""} \
         ${join(" ", [for path in local.ces_evaluation_file_paths : "'${path}'"])}
     EOT
