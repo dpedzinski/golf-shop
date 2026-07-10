@@ -16,6 +16,7 @@ const appVersion = args.flags["app-version"] ?? process.env.CES_APP_VERSION_NAME
 const artifactPath = args.flags.artifact ? resolve(args.flags.artifact) : null;
 const dryRun = Boolean(args.flags["dry-run"]);
 const shouldRun = Boolean(args.flags.run);
+const allowFailures = Boolean(args.flags["allow-failures"]) || process.env.CES_EVALUATION_ALLOW_FAILURES === "true";
 const timeoutSeconds = Number(args.flags["timeout-seconds"] ?? process.env.CES_EVALUATION_TIMEOUT_SECONDS ?? "900");
 const pollSeconds = Number(args.flags["poll-interval-seconds"] ?? process.env.CES_EVALUATION_POLL_SECONDS ?? "10");
 
@@ -95,6 +96,7 @@ if (shouldRun && !dryRun) {
 const artifact = {
   appName,
   appVersionName: appVersionName || null,
+  allowFailures,
   dryRun,
   evaluationRun,
   syncedAgentTools,
@@ -106,7 +108,9 @@ if (artifactPath) {
   await writeFile(artifactPath, `${JSON.stringify(artifact, null, 2)}\n`);
 }
 
-assertRunPassed(evaluationRun);
+if (!allowFailures) {
+  assertRunPassed(evaluationRun);
+}
 
 console.log(JSON.stringify(artifact, null, 2));
 
@@ -319,7 +323,7 @@ function parseArgs(rawArgs) {
     }
 
     const key = arg.slice(2);
-    if (["dry-run", "run"].includes(key)) {
+    if (["allow-failures", "dry-run", "run"].includes(key)) {
       flags[key] = true;
       continue;
     }
