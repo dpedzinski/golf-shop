@@ -21,8 +21,8 @@ agent assets, and BigQuery seed data.
   endpoint that forwards tool calls to the product API.
 - `infra/terraform/`: Google Cloud infrastructure for APIs, BigQuery, Cloud
   Functions, Cloud Run static site hosting, Artifact Registry, service
-  accounts, IAM, Customer Engagement Suite app, agent, Python tools, and MCP
-  toolset.
+  accounts, IAM, Customer Engagement Suite app, agent, Python tools, product
+  OpenAPI toolset, and MCP toolset.
 - `gecx/`: Exported GECX/CES app, root agent, guardrails, tools, evaluations,
   and Python demo tool code.
 - `data/bigquery/`: SQL seed file that creates product, inventory, pricing,
@@ -78,7 +78,8 @@ Terraform:
 - Deploys the product API and MCP server as Cloud Functions Gen 2.
 - Builds the static site container with Cloud Build and deploys it to Cloud Run.
 - Creates Customer Engagement Suite app and root agent resources.
-- Attaches the MCP toolset to the root agent as the primary deployed tool path.
+- Attaches the product OpenAPI toolset and MCP support toolset to the root agent
+  as the primary deployed tool paths.
 
 ## Current Scripts
 

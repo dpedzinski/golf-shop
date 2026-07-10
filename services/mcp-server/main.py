@@ -60,42 +60,6 @@ def _api_post(path, payload):
 
 TOOLS = [
     {
-        "name": "search_products",
-        "description": "Search BigQuery-backed golf products by keyword, category, brand, skill level, budget, and limit.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "q": {"type": "string", "description": "Keyword such as driver, wedge, shoes, beginner, waterproof."},
-                "keyword": {"type": "string", "description": "Alias for q. Use q when possible."},
-                "category": {"type": "string", "description": "Category or parent category."},
-                "category_id": {"type": "string", "description": "Stable category ID such as CAT_DRIVERS."},
-                "category_slug": {"type": "string", "description": "URL category slug such as drivers or golf-balls."},
-                "brand": {"type": "string", "description": "Brand name."},
-                "skill_level": {"type": "string", "description": "Skill level or handicap range."},
-                "min_price": {"type": "number", "description": "Minimum current sale price."},
-                "max_price": {"type": "number", "description": "Maximum current sale price."},
-                "in_stock": {"type": "boolean", "description": "Only include products with available inventory."},
-                "sort": {
-                    "type": "string",
-                    "enum": ["relevance", "price_asc", "price_desc", "rating", "newest", "popular"],
-                    "description": "Sort order for product results.",
-                },
-                "page": {"type": "integer", "minimum": 1, "default": 1},
-                "page_size": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
-                "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
-            },
-        },
-    },
-    {
-        "name": "get_product_details",
-        "description": "Get all catalog, inventory, pricing, specs, tags, and review fields for a product ID.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {"product_id": {"type": "string"}},
-            "required": ["product_id"],
-        },
-    },
-    {
         "name": "compare_products",
         "description": "Compare multiple products by price range, category, profile, inventory, rating, and review snippets.",
         "inputSchema": {
@@ -229,31 +193,6 @@ def _tool_result(data):
 
 def _call_tool(name, arguments):
     arguments = arguments or {}
-    if name == "search_products":
-        if arguments.get("keyword") is not None and arguments.get("q") is None:
-            arguments["q"] = arguments["keyword"]
-        params = {
-            key: arguments[key]
-            for key in [
-                "q",
-                "category",
-                "category_id",
-                "category_slug",
-                "brand",
-                "skill_level",
-                "min_price",
-                "max_price",
-                "in_stock",
-                "sort",
-                "page",
-                "page_size",
-                "limit",
-            ]
-            if arguments.get(key) is not None
-        }
-        return _tool_result(_api_get("/products", params))
-    if name == "get_product_details":
-        return _tool_result(_api_get(f"/products/{arguments['product_id']}"))
     if name == "compare_products":
         return _tool_result(_api_post("/compare", {"product_ids": arguments["product_ids"]}))
     if name == "get_category_margin_summary":

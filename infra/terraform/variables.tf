@@ -189,6 +189,12 @@ variable "mcp_toolset_id" {
   default     = "golf-store-bigquery-mcp"
 }
 
+variable "product_openapi_toolset_id" {
+  description = "Customer Engagement Suite OpenAPI toolset ID for product search and product details."
+  type        = string
+  default     = "golf-store-product-openapi"
+}
+
 variable "app_id" {
   description = "Stable ID for the Customer Engagement Suite app."
   type        = string

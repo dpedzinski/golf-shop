@@ -6,7 +6,7 @@
     "scenarioExpectations": [{
       "toolExpectation": {
         "expectedToolCall": {
-          "tool": "search_products",
+          "tool": "searchProducts",
           "args": {
             "budget_range": {
               "$matchType": "ignore",
@@ -34,14 +34,14 @@
               "$originalValue": "beginner"
             }
           },
-          "displayName": "search_products"
+          "displayName": "searchProducts"
         },
         "mockToolResponse": {
-          "tool": "search_products",
+          "tool": "searchProducts",
           "response": {
             "products": ["{\"id\": \"GC101\", \"name\": \"Strata Ultimate Complete Golf Set\", \"description\": \"Great for beginners, includes all essential clubs, very forgiving.\"}"]
           },
-          "displayName": "search_products"
+          "displayName": "searchProducts"
         }
       }
     }],

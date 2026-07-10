@@ -12,15 +12,16 @@ terraform {
 }
 
 locals {
-  repo_root                  = abspath("${path.module}/../..")
-  product_api_source_dir     = "${local.repo_root}/services/product-api"
-  mcp_server_source_dir      = "${local.repo_root}/services/mcp-server"
-  static_site_source_dir     = "${local.repo_root}/apps/static-site"
-  gecx_tool_python_dir       = "${local.repo_root}/gecx/tools/python"
-  agent_instruction_file     = "${local.repo_root}/gecx/agents/golf-store-assistant/instruction.txt"
-  bigquery_seed_sql_file     = "${local.repo_root}/${var.bigquery_seed_sql_file}"
-  bigquery_smoke_counts_file = "${local.repo_root}/artifacts/terraform/bigquery-smoke-counts.json"
-  ces_evaluation_run_file    = "${local.repo_root}/artifacts/terraform/ces-evaluation-run.json"
+  repo_root                   = abspath("${path.module}/../..")
+  product_api_source_dir      = "${local.repo_root}/services/product-api"
+  mcp_server_source_dir       = "${local.repo_root}/services/mcp-server"
+  static_site_source_dir      = "${local.repo_root}/apps/static-site"
+  gecx_tool_python_dir        = "${local.repo_root}/gecx/tools/python"
+  agent_instruction_file      = "${local.repo_root}/gecx/agents/golf-store-assistant/instruction.txt"
+  product_openapi_schema_file = "${local.repo_root}/infra/terraform/product-openapi.yaml.tftpl"
+  bigquery_seed_sql_file      = "${local.repo_root}/${var.bigquery_seed_sql_file}"
+  bigquery_smoke_counts_file  = "${local.repo_root}/artifacts/terraform/bigquery-smoke-counts.json"
+  ces_evaluation_run_file     = "${local.repo_root}/artifacts/terraform/ces-evaluation-run.json"
 
   ces_evaluation_files = [
     "gecx/evaluations/Storefront_Irons_Experienced_Player/Storefront_Irons_Experienced_Player.json",
@@ -119,14 +120,6 @@ locals {
   static_site_image = "${var.static_site_region}-docker.pkg.dev/${var.project_id}/${var.static_site_artifact_repository_id}/${var.static_site_service_name}:${local.static_site_source_hash}"
 
   python_tools = {
-    search_products = {
-      function_name = "search_products"
-      code_path     = "${local.gecx_tool_python_dir}/search_products.py"
-    }
-    get_product_details = {
-      function_name = "get_product_details"
-      code_path     = "${local.gecx_tool_python_dir}/get_product_details.py"
-    }
     compare_products = {
       function_name = "compare_products"
       code_path     = "${local.gecx_tool_python_dir}/compare_products.py"
@@ -473,6 +466,16 @@ resource "google_cloud_run_v2_service_iam_member" "product_api_mcp_invoker" {
   member   = "serviceAccount:${google_service_account.mcp_server.email}"
 }
 
+resource "google_cloud_run_v2_service_iam_member" "product_api_ces_invoker" {
+  count = var.allow_unauthenticated_serverless ? 0 : 1
+
+  project  = var.project_id
+  location = google_cloudfunctions2_function.product_api.location
+  name     = google_cloudfunctions2_function.product_api.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ces.iam.gserviceaccount.com"
+}
+
 resource "google_cloud_run_v2_service_iam_member" "mcp_server_ces_invoker" {
   count = var.allow_unauthenticated_serverless ? 0 : 1
 
@@ -577,6 +580,36 @@ resource "google_ces_toolset" "golf_store_mcp" {
   ]
 }
 
+resource "google_ces_toolset" "golf_store_product_openapi" {
+  project        = var.project_id
+  location       = google_ces_app.golf_store.location
+  app            = google_ces_app.golf_store.app_id
+  toolset_id     = var.product_openapi_toolset_id
+  display_name   = "Golf Store Product OpenAPI"
+  description    = "OpenAPI toolset for product search and product detail endpoints."
+  execution_type = "SYNCHRONOUS"
+
+  open_api_toolset {
+    open_api_schema = templatefile(local.product_openapi_schema_file, {
+      product_api_url = google_cloudfunctions2_function.product_api.service_config[0].uri
+    })
+    ignore_unknown_fields = true
+
+    dynamic "api_authentication" {
+      for_each = var.allow_unauthenticated_serverless ? [] : [1]
+      content {
+        service_agent_id_token_auth_config {}
+      }
+    }
+  }
+
+  depends_on = [
+    google_cloudfunctions2_function.product_api,
+    google_cloud_run_v2_service_iam_member.product_api_public_invoker,
+    google_cloud_run_v2_service_iam_member.product_api_ces_invoker,
+  ]
+}
+
 resource "google_ces_agent" "golf_store_assistant" {
   project      = var.project_id
   location     = google_ces_app.golf_store.location
@@ -586,11 +619,14 @@ resource "google_ces_agent" "golf_store_assistant" {
   description  = "Friendly golf-store customer service and product recommendation assistant."
 
   instruction = local.agent_instruction
-  tools       = [google_ces_tool.python["search_products"].id]
 
   model_settings {
     model       = var.model
     temperature = var.temperature
+  }
+
+  toolsets {
+    toolset = google_ces_toolset.golf_store_product_openapi.id
   }
 
   toolsets {
@@ -656,8 +692,8 @@ resource "terraform_data" "ces_evaluations" {
     app_version              = google_ces_app_version.web.name
     evaluation_files_sha256  = local.ces_evaluation_hash
     mcp_server_source_sha256 = data.archive_file.mcp_server.output_sha256
-    search_tool              = google_ces_tool.python["search_products"].id
-    search_tool_sha256       = filesha256(local.python_tools.search_products.code_path)
+    product_openapi_sha256   = filesha256(local.product_openapi_schema_file)
+    product_openapi_toolset  = google_ces_toolset.golf_store_product_openapi.name
     script_sha256            = filesha256("${local.repo_root}/scripts/sync-ces-evaluations.mjs")
     toolset                  = google_ces_toolset.golf_store_mcp.name
   }
@@ -683,7 +719,7 @@ resource "terraform_data" "ces_evaluations" {
     google_ces_agent.golf_store_assistant,
     google_ces_app_version.web,
     google_ces_deployment.web,
-    google_ces_tool.python,
+    google_ces_toolset.golf_store_product_openapi,
     google_ces_toolset.golf_store_mcp,
     google_cloudfunctions2_function.mcp_server,
   ]

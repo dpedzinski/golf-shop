@@ -39,7 +39,7 @@ const substitutions = {
   APP_NAME: appName,
   MCP_TOOLSET_NAME: toolsetName,
   AGENT_NAME: agentName,
-  SEARCH_PRODUCTS_TOOL_NAME: `${appName}/tools/search_products`,
+  PRODUCT_SEARCH_TOOL_NAME: `${appName}/tools/searchProducts`,
   APP_VERSION_NAME: appVersionName,
   PROJECT_ID: projectId,
   CES_LOCATION: location,

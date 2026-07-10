@@ -613,8 +613,84 @@ def _openapi(request):
         },
         "servers": [{"url": base_url}],
         "paths": {
-            "/products": {"get": {"summary": "Search products"}},
-            "/products/{product_id}": {"get": {"summary": "Get product details"}},
+            "/products": {
+                "get": {
+                    "operationId": "searchProducts",
+                    "summary": "Search products",
+                    "description": "Search BigQuery-backed golf products by keyword, category, brand, skill level, price range, stock status, and sort order.",
+                    "parameters": [
+                        {"name": "q", "in": "query", "schema": {"type": "string"}},
+                        {"name": "category", "in": "query", "schema": {"type": "string"}},
+                        {"name": "category_id", "in": "query", "schema": {"type": "string"}},
+                        {"name": "category_slug", "in": "query", "schema": {"type": "string"}},
+                        {"name": "brand", "in": "query", "schema": {"type": "string"}},
+                        {"name": "skill_level", "in": "query", "schema": {"type": "string"}},
+                        {"name": "min_price", "in": "query", "schema": {"type": "number"}},
+                        {"name": "max_price", "in": "query", "schema": {"type": "number"}},
+                        {"name": "in_stock", "in": "query", "schema": {"type": "boolean"}},
+                        {
+                            "name": "sort",
+                            "in": "query",
+                            "schema": {
+                                "type": "string",
+                                "enum": ["relevance", "price_asc", "price_desc", "rating", "newest", "popular"],
+                            },
+                        },
+                        {"name": "page", "in": "query", "schema": {"type": "integer", "minimum": 1, "default": 1}},
+                        {
+                            "name": "page_size",
+                            "in": "query",
+                            "schema": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
+                        },
+                        {
+                            "name": "limit",
+                            "in": "query",
+                            "schema": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
+                        },
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Matching products and pagination details.",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/ProductSearchResponse"}
+                                }
+                            },
+                        }
+                    },
+                }
+            },
+            "/products/{product_id}": {
+                "get": {
+                    "operationId": "getProductDetails",
+                    "summary": "Get product details",
+                    "description": "Retrieve catalog, inventory, pricing, specs, tags, and review fields for a product ID.",
+                    "parameters": [
+                        {
+                            "name": "product_id",
+                            "in": "path",
+                            "required": True,
+                            "schema": {"type": "string"},
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Product details.",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/ProductDetailResponse"}
+                                }
+                            },
+                        },
+                        "404": {
+                            "description": "Product not found.",
+                            "content": {
+                                "application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}
+                            },
+                        },
+                    },
+                }
+            },
             "/compare": {"post": {"summary": "Compare products"}},
             "/categories": {"get": {"summary": "Category navigation and margin summary"}},
             "/facets": {"get": {"summary": "Product listing facets"}},
@@ -630,6 +706,56 @@ def _openapi(request):
             "/warranties": {"get": {"summary": "Warranty policies"}},
             "/checkout-guidance": {"get": {"summary": "Checkout guidance"}},
             "/health": {"get": {"summary": "Health check"}},
+        },
+        "components": {
+            "schemas": {
+                "ProductSummary": {
+                    "type": "object",
+                    "properties": {
+                        "product_id": {"type": "string"},
+                        "product_name": {"type": "string"},
+                        "brand_name": {"type": "string"},
+                        "category_name": {"type": "string"},
+                        "current_sale_price": {"type": "number"},
+                        "average_rating": {"type": "number"},
+                        "review_count": {"type": "integer"},
+                        "inventory_status": {"type": "string"},
+                        "target_player_profile": {"type": "string"},
+                        "short_description": {"type": "string"},
+                    },
+                },
+                "ProductSearchResponse": {
+                    "type": "object",
+                    "properties": {
+                        "products": {
+                            "type": "array",
+                            "items": {"$ref": "#/components/schemas/ProductSummary"},
+                        },
+                        "count": {"type": "integer"},
+                        "total_count": {"type": "integer"},
+                        "page": {"type": "integer"},
+                        "page_size": {"type": "integer"},
+                    },
+                },
+                "ProductDetailResponse": {
+                    "type": "object",
+                    "properties": {
+                        "product_id": {"type": "string"},
+                        "product": {"type": "object", "additionalProperties": True},
+                        "variants": {
+                            "type": "array",
+                            "items": {"type": "object", "additionalProperties": True},
+                        },
+                    },
+                },
+                "ErrorResponse": {
+                    "type": "object",
+                    "properties": {
+                        "error": {"type": "string"},
+                        "message": {"type": "string"},
+                    },
+                },
+            }
         },
     }, 200
 

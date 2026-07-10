@@ -1,0 +1,186 @@
+openapi: 3.0.3
+info:
+  title: Golf Store Product API
+  version: 0.1.0
+  description: Product catalog search and product detail API backed by BigQuery.
+servers:
+  - url: ${product_api_url}
+paths:
+  /products:
+    get:
+      operationId: searchProducts
+      summary: Search golf products
+      description: Search golf products by keyword, category, brand, skill level, price range, stock status, and sort order.
+      parameters:
+        - name: q
+          in: query
+          description: Keyword such as irons, driver, wedge, shoes, beginner, or waterproof.
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Product category such as Iron Sets, Drivers, Golf Balls, or Footwear.
+          schema:
+            type: string
+        - name: category_id
+          in: query
+          description: Stable category ID such as CAT_DRIVERS.
+          schema:
+            type: string
+        - name: category_slug
+          in: query
+          description: URL category slug such as drivers or golf-balls.
+          schema:
+            type: string
+        - name: brand
+          in: query
+          description: Brand name.
+          schema:
+            type: string
+        - name: skill_level
+          in: query
+          description: Shopper skill level or handicap signal, such as beginner, improving, intermediate, experienced, or advanced.
+          schema:
+            type: string
+        - name: min_price
+          in: query
+          description: Minimum current sale price.
+          schema:
+            type: number
+        - name: max_price
+          in: query
+          description: Maximum current sale price.
+          schema:
+            type: number
+        - name: in_stock
+          in: query
+          description: Only include products with available inventory.
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          description: Sort order for product results.
+          schema:
+            type: string
+            enum:
+              - relevance
+              - price_asc
+              - price_desc
+              - rating
+              - newest
+              - popular
+        - name: page
+          in: query
+          description: One-based page number.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: Number of products to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: limit
+          in: query
+          description: Alias for page_size when the agent wants a fixed result count.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: Matching products and pagination details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductSearchResponse"
+  /products/{product_id}:
+    get:
+      operationId: getProductDetails
+      summary: Get product details
+      description: Retrieve catalog, inventory, pricing, specs, tags, and review fields for a product ID.
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: Product ID such as P001.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductDetailResponse"
+        "404":
+          description: Product not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ProductSummary:
+      type: object
+      properties:
+        product_id:
+          type: string
+        product_name:
+          type: string
+        brand_name:
+          type: string
+        category_name:
+          type: string
+        current_sale_price:
+          type: number
+        average_rating:
+          type: number
+        review_count:
+          type: integer
+        inventory_status:
+          type: string
+        target_player_profile:
+          type: string
+        short_description:
+          type: string
+    ProductSearchResponse:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductSummary"
+        count:
+          type: integer
+        total_count:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+    ProductDetailResponse:
+      type: object
+      properties:
+        product_id:
+          type: string
+        product:
+          type: object
+          additionalProperties: true
+        variants:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string

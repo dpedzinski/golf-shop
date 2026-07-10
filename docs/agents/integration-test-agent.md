@@ -3,7 +3,7 @@
 ## Mission
 
 Validate and maintain `docs/specs/e2e-test-approach.spec.md`, covering the full
-website -> GECX -> MCP -> API -> BigQuery chain.
+website -> GECX -> product OpenAPI / MCP -> API -> BigQuery chain.
 
 ## Inputs To Inspect
 
@@ -25,7 +25,7 @@ website -> GECX -> MCP -> API -> BigQuery chain.
 3. Validate the Cloud Run static site URL and env values from Terraform outputs.
 4. Smoke test product API endpoints.
 5. Smoke test MCP health, `tools/list`, and `tools/call`.
-6. Validate GECX/CES toolset behavior through the console or website CES chat.
+6. Validate GECX/CES OpenAPI and MCP toolset behavior through the console or website CES chat.
 7. Confirm BigQuery seeded views return rows.
 
 ## Commands To Keep Current
@@ -46,10 +46,10 @@ terraform -chdir=infra/terraform output -raw bigquery_dataset
 - Static site Playwright test finds storefront widgets and configured native chat behavior. Component package coverage is handled by Vitest unit tests.
 - Product API `/health` returns `status: ok`.
 - Product API `/products` returns product data from BigQuery-backed views.
-- MCP `tools/list` returns the expected tool names.
+- MCP `tools/list` returns the expected non-product support tool names.
 - MCP `tools/call` returns JSON-RPC results with text content containing API
   response JSON.
-- GECX tool traces show the deployed MCP toolset for BigQuery-backed answers.
+- GECX tool traces show the deployed product OpenAPI toolset for product search/details and the MCP toolset for support answers.
 
 ## Triage Rules
 
@@ -59,5 +59,5 @@ terraform -chdir=infra/terraform output -raw bigquery_dataset
   and Cloud Function logs.
 - If MCP smoke tests fail but API tests pass, inspect MCP env vars, product API
   auth mode, and Cloud Function logs.
-- If GECX does not call tools but MCP tests pass, inspect root agent toolset
-  attachment, agent instruction, and console traces.
+- If GECX does not call tools but direct Product API and MCP tests pass, inspect
+  root agent toolset attachments, agent instruction, and console traces.

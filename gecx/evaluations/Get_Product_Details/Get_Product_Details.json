@@ -6,14 +6,14 @@
     "scenarioExpectations": [{
       "toolExpectation": {
         "expectedToolCall": {
-          "tool": "get_product_details",
+          "tool": "getProductDetails",
           "args": {
             "product_id": "GC102"
           },
-          "displayName": "get_product_details"
+          "displayName": "getProductDetails"
         },
         "mockToolResponse": {
-          "tool": "get_product_details",
+          "tool": "getProductDetails",
           "response": {
             "availability": "In Stock",
             "features": ["Driver", "Fairway Wood", "Hybrid", "Irons (6-SW)", "Putter", "Carry Bag", "Lightweight components for easier swings"],
@@ -22,7 +22,7 @@
             "price": "$649.99",
             "reviews": "4.3/5 stars from 95 reviews"
           },
-          "displayName": "get_product_details"
+          "displayName": "getProductDetails"
         }
       }
     }],

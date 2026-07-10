@@ -54,8 +54,13 @@ output "static_site_image" {
 }
 
 output "mcp_toolset_name" {
-  description = "Customer Engagement Suite MCP toolset attached to the root agent."
+  description = "Customer Engagement Suite MCP toolset attached to the root agent for non-product support tools."
   value       = google_ces_toolset.golf_store_mcp.name
+}
+
+output "product_openapi_toolset_name" {
+  description = "Customer Engagement Suite OpenAPI toolset attached to the root agent for product search and product details."
+  value       = google_ces_toolset.golf_store_product_openapi.name
 }
 
 output "web_deployment_name" {
@@ -64,6 +69,6 @@ output "web_deployment_name" {
 }
 
 output "tool_names" {
-  description = "Fully qualified Python demo tool resource names. The root agent uses the BigQuery-backed MCP toolset by default."
+  description = "Fully qualified Python demo tool resource names. The root agent uses product OpenAPI plus MCP toolsets by default."
   value       = { for key, tool in google_ces_tool.python : key => tool.id }
 }

@@ -27,8 +27,9 @@ structure and runtime wiring.
 
 - Start from local repo truth. Do not infer package scripts or endpoint names.
 - Treat `apps/static-site` as the canonical storefront app; the older Vertex AI Studio `frontend/` and `backend/` demo path has been removed.
-- Preserve the canonical flow as website -> GECX -> MCP -> product API ->
-  BigQuery when Terraform still attaches the MCP toolset to the root agent.
+- Preserve the canonical flow as website -> GECX -> product OpenAPI / MCP ->
+  product API -> BigQuery when Terraform still attaches both toolsets to the
+  root agent.
 - Update the Mermaid diagram if any deployed component, service, or direct
   browser call changes.
 - Keep environment variable and Terraform output lists exact.
@@ -41,4 +42,4 @@ structure and runtime wiring.
 - Every endpoint mentioned exists in `services/product-api/main.py` or
   `services/mcp-server/main.py`.
 - The architecture spec clearly distinguishes browser status calls from the
-  conversational MCP tool path.
+  conversational product OpenAPI and MCP tool paths.

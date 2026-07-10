@@ -4,10 +4,10 @@
   "displayName": "Golf Store Assistant",
   "description": "Friendly Fairway Supply golf-store customer service assistant for product guidance, purchase support, financing, loyalty, and storefront rich content.",
   "instruction": "gecx/agents/golf-store-assistant/instruction.txt",
-  "toolset": "golf-store-bigquery-mcp",
+  "toolsets": ["golf-store-product-openapi", "golf-store-bigquery-mcp"],
   "tools": [
-    "search_products",
-    "get_product_details",
+    "searchProducts",
+    "getProductDetails",
     "compare_products",
     "get_category_margin_summary",
     "get_low_stock_best_sellers",

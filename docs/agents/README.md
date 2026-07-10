@@ -10,13 +10,15 @@ Use these files by task:
 - [Repo Architecture Agent](./repo-architecture-agent.md): keep repo overview
   and architecture/data-flow specs accurate.
 - [Integration Test Agent](./integration-test-agent.md): validate the full
-  website -> GECX -> MCP -> API -> BigQuery chain.
+  website -> GECX -> product OpenAPI / MCP -> API -> BigQuery chain.
 - [BigQuery API Agent](./bigquery-api-agent.md): focus on product API,
   BigQuery, and MCP-to-API behavior.
 
 Ground rules:
 
-- Treat the Terraform-created MCP toolset as the primary deployed path.
+- Treat the Terraform-created product OpenAPI toolset as the primary deployed
+  path for product search/details and the MCP toolset as the primary deployed
+  path for support tools.
 - Do not describe `gecx/tools/python` or `gecx/evaluations` as production
   runtime paths unless the repo wiring proves that they are attached to the
   deployed root agent.

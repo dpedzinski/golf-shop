@@ -6,8 +6,9 @@ This repo models a Google Customer Engagement Suite / GECX customer service
 experience for an online golf store. The web storefront embeds Dialogflow CX
 Messenger as a fallback and uses the CES WEB_UI deployment for native chat
 sessions when configured. Terraform creates the Customer Engagement Suite app,
-root agent, web deployment, and MCP toolset that lets the agent retrieve
-BigQuery-backed product, policy, financing, loyalty, and checkout data.
+root agent, web deployment, a product OpenAPI toolset, and an MCP support
+toolset that let the agent retrieve BigQuery-backed product, policy, financing,
+loyalty, and checkout data.
 
 Use the term GECX/CES in this repo to mean the Google customer engagement agent
 layer built from Dialogflow CX / Conversational Agents concepts and provisioned
@@ -20,8 +21,9 @@ through `infra/terraform`.
   public chat token and call `runSession`. Dialogflow CX Messenger remains as a
   fallback when only project, location, and agent IDs are configured.
 - Playbook tools connect generative agents to external systems. In this repo,
-  the primary deployed external-system connector is the Terraform-created MCP
-  toolset, not the direct Python demo tools.
+  the primary deployed product connector is the Terraform-created OpenAPI
+  toolset, and the primary deployed support connector is the Terraform-created
+  MCP toolset. Direct Python tools are demo/reference assets.
 - Playbook evaluations verify agent functionality and prevent regressions with
   test cases, expected tool usage, and golden responses.
 - Conversation history export to BigQuery is a separate observability feature
@@ -57,6 +59,7 @@ Primary GECX/CES assets:
 Terraform-created GECX/CES resources:
 
 - `google_ces_app.golf_store`
+- `google_ces_toolset.golf_store_product_openapi`
 - `google_ces_toolset.golf_store_mcp`
 - `google_ces_agent.golf_store_assistant`
 - `google_ces_app_root_agent_association.root`
@@ -67,19 +70,17 @@ Terraform-created GECX/CES resources:
 
 ## Primary Runtime Tool Path
 
-The root agent uses `google_ces_toolset.golf_store_mcp`, whose server address is
-the deployed MCP Cloud Function URL plus `/mcp/`. It also attaches the first-class
-CES `search_products` Python tool so catalog search remains available as an
-explicit grounded tool call in app-version evaluation runs. The agent
-instructions require catalog, pricing, inventory, offer, and policy claims to be
-grounded in tool output instead of memory. The storefront CES regression
-evaluations enable semantic similarity, tool correctness, and golden
-hallucination checks.
+The root agent uses `google_ces_toolset.golf_store_product_openapi` for
+`searchProducts` and `getProductDetails`. It uses
+`google_ces_toolset.golf_store_mcp`, whose server address is the deployed MCP
+Cloud Function URL plus `/mcp/`, for compare, cart, financing, loyalty,
+promotions, policy, and checkout support tools. The agent instructions require
+catalog, pricing, inventory, offer, and policy claims to be grounded in tool
+output instead of memory. The storefront CES regression evaluations enable
+semantic similarity, tool correctness, and golden hallucination checks.
 
-The MCP server lists and calls tools including:
+The MCP server lists and calls support tools including:
 
-- `search_products`
-- `get_product_details`
 - `compare_products`
 - `get_category_margin_summary`
 - `get_low_stock_best_sellers`

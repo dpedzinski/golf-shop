@@ -23,9 +23,9 @@
           },
           {
             "expectation": {
-              "note": "search_products_called_for_experienced_irons",
+              "note": "searchProducts_called_for_experienced_irons",
               "toolCall": {
-                "tool": "{{SEARCH_PRODUCTS_TOOL_NAME}}"
+                "tool": "{{PRODUCT_SEARCH_TOOL_NAME}}"
               }
             }
           },
@@ -33,7 +33,7 @@
             "expectation": {
               "note": "mock_experienced_irons_catalog_response",
               "mockToolResponse": {
-                "tool": "{{SEARCH_PRODUCTS_TOOL_NAME}}",
+                "tool": "{{PRODUCT_SEARCH_TOOL_NAME}}",
                 "response": {
                   "count": 2,
                   "page": 1,

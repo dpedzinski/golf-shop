@@ -4,13 +4,18 @@
 
 The canonical deployed flow is:
 
+website -> GECX/CES root agent -> product OpenAPI toolset -> product REST API
+Cloud Function -> BigQuery views.
+
+For non-product support tools, the deployed flow remains:
+
 website -> GECX/CES root agent -> MCP toolset -> MCP Cloud Function -> product
 REST API Cloud Function -> BigQuery views.
 
 The static website also calls the product API and MCP endpoint directly for page
 rendering and status display. Those direct browser calls support the storefront
-experience, but the conversational tool path for deployed GECX is the MCP
-toolset attached by Terraform.
+experience, but the conversational product search/detail path for deployed GECX
+is the product OpenAPI toolset attached by Terraform.
 
 Terraform deploys the website itself to Cloud Run. Cloud Run serves the Vinext
 server/client build and injects the runtime environment variables that point to
@@ -26,7 +31,8 @@ flowchart LR
   Components["packages/gecx-components"]
   CesChat["Native CES chat client"]
   GECX["GECX / CES root agent"]
-  Toolset["CES MCP toolset"]
+  ProductToolset["CES product OpenAPI toolset"]
+  Toolset["CES MCP support toolset"]
   MCP["services/mcp-server Cloud Function"]
   API["services/product-api Cloud Function"]
   BigQuery["BigQuery golf_products dataset"]
@@ -37,6 +43,8 @@ flowchart LR
   Site --> Components
   SDK --> CesChat
   CesChat --> GECX
+  GECX --> ProductToolset
+  ProductToolset --> API
   GECX --> Toolset
   Toolset --> MCP
   MCP --> API
@@ -68,18 +76,27 @@ deployment, then calls `runSession` for each user message.
 
 ## GECX To MCP
 
-Terraform creates the MCP toolset with:
+Terraform creates a product OpenAPI toolset with:
+
+- resource: `google_ces_toolset.golf_store_product_openapi`
+- output: `product_openapi_toolset_name`
+- schema: `infra/terraform/product-openapi.yaml.tftpl`
+- operations: `searchProducts` for `GET /products`, `getProductDetails` for `GET /products/{product_id}`
+
+Terraform also creates the MCP toolset with:
 
 - resource: `google_ces_toolset.golf_store_mcp`
 - output: `mcp_toolset_name`
 - server address: deployed MCP function URL plus `/mcp/`
 
-The root agent resource `google_ces_agent.golf_store_assistant` attaches this
-toolset. This is the primary deployed path for BigQuery-backed catalog and
-purchase-support answers.
+The root agent resource `google_ces_agent.golf_store_assistant` attaches both
+toolsets. Product search/details use the OpenAPI toolset. Compare, cart,
+financing, loyalty, promotions, policy, and checkout support use the MCP
+toolset.
 
 Direct Python tools are also provisioned by Terraform from `gecx/tools/python`,
-but the root agent is configured to use the MCP toolset by default. Treat
+but the root agent is configured to use the product OpenAPI and MCP toolsets by
+default. Treat
 `gecx/tools/python`, `gecx/tools/definitions`, and `gecx/evaluations` as
 demo/reference assets unless the deployed agent is changed to use them directly.
 
@@ -91,11 +108,9 @@ The MCP server accepts JSON-RPC over HTTP at `/mcp`. It supports:
 - `tools/list`
 - `tools/call`
 
-For `tools/call`, `services/mcp-server/main.py` maps tool names to product API
-endpoints:
+For `tools/call`, `services/mcp-server/main.py` maps non-product-support tool
+names to product API endpoints:
 
-- `search_products` -> `GET /products`
-- `get_product_details` -> `GET /products/{product_id}`
 - `compare_products` -> `POST /compare`
 - `get_category_margin_summary` -> `GET /categories`
 - `get_low_stock_best_sellers` -> `GET /low-stock`

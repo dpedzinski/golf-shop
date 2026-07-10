@@ -6,7 +6,7 @@
     "scenarioExpectations": [{
       "toolExpectation": {
         "expectedToolCall": {
-          "tool": "search_products",
+          "tool": "searchProducts",
           "args": {
             "brand": "Titleist",
             "product_type": {
@@ -15,14 +15,14 @@
               "$originalValue": "golf balls"
             }
           },
-          "displayName": "search_products"
+          "displayName": "searchProducts"
         },
         "mockToolResponse": {
-          "tool": "search_products",
+          "tool": "searchProducts",
           "response": {
             "products": ["{\"id\": \"GB201\", \"name\": \"Titleist Pro V1 Golf Balls (Dozen)\", \"description\": \"High velocity, low spin, Exceptional greenside control, Soft feel\"}"]
           },
-          "displayName": "search_products"
+          "displayName": "searchProducts"
         }
       }
     }],

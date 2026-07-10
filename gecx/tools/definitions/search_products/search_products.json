@@ -1,9 +1,0 @@
-{
-  "name": "ca381076-90a3-4d43-a6db-5d5696f78ae3",
-  "pythonFunction": {
-    "name": "search_products",
-    "pythonCode": "gecx/tools/python/search_products.py",
-    "description": "Searches for golf products based on various criteria provided by the customer.\n\nArgs:\n    product_type (Optional[str]): The general type of golf product (e.g., \"golf clubs\", \"golf balls\", \"apparel\").\n    skill_level (Optional[str]): The customer\u0027s skill level (e.g., \"beginner\", \"intermediate\", \"advanced\").\n    budget_range (Optional[str]): The customer\u0027s budget range (e.g., \"under $500\", \"$500-$1000\", \"premium\").\n    playing_style (Optional[str]): The customer\u0027s playing style (e.g., \"aggressive\", \"finesse\", \"casual\").\n    brand (Optional[str]): A specific brand the customer is interested in.\n    product_category (Optional[str]): A more specific category within a product type (e.g., \"full set\", \"driver\", \"putter\").\n    preferences (Optional[str]): Any specific preferences (e.g., \"forgiving\", \"distance\", \"control\", \"waterproof\").\n\nReturns:\n    dict[str, Any]: A dictionary containing a list of matching products, each with an ID, name, and brief description.\n          Example: {\"products\": [{\"id\": \"GC101\", \"name\": \"Strata Ultimate Complete Golf Set\", \"description\": \"Great for beginners, includes all essential clubs, very forgiving.\"}]}\n          Example: {\"products\": [], \"message\": \"No products found matching your criteria.\"}"
-  },
-  "displayName": "search_products"
-}

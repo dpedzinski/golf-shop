@@ -12,10 +12,13 @@ It creates:
 - A `google_ces_app`.
 - A root `google_ces_agent`.
 - A `google_ces_app_root_agent_association`.
-- A `google_ces_toolset` pointing at the MCP endpoint.
-- Python-backed CES demo tools are provisioned; the root agent attaches the
-  first-class `search_products` tool for reliable native tool calling and keeps
-  the BigQuery-backed MCP toolset for catalog and purchase-support tools.
+- A product-only `google_ces_toolset` backed by an OpenAPI schema for
+  `GET /products` and `GET /products/{product_id}`.
+- A `google_ces_toolset` pointing at the MCP endpoint for compare, cart,
+  financing, loyalty, promotion, policy, and checkout support tools.
+- Python-backed CES demo tools are provisioned as reference assets, but the root
+  agent uses the product OpenAPI toolset plus the BigQuery-backed MCP toolset by
+  default.
 - CES regression evaluations for the storefront irons flows. Terraform syncs
   the checked-in evaluation JSON files to CES and, by default, starts a
   fake-tool evaluation run after the app, agent, version, deployment, and
@@ -32,7 +35,7 @@ terraform plan
 terraform apply
 ```
 
-The direct CES Python tools return demo data. The MCP toolset calls the deployed serverless REST API, which queries the BigQuery views created by the SQL seed script. The seed script is applied with the `bq` CLI because BigQuery multi-statement scripts cannot be run through the Terraform BigQuery job resource's default destination-table settings. After the seed job, Terraform runs the storefront smoke-count queries and writes the results to `artifacts/terraform/bigquery-smoke-counts.json`.
+The direct CES Python tools return demo data. The product OpenAPI toolset calls the deployed serverless REST API for product search/details, and the MCP toolset calls the same REST API for the remaining support tools. The REST API queries the BigQuery views created by the SQL seed script. The seed script is applied with the `bq` CLI because BigQuery multi-statement scripts cannot be run through the Terraform BigQuery job resource's default destination-table settings. After the seed job, Terraform runs the storefront smoke-count queries and writes the results to `artifacts/terraform/bigquery-smoke-counts.json`.
 
 Useful endpoints after `terraform apply`:
 
@@ -57,7 +60,7 @@ Useful endpoints after `terraform apply`:
 
 If your Google Cloud project uses a different supported Gemini model for Customer Engagement Suite, override `model` in `terraform.tfvars`.
 
-Set `allow_unauthenticated_serverless = false` to keep the functions private. Terraform will grant the MCP runtime service account permission to call the REST API and will configure the CES MCP toolset to use service-agent ID-token auth for the MCP server.
+Set `allow_unauthenticated_serverless = false` to keep the functions private. Terraform will grant the MCP runtime service account permission to call the REST API and will configure both the CES product OpenAPI toolset and the CES MCP toolset to use service-agent ID-token auth.
 
 The static storefront is deployed to Cloud Run because the Vinext app has a server runtime in addition to client assets. Terraform submits the repository to Cloud Build, builds `apps/static-site/Dockerfile`, pushes the image to Artifact Registry, and deploys the Cloud Run service with runtime environment variables populated from the Terraform-managed Product API, MCP server, and CES WEB_UI deployment. Keep `allow_unauthenticated_serverless = true` for the current browser-facing storefront path; if the API and MCP services are made private, add a backend proxy before exposing the site publicly.
 

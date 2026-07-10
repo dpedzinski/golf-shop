@@ -6,19 +6,19 @@
     "scenarioExpectations": [{
       "toolExpectation": {
         "expectedToolCall": {
-          "tool": "get_product_details",
+          "tool": "getProductDetails",
           "args": {
             "product_id": "XYZ999"
           },
-          "displayName": "get_product_details"
+          "displayName": "getProductDetails"
         },
         "mockToolResponse": {
-          "tool": "get_product_details",
+          "tool": "getProductDetails",
           "response": {
             "error": true,
             "message": "Product with ID \u0027XYZ999\u0027 not found. Please check the product ID."
           },
-          "displayName": "get_product_details"
+          "displayName": "getProductDetails"
         }
       }
     }],

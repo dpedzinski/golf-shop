@@ -43,12 +43,18 @@ Keep docs aligned with these current REST routes:
 - `GET /warranties`
 - `GET /checkout-guidance`
 
+## OpenAPI Product Tool Contract
+
+Keep docs aligned with `infra/terraform/product-openapi.yaml.tftpl` and the
+`/products` entries in `services/product-api/main.py`:
+
+- `searchProducts` -> `GET /products`
+- `getProductDetails` -> `GET /products/{product_id}`
+
 ## MCP Mapping Contract
 
 Keep docs aligned with `services/mcp-server/main.py`:
 
-- `search_products` -> `GET /products`
-- `get_product_details` -> `GET /products/{product_id}`
 - `compare_products` -> `POST /compare`
 - `get_category_margin_summary` -> `GET /categories`
 - `get_low_stock_best_sellers` -> `GET /low-stock`
@@ -101,7 +107,7 @@ MCP:
 MCP_SERVER_URL=$(terraform -chdir=infra/terraform output -raw mcp_server_url)
 curl -sS "$MCP_SERVER_URL"
 curl -sS "$MCP_SERVER_URL" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-curl -sS "$MCP_SERVER_URL" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_products","arguments":{"q":"driver","limit":3}}}'
+curl -sS "$MCP_SERVER_URL" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"compare_products","arguments":{"product_ids":["P001","P002"]}}}'
 ```
 
 BigQuery:
