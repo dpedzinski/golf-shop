@@ -10,9 +10,9 @@ on:
     branches:
       - 'feat/**'
 
-# Ensure only one apply runs at a time
+# Serialize plan/apply jobs that touch the shared Terraform state backend.
 concurrency:
-  group: terraform-apply-main
+  group: terraform-state-${{ github.repository }}
   cancel-in-progress: false
 
 permissions:
@@ -58,6 +58,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
+          EXIT_CODE=0
           terraform plan \
             -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
             -out=tfplan \
@@ -129,7 +130,7 @@ jobs:
         run: |
           echo "## 🚀 Terraform Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`main\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
