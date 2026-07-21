@@ -10,10 +10,12 @@ on:
       - main
   push:
     paths:
+      - 'apps/**'
       - 'gecx/**'
       - 'infra/terraform/**'
       - '.github/workflows/terraform-*.yml'
     branches:
+      - main
       - 'feat/**'
 
 # Serialize plan/apply jobs that touch the shared Terraform state backend.
