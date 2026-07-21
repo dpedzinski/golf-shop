@@ -320,6 +320,25 @@ export function StorefrontExperience({ config }: { config: StorefrontConfig }) {
           <CesChat config={config.gecx} registerFocus={registerChatFocus} renderCxWidget={renderCxWidget} />
         )}
       </section>
+
+      {cesChatReady ? (
+        <section className="embed-ask-section" id="embed-ask" aria-label="Ask about this product">
+          <div className="embed-ask-copy">
+            <p className="eyebrow">Embedded widget</p>
+            <h2>Ask about this product</h2>
+            <p>
+              Third-party surfaces can post messages into Fairway AI. Type below and watch the
+              question land in the assistant above as a visible user turn.
+            </p>
+          </div>
+          <iframe
+            className="embed-ask-frame"
+            src="/embed/ask"
+            title="Ask Fairway AI"
+            loading="lazy"
+          />
+        </section>
+      ) : null}
     </>
   );
 }
@@ -374,6 +393,30 @@ function CesChat({
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [error, messages, status]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const extraOrigins = (process.env.NEXT_PUBLIC_IFRAME_ORIGIN_ALLOWLIST ?? "")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    const allowedOrigins = new Set<string>([window.location.origin, ...extraOrigins]);
+
+    function handleMessage(event: MessageEvent) {
+      if (!allowedOrigins.has(event.origin)) return;
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+      const payload = data as { type?: unknown; text?: unknown };
+      if (payload.type !== "fairway-ai:input") return;
+      if (typeof payload.text !== "string") return;
+      const text = payload.text.trim();
+      if (!text) return;
+      void sendMessage(text, true);
+    }
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
