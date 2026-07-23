@@ -1,6 +1,6 @@
 -- BigQuery Standard SQL
 -- Synthetic golf retail star schema / mini data warehouse.
--- Replace `agentic-bread` with your actual Google Cloud project ID before running.
+-- Replace `affable-seat-501018-q0` with your actual Google Cloud project ID before running.
 --
 -- Product and brand names are fictional and anonymized.
 -- They are not affiliated with, endorsed by, or copied from any real golf brand.
@@ -8,49 +8,49 @@
 -- clearance items, discontinued products, preorder products, uneven review counts,
 -- returns, discounts, and category-specific variants.
 
-CREATE SCHEMA IF NOT EXISTS `agentic-bread.golf_products`
+CREATE SCHEMA IF NOT EXISTS `affable-seat-501018-q0.golf_products`
 OPTIONS(
   location = 'US',
   description = 'Synthetic golf retail dataset with products, variants, inventory, reviews, pricing, sales, and performance metrics.'
 );
 
 -- Clean reruns: drop dependent views and tables first.
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_category_margin_summary`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_low_stock_best_sellers`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_cart_pricing_current`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_category_navigation`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_product_facets`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_product_detail_current`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_product_listing_current`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_product_catalog_current`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_checkout_support`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_purchase_support_policies`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_loyalty_benefits`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_active_financing_options`;
-DROP VIEW IF EXISTS `agentic-bread.golf_products.vw_active_promotions`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_category_margin_summary`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_low_stock_best_sellers`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_cart_pricing_current`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_category_navigation`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_facets`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_detail_current`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_listing_current`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_product_catalog_current`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_checkout_support`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_purchase_support_policies`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_loyalty_benefits`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_active_financing_options`;
+DROP VIEW IF EXISTS `affable-seat-501018-q0.golf_products.vw_active_promotions`;
 
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_checkout_guidance`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_warranty_policies`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_return_policies`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_shipping_services`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_promotions`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_loyalty_tiers`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_loyalty_programs`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_installment_plan_offers`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_card_offers`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_payment_methods`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.fact_product_performance_90d`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.fact_sales_order_lines`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.fact_price_history`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.fact_inventory_snapshots`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.fact_product_reviews`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_product_variants`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_products`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_categories`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_suppliers`;
-DROP TABLE IF EXISTS `agentic-bread.golf_products.dim_brands`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_checkout_guidance`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_warranty_policies`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_return_policies`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_shipping_services`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_promotions`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_loyalty_tiers`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_loyalty_programs`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_installment_plan_offers`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_card_offers`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_payment_methods`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.fact_product_performance_90d`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.fact_sales_order_lines`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.fact_price_history`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.fact_inventory_snapshots`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.fact_product_reviews`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_product_variants`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_products`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_categories`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_suppliers`;
+DROP TABLE IF EXISTS `affable-seat-501018-q0.golf_products.dim_brands`;
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_brands` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_brands` (
   brand_id STRING NOT NULL,
   brand_name STRING NOT NULL,
   brand_tier STRING,
@@ -62,7 +62,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_brands` (
 )
 OPTIONS(description = 'Fictional anonymized golf brand dimension.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_suppliers` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_suppliers` (
   supplier_id STRING NOT NULL,
   supplier_name STRING NOT NULL,
   supplier_type STRING,
@@ -75,7 +75,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_suppliers` (
 )
 OPTIONS(description = 'Synthetic supplier dimension for lead times and sourcing context.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_categories` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_categories` (
   category_id STRING NOT NULL,
   category_name STRING NOT NULL,
   parent_category STRING,
@@ -88,7 +88,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_categories` (
 )
 OPTIONS(description = 'Golf product category dimension with realistic price bands and variant strategy notes.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_products` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_products` (
   product_id STRING NOT NULL,
   brand_id STRING NOT NULL,
   supplier_id STRING NOT NULL,
@@ -111,14 +111,14 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_products` (
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
   PRIMARY KEY (product_id) NOT ENFORCED,
-  FOREIGN KEY (brand_id) REFERENCES `agentic-bread.golf_products.dim_brands`(brand_id) NOT ENFORCED,
-  FOREIGN KEY (supplier_id) REFERENCES `agentic-bread.golf_products.dim_suppliers`(supplier_id) NOT ENFORCED,
-  FOREIGN KEY (category_id) REFERENCES `agentic-bread.golf_products.dim_categories`(category_id) NOT ENFORCED
+  FOREIGN KEY (brand_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_brands`(brand_id) NOT ENFORCED,
+  FOREIGN KEY (supplier_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_suppliers`(supplier_id) NOT ENFORCED,
+  FOREIGN KEY (category_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_categories`(category_id) NOT ENFORCED
 )
 CLUSTER BY category_id, brand_id, product_status
 OPTIONS(description = 'One row per fictional golf product. Flexible specs and tags use nested/repeated fields.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_product_variants` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_product_variants` (
   variant_id STRING NOT NULL,
   product_id STRING NOT NULL,
   sku STRING NOT NULL,
@@ -144,12 +144,12 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_product_variants` (
   variant_status STRING,
   created_at TIMESTAMP,
   PRIMARY KEY (variant_id) NOT ENFORCED,
-  FOREIGN KEY (product_id) REFERENCES `agentic-bread.golf_products.dim_products`(product_id) NOT ENFORCED
+  FOREIGN KEY (product_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_products`(product_id) NOT ENFORCED
 )
 CLUSTER BY product_id, variant_status
 OPTIONS(description = 'Variant-level SKU table for club specs, apparel sizes, colors, and pricing attributes.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_product_reviews` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.fact_product_reviews` (
   review_summary_id STRING NOT NULL,
   product_id STRING NOT NULL,
   review_snapshot_date DATE NOT NULL,
@@ -167,13 +167,13 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_product_reviews` (
   quality_score FLOAT64,
   created_at TIMESTAMP,
   PRIMARY KEY (review_summary_id) NOT ENFORCED,
-  FOREIGN KEY (product_id) REFERENCES `agentic-bread.golf_products.dim_products`(product_id) NOT ENFORCED
+  FOREIGN KEY (product_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_products`(product_id) NOT ENFORCED
 )
 PARTITION BY review_snapshot_date
 CLUSTER BY product_id
 OPTIONS(description = 'Review summary fact table with star distributions and realistic positive/negative sample feedback.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_inventory_snapshots` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` (
   inventory_snapshot_id STRING NOT NULL,
   snapshot_date DATE NOT NULL,
   variant_id STRING NOT NULL,
@@ -188,14 +188,14 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_inventory_snapshots` (
   last_restock_date DATE,
   next_expected_restock_date DATE,
   PRIMARY KEY (inventory_snapshot_id) NOT ENFORCED,
-  FOREIGN KEY (variant_id) REFERENCES `agentic-bread.golf_products.dim_product_variants`(variant_id) NOT ENFORCED,
-  FOREIGN KEY (product_id) REFERENCES `agentic-bread.golf_products.dim_products`(product_id) NOT ENFORCED
+  FOREIGN KEY (variant_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_product_variants`(variant_id) NOT ENFORCED,
+  FOREIGN KEY (product_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_products`(product_id) NOT ENFORCED
 )
 PARTITION BY snapshot_date
 CLUSTER BY product_id, variant_id, inventory_status
 OPTIONS(description = 'Monthly variant-level inventory snapshots with stock status, reorder thresholds, and lead times.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_price_history` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.fact_price_history` (
   price_history_id STRING NOT NULL,
   variant_id STRING NOT NULL,
   product_id STRING NOT NULL,
@@ -208,14 +208,14 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_price_history` (
   promotion_name STRING,
   price_status STRING,
   PRIMARY KEY (price_history_id) NOT ENFORCED,
-  FOREIGN KEY (variant_id) REFERENCES `agentic-bread.golf_products.dim_product_variants`(variant_id) NOT ENFORCED,
-  FOREIGN KEY (product_id) REFERENCES `agentic-bread.golf_products.dim_products`(product_id) NOT ENFORCED
+  FOREIGN KEY (variant_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_product_variants`(variant_id) NOT ENFORCED,
+  FOREIGN KEY (product_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_products`(product_id) NOT ENFORCED
 )
 PARTITION BY effective_start_date
 CLUSTER BY product_id, variant_id, price_status
 OPTIONS(description = 'Variant-level price history with current and historical promotions.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_sales_order_lines` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.fact_sales_order_lines` (
   order_line_id STRING NOT NULL,
   order_id STRING NOT NULL,
   order_date DATE NOT NULL,
@@ -234,14 +234,14 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_sales_order_lines` (
   return_reason STRING,
   order_status STRING,
   PRIMARY KEY (order_line_id) NOT ENFORCED,
-  FOREIGN KEY (product_id) REFERENCES `agentic-bread.golf_products.dim_products`(product_id) NOT ENFORCED,
-  FOREIGN KEY (variant_id) REFERENCES `agentic-bread.golf_products.dim_product_variants`(variant_id) NOT ENFORCED
+  FOREIGN KEY (product_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_products`(product_id) NOT ENFORCED,
+  FOREIGN KEY (variant_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_product_variants`(variant_id) NOT ENFORCED
 )
 PARTITION BY order_date
 CLUSTER BY product_id, customer_state, sales_channel
 OPTIONS(description = 'Synthetic sales order line fact table for 90-day retail analytics.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_product_performance_90d` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.fact_product_performance_90d` (
   metric_as_of_date DATE NOT NULL,
   product_id STRING NOT NULL,
   units_sold_30d INT64,
@@ -255,13 +255,13 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.fact_product_performance_90
   conversion_rate FLOAT64,
   views_90d INT64,
   PRIMARY KEY (metric_as_of_date, product_id) NOT ENFORCED,
-  FOREIGN KEY (product_id) REFERENCES `agentic-bread.golf_products.dim_products`(product_id) NOT ENFORCED
+  FOREIGN KEY (product_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_products`(product_id) NOT ENFORCED
 )
 PARTITION BY metric_as_of_date
 CLUSTER BY product_id
 OPTIONS(description = 'Derived product-level ecommerce and merchandising metrics as of the latest snapshot date.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_payment_methods` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_payment_methods` (
   payment_method_id STRING NOT NULL,
   method_name STRING NOT NULL,
   method_type STRING NOT NULL,
@@ -278,7 +278,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_payment_methods` (
 )
 OPTIONS(description = 'Payment methods available at checkout, including financing and non-financing options.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_card_offers` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_card_offers` (
   card_offer_id STRING NOT NULL,
   payment_method_id STRING NOT NULL,
   offer_name STRING NOT NULL,
@@ -302,11 +302,11 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_card_offers` (
   effective_end_date DATE,
   is_active BOOL,
   PRIMARY KEY (card_offer_id) NOT ENFORCED,
-  FOREIGN KEY (payment_method_id) REFERENCES `agentic-bread.golf_products.dim_payment_methods`(payment_method_id) NOT ENFORCED
+  FOREIGN KEY (payment_method_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_payment_methods`(payment_method_id) NOT ENFORCED
 )
 OPTIONS(description = 'Store credit card and co-branded card offers used for responsible financing explanations.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_installment_plan_offers` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_installment_plan_offers` (
   installment_offer_id STRING NOT NULL,
   payment_method_id STRING NOT NULL,
   provider_name STRING,
@@ -325,11 +325,11 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_installment_plan_offers
   effective_end_date DATE,
   is_active BOOL,
   PRIMARY KEY (installment_offer_id) NOT ENFORCED,
-  FOREIGN KEY (payment_method_id) REFERENCES `agentic-bread.golf_products.dim_payment_methods`(payment_method_id) NOT ENFORCED
+  FOREIGN KEY (payment_method_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_payment_methods`(payment_method_id) NOT ENFORCED
 )
 OPTIONS(description = 'Installment financing options with terms, eligibility notes, and responsible-use disclosures.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_loyalty_programs` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_loyalty_programs` (
   loyalty_program_id STRING NOT NULL,
   program_name STRING NOT NULL,
   description STRING,
@@ -344,7 +344,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_loyalty_programs` (
 )
 OPTIONS(description = 'Loyalty rewards programs for member benefits, points, and redemption guidance.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_loyalty_tiers` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_loyalty_tiers` (
   loyalty_tier_id STRING NOT NULL,
   loyalty_program_id STRING NOT NULL,
   tier_name STRING NOT NULL,
@@ -357,11 +357,11 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_loyalty_tiers` (
   early_access BOOL,
   benefits ARRAY<STRING>,
   PRIMARY KEY (loyalty_tier_id) NOT ENFORCED,
-  FOREIGN KEY (loyalty_program_id) REFERENCES `agentic-bread.golf_products.dim_loyalty_programs`(loyalty_program_id) NOT ENFORCED
+  FOREIGN KEY (loyalty_program_id) REFERENCES `affable-seat-501018-q0.golf_products.dim_loyalty_programs`(loyalty_program_id) NOT ENFORCED
 )
 OPTIONS(description = 'Loyalty tiers with earning multipliers, discounts, free-shipping thresholds, and member benefits.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_promotions` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_promotions` (
   promotion_id STRING NOT NULL,
   promotion_name STRING NOT NULL,
   promotion_type STRING,
@@ -381,7 +381,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_promotions` (
 )
 OPTIONS(description = 'Synthetic active and upcoming promotions for golf products and categories.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_shipping_services` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_shipping_services` (
   shipping_service_id STRING NOT NULL,
   service_name STRING NOT NULL,
   service_level STRING,
@@ -398,7 +398,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_shipping_services` (
 )
 OPTIONS(description = 'Shipping service levels and fee rules for checkout and delivery questions.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_return_policies` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_return_policies` (
   return_policy_id STRING NOT NULL,
   category_id STRING,
   policy_name STRING NOT NULL,
@@ -413,7 +413,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_return_policies` (
 )
 OPTIONS(description = 'Category-specific return policies and exclusions.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_warranty_policies` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_warranty_policies` (
   warranty_policy_id STRING NOT NULL,
   category_id STRING,
   policy_name STRING NOT NULL,
@@ -428,7 +428,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_warranty_policies` (
 )
 OPTIONS(description = 'Category-specific warranty coverage, exclusions, and claim requirements.');
 
-CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_checkout_guidance` (
+CREATE OR REPLACE TABLE `affable-seat-501018-q0.golf_products.dim_checkout_guidance` (
   checkout_step_id STRING NOT NULL,
   step_order INT64 NOT NULL,
   step_name STRING NOT NULL,
@@ -441,7 +441,7 @@ CREATE OR REPLACE TABLE `agentic-bread.golf_products.dim_checkout_guidance` (
 )
 OPTIONS(description = 'Checkout guidance steps for cart review, discounts, loyalty, financing, shipping, and confirmation.');
 
-INSERT INTO `agentic-bread.golf_products.dim_brands` (brand_id, brand_name, brand_tier, brand_style, country_of_origin, is_house_brand, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_brands` (brand_id, brand_name, brand_tier, brand_style, country_of_origin, is_house_brand, created_at) VALUES
   ('BR001', 'Apex Canyon Golf', 'Premium', 'forgiving distance metals and clean game-improvement clubs', 'USA', FALSE, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('BR002', 'NorthLake Forge', 'Tour', 'soft forged irons, compact wedges, and precision shaping', 'Japan', FALSE, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('BR003', 'Vantage Core Golf', 'Direct-to-player', 'high-value urethane balls, bold colors, and modern accessories', 'Germany', FALSE, TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -451,7 +451,7 @@ INSERT INTO `agentic-bread.golf_products.dim_brands` (brand_id, brand_name, bran
   ('BR007', 'Driftline Athletic', 'Performance', 'spikeless shoes, stretch bottoms, and athletic golf layering', 'South Korea', TRUE, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('BR008', 'Stonebridge Carry Co.', 'Utility', 'stand bags, cart bags, travel covers, and durable accessories', 'Vietnam', TRUE, TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_suppliers` (supplier_id, supplier_name, supplier_type, region, default_lead_time_days, reliability_score, primary_contact_email, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_suppliers` (supplier_id, supplier_name, supplier_type, region, default_lead_time_days, reliability_score, primary_contact_email, created_at) VALUES
   ('SUP001', 'Pacific Components Group', 'Club components', 'West Coast', 18, 0.94, 'components@example.invalid', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('SUP002', 'Kansai Forging Works', 'Forged heads and wedges', 'Asia Pacific', 28, 0.91, 'forging@example.invalid', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('SUP003', 'Rhine Ball Materials', 'Ball cores and covers', 'Europe', 21, 0.89, 'balls@example.invalid', TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -460,7 +460,7 @@ INSERT INTO `agentic-bread.golf_products.dim_suppliers` (supplier_id, supplier_n
   ('SUP006', 'BlueArc Optics', 'Electronics and optics', 'Southwest', 24, 0.92, 'optics@example.invalid', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('SUP007', 'Stoneport Luggage Manufacturing', 'Bags and travel gear', 'Southeast Asia', 26, 0.9, 'bags@example.invalid', TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_categories` (category_id, category_name, parent_category, department, sort_order, typical_price_floor, typical_price_ceiling, variant_strategy) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_categories` (category_id, category_name, parent_category, department, sort_order, typical_price_floor, typical_price_ceiling, variant_strategy) VALUES
   ('CAT_DRIVERS', 'Drivers', 'Clubs', 'Hard Goods', 1, NUMERIC '349.00', NUMERIC '649.00', 'Loft, handedness, shaft flex, and shaft material'),
   ('CAT_FAIRWAY', 'Fairway Woods', 'Clubs', 'Hard Goods', 2, NUMERIC '229.00', NUMERIC '399.00', 'Wood number, loft, handedness, and shaft flex'),
   ('CAT_HYBRIDS', 'Hybrids', 'Clubs', 'Hard Goods', 3, NUMERIC '189.00', NUMERIC '299.00', 'Loft, handedness, and shaft flex'),
@@ -478,7 +478,7 @@ INSERT INTO `agentic-bread.golf_products.dim_categories` (category_id, category_
   ('CAT_TRAINING', 'Training Aids', 'Practice', 'Accessories', 15, NUMERIC '29.00', NUMERIC '199.00', 'Skill focus, setup time, portability, and feedback type'),
   ('CAT_ACCESSORIES', 'Accessories', 'Accessories', 'Accessories', 16, NUMERIC '9.00', NUMERIC '79.00', 'Color, fit, pack size, durability, and use case');
 
-INSERT INTO `agentic-bread.golf_products.dim_products` (product_id, brand_id, supplier_id, category_id, product_name, product_family, model_year, release_season, product_status, lifecycle_stage, target_player_profile, handicap_range, short_description, long_description, specs, tags, is_limited_edition, is_custom_fit, is_active, created_at, updated_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_products` (product_id, brand_id, supplier_id, category_id, product_name, product_family, model_year, release_season, product_status, lifecycle_stage, target_player_profile, handicap_range, short_description, long_description, specs, tags, is_limited_edition, is_custom_fit, is_active, created_at, updated_at) VALUES
   ('P001', 'BR001', 'SUP001', 'CAT_DRIVERS', 'Apex Canyon Golf LaunchMax Carbon Driver', 'LaunchMax Carbon', 2025, 'Spring', 'Current', 'Core', 'mid-handicap golfers needing easier launch', '0-8', 'Adjustable driver built for ball speed, launch tuning, and stable misses.', 'Apex Canyon Golf LaunchMax Carbon Driver uses a lightweight crown, reinforced sole frame, and adjustable rear weighting to help golfers tune launch window and shot shape. The face is engineered for speed retention across common miss patterns, while the acoustics are damped for a solid, modern impact sound.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Head Volume' AS spec_name, '460 cc' AS spec_value), STRUCT('Loft Options' AS spec_name, '9, 10.5, and 12 degrees' AS spec_value), STRUCT('Face Material' AS spec_name, 'Variable-thickness titanium alloy' AS spec_value), STRUCT('Launch Profile' AS spec_name, 'Mid-high launch' AS spec_value), STRUCT('Spin Profile' AS spec_name, 'Mid spin' AS spec_value), STRUCT('Adjustability' AS spec_name, 'Eight-position hosel and rear weight track' AS spec_value)], ['driver', 'adjustable', 'forgiving', 'distance'], FALSE, TRUE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('P002', 'BR004', 'SUP001', 'CAT_DRIVERS', 'Meridian Tour Labs SpeedCrest LS Driver', 'SpeedCrest LS', 2025, 'Fall', 'Current', 'Core', 'players who want lower spin without giving up stability', '5-15', 'Adjustable driver built for ball speed, launch tuning, and stable misses.', 'Meridian Tour Labs SpeedCrest LS Driver uses a lightweight crown, reinforced sole frame, and adjustable rear weighting to help golfers tune launch window and shot shape. The face is engineered for speed retention across common miss patterns, while the acoustics are damped for a solid, modern impact sound.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Head Volume' AS spec_name, '460 cc' AS spec_value), STRUCT('Loft Options' AS spec_name, '9, 10.5, and 12 degrees' AS spec_value), STRUCT('Face Material' AS spec_name, 'Variable-thickness titanium alloy' AS spec_value), STRUCT('Launch Profile' AS spec_name, 'Mid-high launch' AS spec_value), STRUCT('Spin Profile' AS spec_name, 'Low-mid spin' AS spec_value), STRUCT('Adjustability' AS spec_name, 'Eight-position hosel and rear weight track' AS spec_value)], ['driver', 'adjustable', 'forgiving', 'distance'], FALSE, TRUE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('P003', 'BR002', 'SUP001', 'CAT_DRIVERS', 'NorthLake Forge DrawPeak Max Driver', 'DrawPeak Max', 2026, 'Spring', 'Current', 'Core', 'mid-handicap golfers needing easier launch', '0-8', 'Adjustable driver built for ball speed, launch tuning, and stable misses.', 'NorthLake Forge DrawPeak Max Driver uses a lightweight crown, reinforced sole frame, and adjustable rear weighting to help golfers tune launch window and shot shape. The face is engineered for speed retention across common miss patterns, while the acoustics are damped for a solid, modern impact sound.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Head Volume' AS spec_name, '445 cc' AS spec_value), STRUCT('Loft Options' AS spec_name, '9, 10.5, and 12 degrees' AS spec_value), STRUCT('Face Material' AS spec_name, 'Variable-thickness titanium alloy' AS spec_value), STRUCT('Launch Profile' AS spec_name, 'High launch with draw bias' AS spec_value), STRUCT('Spin Profile' AS spec_name, 'Mid spin' AS spec_value), STRUCT('Adjustability' AS spec_name, 'Eight-position hosel and rear weight track' AS spec_value)], ['driver', 'adjustable', 'forgiving', 'distance'], FALSE, TRUE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -530,7 +530,7 @@ INSERT INTO `agentic-bread.golf_products.dim_products` (product_id, brand_id, su
   ('P049', 'BR004', 'SUP003', 'CAT_BALLS', 'Meridian Tour Labs SoftPulse Distance Golf Balls', 'SoftPulse Distance Golf', 2026, 'Spring', 'New Release', 'Launch', 'players balancing distance, feel, and greenside control', 'High swing speeds', 'Dozen golf balls tuned for distance, feel, and greenside control.', 'Meridian Tour Labs SoftPulse Distance Golf Balls offers a balanced flight profile with responsive feel through the bag. The cover and core are tuned to reduce unwanted driver spin while keeping enough greenside grab for pitches, chips, and partial wedge shots.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Construction' AS spec_name, 'Two-piece ionomer' AS spec_value), STRUCT('Compression' AS spec_name, '75' AS spec_value), STRUCT('Cover' AS spec_name, 'Soft ionomer' AS spec_value), STRUCT('Flight' AS spec_name, 'Mid flight' AS spec_value), STRUCT('Spin' AS spec_name, 'Balanced spin' AS spec_value), STRUCT('Pack Size' AS spec_name, '12 balls' AS spec_value)], ['golf balls', 'dozen', 'greenside feel', 'new release'], FALSE, FALSE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('P050', 'BR003', 'SUP003', 'CAT_BALLS', 'Vantage Core Golf SpinHalo Tour Golf Balls', 'SpinHalo Tour Golf', 2025, 'Fall', 'Current', 'Core', 'budget-conscious golfers seeking tour-style performance', 'All swing speeds', 'Dozen golf balls tuned for distance, feel, and greenside control.', 'Vantage Core Golf SpinHalo Tour Golf Balls offers a balanced flight profile with responsive feel through the bag. The cover and core are tuned to reduce unwanted driver spin while keeping enough greenside grab for pitches, chips, and partial wedge shots.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Construction' AS spec_name, 'Three-piece urethane' AS spec_value), STRUCT('Compression' AS spec_name, '95' AS spec_value), STRUCT('Cover' AS spec_name, 'Hybrid elastomer' AS spec_value), STRUCT('Flight' AS spec_name, 'Mid flight' AS spec_value), STRUCT('Spin' AS spec_name, 'High greenside spin' AS spec_value), STRUCT('Pack Size' AS spec_name, '12 balls' AS spec_value)], ['golf balls', 'dozen', 'greenside feel'], FALSE, FALSE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_products` (product_id, brand_id, supplier_id, category_id, product_name, product_family, model_year, release_season, product_status, lifecycle_stage, target_player_profile, handicap_range, short_description, long_description, specs, tags, is_limited_edition, is_custom_fit, is_active, created_at, updated_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_products` (product_id, brand_id, supplier_id, category_id, product_name, product_family, model_year, release_season, product_status, lifecycle_stage, target_player_profile, handicap_range, short_description, long_description, specs, tags, is_limited_edition, is_custom_fit, is_active, created_at, updated_at) VALUES
   ('P051', 'BR001', 'SUP003', 'CAT_BALLS', 'Apex Canyon Golf VelocityCore Two-Piece Balls', 'VelocityCore Two-Piece', 2026, 'Summer', 'Limited Edition', 'Limited', 'golfers who like visible matte colors', 'High swing speeds', 'Dozen golf balls tuned for distance, feel, and greenside control.', 'Apex Canyon Golf VelocityCore Two-Piece Balls offers a balanced flight profile with responsive feel through the bag. The cover and core are tuned to reduce unwanted driver spin while keeping enough greenside grab for pitches, chips, and partial wedge shots.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Construction' AS spec_name, 'Three-piece urethane' AS spec_value), STRUCT('Compression' AS spec_name, '65' AS spec_value), STRUCT('Cover' AS spec_name, 'Cast urethane' AS spec_value), STRUCT('Flight' AS spec_name, 'Mid flight' AS spec_value), STRUCT('Spin' AS spec_name, 'Balanced spin' AS spec_value), STRUCT('Pack Size' AS spec_name, '12 balls' AS spec_value)], ['golf balls', 'dozen', 'greenside feel', 'limited edition'], TRUE, FALSE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('P052', 'BR004', 'SUP003', 'CAT_BALLS', 'Meridian Tour Labs TrueFeel Low Compression Balls', 'TrueFeel Low Compression', 2024, 'Spring', 'Clearance', 'Markdown', 'budget-conscious golfers seeking tour-style performance', 'Moderate swing speeds', 'Dozen golf balls tuned for distance, feel, and greenside control.', 'Meridian Tour Labs TrueFeel Low Compression Balls offers a balanced flight profile with responsive feel through the bag. The cover and core are tuned to reduce unwanted driver spin while keeping enough greenside grab for pitches, chips, and partial wedge shots.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Construction' AS spec_name, 'Three-piece urethane' AS spec_value), STRUCT('Compression' AS spec_name, '95' AS spec_value), STRUCT('Cover' AS spec_name, 'Cast urethane' AS spec_value), STRUCT('Flight' AS spec_name, 'Mid flight' AS spec_value), STRUCT('Spin' AS spec_name, 'Balanced spin' AS spec_value), STRUCT('Pack Size' AS spec_name, '12 balls' AS spec_value)], ['golf balls', 'dozen', 'greenside feel', 'markdown'], FALSE, FALSE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('P053', 'BR003', 'SUP003', 'CAT_BALLS', 'Vantage Core Golf BrightTrack Practice Balls', 'BrightTrack Practice', 2025, 'Spring', 'Current', 'Core', 'players balancing distance, feel, and greenside control', 'Moderate swing speeds', 'Dozen golf balls tuned for distance, feel, and greenside control.', 'Vantage Core Golf BrightTrack Practice Balls offers a balanced flight profile with responsive feel through the bag. The cover and core are tuned to reduce unwanted driver spin while keeping enough greenside grab for pitches, chips, and partial wedge shots.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Construction' AS spec_name, 'Two-piece ionomer' AS spec_value), STRUCT('Compression' AS spec_name, '95' AS spec_value), STRUCT('Cover' AS spec_name, 'Soft ionomer' AS spec_value), STRUCT('Flight' AS spec_name, 'High flight' AS spec_value), STRUCT('Spin' AS spec_name, 'Low driver spin' AS spec_value), STRUCT('Pack Size' AS spec_name, '12 balls' AS spec_value)], ['golf balls', 'dozen', 'greenside feel'], FALSE, FALSE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -582,7 +582,7 @@ INSERT INTO `agentic-bread.golf_products.dim_products` (product_id, brand_id, su
   ('P099', 'BR008', 'SUP007', 'CAT_ACCESSORIES', 'Stonebridge Carry Co. Magnetic Towel and Brush Kit', 'Magnetic Towel and Brush', 2026, 'Spring', 'Current', 'Core', 'walking golfers who value small convenience items', 'All golfers', 'Practical course accessory for organization, cleaning, or alignment.', 'Stonebridge Carry Co. Magnetic Towel and Brush Kit solves a practical course problem with durable materials and simple setup. It is designed to stay in the bag, work in changing weather, and support regular practice or on-course organization.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Use Case' AS spec_name, 'Alignment practice' AS spec_value), STRUCT('Pack Size' AS spec_name, 'Three pieces' AS spec_value), STRUCT('Material' AS spec_name, 'Fiberglass rods' AS spec_value), STRUCT('Weather Ready' AS spec_name, 'Yes' AS spec_value)], ['accessory', 'practice', 'course utility'], FALSE, FALSE, TRUE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('P100', 'BR003', 'SUP007', 'CAT_ACCESSORIES', 'Vantage Core Golf Alignment Stick Pro Pack', 'Alignment Stick Pro', 2023, 'Spring', 'Discontinued', 'End of Life', 'walking golfers who value small convenience items', 'All golfers', 'Practical course accessory for organization, cleaning, or alignment.', 'Vantage Core Golf Alignment Stick Pro Pack solves a practical course problem with durable materials and simple setup. It is designed to stay in the bag, work in changing weather, and support regular practice or on-course organization.', ARRAY<STRUCT<spec_name STRING, spec_value STRING>>[STRUCT('Use Case' AS spec_name, 'Alignment practice' AS spec_value), STRUCT('Pack Size' AS spec_name, 'Four pieces' AS spec_value), STRUCT('Material' AS spec_name, 'Microfiber and nylon bristles' AS spec_value), STRUCT('Weather Ready' AS spec_name, 'Yes' AS spec_value)], ['accessory', 'practice', 'course utility', 'markdown'], FALSE, FALSE, FALSE, TIMESTAMP '2026-07-07 00:00:00+00', TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_product_variants` (variant_id, product_id, sku, upc, gender, handedness, color, size, loft, bounce, grind, shaft_flex, shaft_material, ball_color, pack_size, shoe_size, shoe_width, apparel_fit, weight_grams, msrp, cost, initial_sale_price, variant_status, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_product_variants` (variant_id, product_id, sku, upc, gender, handedness, color, size, loft, bounce, grind, shaft_flex, shaft_material, ball_color, pack_size, shoe_size, shoe_width, apparel_fit, weight_grams, msrp, cost, initial_sale_price, variant_status, created_at) VALUES
   ('V0001', 'P001', 'APE-P001-01', '800000000038', NULL, 'RH', NULL, NULL, '10.5 degrees', NULL, NULL, 'Regular', 'Graphite', NULL, NULL, NULL, NULL, NULL, 310, NUMERIC '449.99', NUMERIC '247.49', NUMERIC '449.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0002', 'P001', 'APE-P001-02', '800000000075', NULL, 'RH', NULL, NULL, '9 degrees', NULL, NULL, 'Stiff', 'Graphite', NULL, NULL, NULL, NULL, NULL, 315, NUMERIC '469.99', NUMERIC '267.89', NUMERIC '469.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0003', 'P002', 'MER-P002-01', '800000000113', NULL, 'RH', NULL, NULL, '10.5 degrees', NULL, NULL, 'Regular', 'Graphite', NULL, NULL, NULL, NULL, NULL, 310, NUMERIC '549.99', NUMERIC '302.49', NUMERIC '549.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -659,7 +659,7 @@ INSERT INTO `agentic-bread.golf_products.dim_product_variants` (variant_id, prod
   ('V0074', 'P035', 'APE-P035-01', '800000002773', NULL, 'RH', NULL, NULL, '50 degrees', '10 degrees', 'S Grind', 'Wedge', 'Steel', NULL, NULL, NULL, NULL, NULL, 465, NUMERIC '119.99', NUMERIC '64.79', NUMERIC '119.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0075', 'P035', 'APE-P035-02', '800000002810', NULL, 'RH', NULL, NULL, '54 degrees', '12 degrees', 'W Grind', 'Wedge', 'Steel', NULL, NULL, NULL, NULL, NULL, 470, NUMERIC '119.99', NUMERIC '67.19', NUMERIC '107.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_product_variants` (variant_id, product_id, sku, upc, gender, handedness, color, size, loft, bounce, grind, shaft_flex, shaft_material, ball_color, pack_size, shoe_size, shoe_width, apparel_fit, weight_grams, msrp, cost, initial_sale_price, variant_status, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_product_variants` (variant_id, product_id, sku, upc, gender, handedness, color, size, loft, bounce, grind, shaft_flex, shaft_material, ball_color, pack_size, shoe_size, shoe_width, apparel_fit, weight_grams, msrp, cost, initial_sale_price, variant_status, created_at) VALUES
   ('V0076', 'P035', 'APE-P035-03', '800000002847', NULL, 'LH', NULL, NULL, '58 degrees', '8 degrees', 'C Grind', 'Wedge', 'Steel', NULL, NULL, NULL, NULL, NULL, 475, NUMERIC '119.99', NUMERIC '73.19', NUMERIC '107.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0077', 'P036', 'NOR-P036-01', '800000002885', NULL, 'RH', NULL, NULL, '50 degrees', '10 degrees', 'S Grind', 'Wedge', 'Steel', NULL, NULL, NULL, NULL, NULL, 465, NUMERIC '159.99', NUMERIC '86.39', NUMERIC '159.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0078', 'P036', 'NOR-P036-02', '800000002922', NULL, 'RH', NULL, NULL, '54 degrees', '12 degrees', 'W Grind', 'Wedge', 'Steel', NULL, NULL, NULL, NULL, NULL, 470, NUMERIC '159.99', NUMERIC '95.99', NUMERIC '159.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -736,7 +736,7 @@ INSERT INTO `agentic-bread.golf_products.dim_product_variants` (variant_id, prod
   ('V0149', 'P068', 'SIL-P068-01', '800000005581', 'Men', NULL, 'Navy', 'Medium', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Athletic', 210, NUMERIC '94.99', NUMERIC '48.44', NUMERIC '94.99', 'Limited', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0150', 'P068', 'SIL-P068-02', '800000005618', 'Men', NULL, 'White', 'Large', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Classic', 220, NUMERIC '94.99', NUMERIC '45.60', NUMERIC '94.99', 'Limited', TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_product_variants` (variant_id, product_id, sku, upc, gender, handedness, color, size, loft, bounce, grind, shaft_flex, shaft_material, ball_color, pack_size, shoe_size, shoe_width, apparel_fit, weight_grams, msrp, cost, initial_sale_price, variant_status, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_product_variants` (variant_id, product_id, sku, upc, gender, handedness, color, size, loft, bounce, grind, shaft_flex, shaft_material, ball_color, pack_size, shoe_size, shoe_width, apparel_fit, weight_grams, msrp, cost, initial_sale_price, variant_status, created_at) VALUES
   ('V0151', 'P068', 'SIL-P068-03', '800000005655', 'Women', NULL, 'Coral', 'Medium', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Regular', 200, NUMERIC '94.99', NUMERIC '48.44', NUMERIC '94.99', 'Limited', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0152', 'P069', 'DRI-P069-01', '800000005693', 'Men', NULL, 'Navy', 'Medium', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Athletic', 210, NUMERIC '74.99', NUMERIC '38.24', NUMERIC '74.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0153', 'P069', 'DRI-P069-02', '800000005730', 'Men', NULL, 'White', 'Large', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Classic', 220, NUMERIC '74.99', NUMERIC '36.00', NUMERIC '74.99', 'Active', TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -812,7 +812,7 @@ INSERT INTO `agentic-bread.golf_products.dim_product_variants` (variant_id, prod
   ('V0223', 'P100', 'VAN-P100-01', '800000008351', NULL, NULL, 'Black', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, 150, NUMERIC '49.99', NUMERIC '28.49', NUMERIC '34.99', 'Discontinued', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('V0224', 'P100', 'VAN-P100-02', '800000008388', NULL, NULL, 'Orange', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, 150, NUMERIC '49.99', NUMERIC '27.99', NUMERIC '34.99', 'Discontinued', TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.fact_product_reviews` (review_summary_id, product_id, review_snapshot_date, average_rating, review_count, five_star_count, four_star_count, three_star_count, two_star_count, one_star_count, sample_positive_review, sample_negative_review, common_theme, verified_buyer_rate, quality_score, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_product_reviews` (review_summary_id, product_id, review_snapshot_date, average_rating, review_count, five_star_count, four_star_count, three_star_count, two_star_count, one_star_count, sample_positive_review, sample_negative_review, common_theme, verified_buyer_rate, quality_score, created_at) VALUES
   ('RS001', 'P001', DATE '2026-06-30', 4.45, 190, 119, 48, 15, 5, 3, 'Ball speed stayed strong on slight toe strikes and the adjustable weight helped me reduce my fade.', 'The adjustability helps, but the headcover is tighter than it needs to be.', 'comfort', 0.93, 86.3, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('RS002', 'P002', DATE '2026-06-30', 4.02, 485, 204, 155, 78, 29, 19, 'Easy to launch without feeling oversized, and the sound is solid rather than sharp.', 'Forgiveness is strong, but the impact sound is a little louder than I prefer.', 'feel', 0.82, 78.5, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('RS003', 'P003', DATE '2026-06-30', 4.01, 193, 80, 62, 31, 12, 8, 'Easy to launch without feeling oversized, and the sound is solid rather than sharp.', 'Great distance, although the stock grip felt slick after a few humid holes.', 'durability', 0.88, 80, TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -864,7 +864,7 @@ INSERT INTO `agentic-bread.golf_products.fact_product_reviews` (review_summary_i
   ('RS049', 'P049', DATE '2026-06-30', 4.63, 57, 43, 10, 2, 1, 1, 'Great value for a urethane-style ball with reliable wedge spin.', 'Easy to see in flight, but the matte color picked up dirt quickly.', 'forgiveness', 0.87, 87.1, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('RS050', 'P050', DATE '2026-06-30', 4.45, 745, 469, 186, 60, 19, 11, 'The color is easy to track and the cover held up for the whole round.', 'Easy to see in flight, but the matte color picked up dirt quickly.', 'distance', 0.94, 82.1, TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.fact_product_reviews` (review_summary_id, product_id, review_snapshot_date, average_rating, review_count, five_star_count, four_star_count, three_star_count, two_star_count, one_star_count, sample_positive_review, sample_negative_review, common_theme, verified_buyer_rate, quality_score, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_product_reviews` (review_summary_id, product_id, review_snapshot_date, average_rating, review_count, five_star_count, four_star_count, three_star_count, two_star_count, one_star_count, sample_positive_review, sample_negative_review, common_theme, verified_buyer_rate, quality_score, created_at) VALUES
   ('RS051', 'P051', DATE '2026-06-30', 4, 45, 19, 14, 7, 3, 2, 'The color is easy to track and the cover held up for the whole round.', 'Great value, but the cover scuffed faster after bunker shots.', 'feel', 0.9, 80.8, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('RS052', 'P052', DATE '2026-06-30', 4.66, 178, 135, 32, 7, 2, 2, 'The color is easy to track and the cover held up for the whole round.', 'Good greenside feel, although driver spin was a bit high for my swing.', 'comfort', 0.76, 84.7, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('RS053', 'P053', DATE '2026-06-30', 4.66, 367, 278, 66, 15, 4, 4, 'Good driver distance and a soft enough feel on chips around the green.', 'Great value, but the cover scuffed faster after bunker shots.', 'feel', 0.9, 82.6, TIMESTAMP '2026-07-07 00:00:00+00'),
@@ -916,7 +916,7 @@ INSERT INTO `agentic-bread.golf_products.fact_product_reviews` (review_summary_i
   ('RS099', 'P099', DATE '2026-06-30', 4.02, 468, 196, 150, 75, 28, 19, 'The magnet is stronger than expected and the towel dries quickly.', 'Useful accessory, but the included clip could be more premium.', 'distance', 0.75, 75.2, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('RS100', 'P100', DATE '2026-06-30', 4.02, 1046, 439, 335, 167, 63, 42, 'Practical kit that saves time during practice and keeps small items organized.', 'Works well, though the bright color option gets dirty quickly.', 'weather performance', 0.72, 77.4, TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
   ('INV000001', DATE '2026-04-30', 'V0001', 'P001', 'WH-WEST', 19, 1, 4, 8, 'In Stock', 18, DATE '2026-02-28', NULL),
   ('INV000002', DATE '2026-05-31', 'V0001', 'P001', 'WH-WEST', 18, 0, 4, 8, 'In Stock', 23, DATE '2026-04-07', NULL),
   ('INV000003', DATE '2026-06-30', 'V0001', 'P001', 'WH-WEST', 9, 0, 4, 8, 'In Stock', 21, DATE '2026-04-23', NULL),
@@ -1043,7 +1043,7 @@ INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_sn
   ('INV000124', DATE '2026-04-30', 'V0042', 'P021', 'WH-WEST', 29, 1, 2, 4, 'In Stock', 27, DATE '2026-02-22', NULL),
   ('INV000125', DATE '2026-05-31', 'V0042', 'P021', 'WH-WEST', 10, 1, 2, 4, 'In Stock', 31, DATE '2026-03-17', NULL);
 
-INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
   ('INV000126', DATE '2026-06-30', 'V0042', 'P021', 'WH-WEST', 7, 1, 2, 4, 'In Stock', 28, DATE '2026-05-21', NULL),
   ('INV000127', DATE '2026-04-30', 'V0043', 'P022', 'WH-EAST', 26, 0, 2, 6, 'In Stock', 25, DATE '2026-03-19', NULL),
   ('INV000128', DATE '2026-05-31', 'V0043', 'P022', 'WH-EAST', 13, 0, 2, 8, 'In Stock', 26, DATE '2026-04-29', NULL),
@@ -1170,7 +1170,7 @@ INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_sn
   ('INV000249', DATE '2026-06-30', 'V0083', 'P038', 'DROP-SHIP', 23, 2, 8, 16, 'In Stock', 26, DATE '2026-04-16', NULL),
   ('INV000250', DATE '2026-04-30', 'V0084', 'P038', 'WH-CENTRAL', 15, 1, 8, 24, 'In Stock', 33, DATE '2026-03-31', NULL);
 
-INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
   ('INV000251', DATE '2026-05-31', 'V0084', 'P038', 'WH-CENTRAL', 23, 0, 8, 16, 'In Stock', 25, DATE '2026-05-15', NULL),
   ('INV000252', DATE '2026-06-30', 'V0084', 'P038', 'WH-CENTRAL', 15, 1, 8, 16, 'In Stock', 28, DATE '2026-06-17', NULL),
   ('INV000253', DATE '2026-04-30', 'V0085', 'P038', 'DROP-SHIP', 26, 1, 8, 32, 'In Stock', 31, DATE '2026-04-12', NULL),
@@ -1297,7 +1297,7 @@ INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_sn
   ('INV000374', DATE '2026-05-31', 'V0125', 'P058', 'DROP-SHIP', 112, 5, 24, 96, 'In Stock', 15, DATE '2026-04-20', NULL),
   ('INV000375', DATE '2026-06-30', 'V0125', 'P058', 'DROP-SHIP', 107, 4, 24, 96, 'In Stock', 14, DATE '2026-06-03', NULL);
 
-INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
   ('INV000376', DATE '2026-04-30', 'V0126', 'P058', 'WH-EAST', 89, 0, 24, 72, 'In Stock', 18, DATE '2026-03-16', NULL),
   ('INV000377', DATE '2026-05-31', 'V0126', 'P058', 'WH-EAST', 79, 6, 24, 96, 'In Stock', 17, DATE '2026-04-04', NULL),
   ('INV000378', DATE '2026-06-30', 'V0126', 'P058', 'WH-EAST', 73, 0, 24, 96, 'In Stock', 14, DATE '2026-05-10', NULL),
@@ -1424,7 +1424,7 @@ INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_sn
   ('INV000499', DATE '2026-04-30', 'V0167', 'P074', 'WH-EAST', 93, 3, 20, 80, 'In Stock', 16, DATE '2026-03-14', NULL),
   ('INV000500', DATE '2026-05-31', 'V0167', 'P074', 'WH-EAST', 95, 4, 20, 60, 'In Stock', 13, DATE '2026-04-07', NULL);
 
-INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
   ('INV000501', DATE '2026-06-30', 'V0167', 'P074', 'WH-EAST', 89, 3, 20, 60, 'In Stock', 13, DATE '2026-06-22', NULL),
   ('INV000502', DATE '2026-04-30', 'V0168', 'P074', 'WH-WEST', 59, 1, 20, 60, 'In Stock', 16, DATE '2026-02-20', NULL),
   ('INV000503', DATE '2026-05-31', 'V0168', 'P074', 'WH-WEST', 45, 3, 20, 60, 'In Stock', 16, DATE '2026-04-14', NULL),
@@ -1551,7 +1551,7 @@ INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_sn
   ('INV000624', DATE '2026-06-30', 'V0208', 'P091', 'STORE-DEMO', 9, 3, 14, 42, 'Low Stock', 30, DATE '2026-05-29', DATE '2026-08-03'),
   ('INV000625', DATE '2026-04-30', 'V0209', 'P091', 'WH-EAST', 6, 1, 14, 56, 'Low Stock', 28, DATE '2026-03-28', DATE '2026-06-04');
 
-INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` (inventory_snapshot_id, snapshot_date, variant_id, product_id, warehouse_location, stock_quantity, reserved_quantity, reorder_level, reorder_quantity, inventory_status, supplier_lead_time_days, last_restock_date, next_expected_restock_date) VALUES
   ('INV000626', DATE '2026-05-31', 'V0209', 'P091', 'WH-EAST', 8, 0, 14, 42, 'Low Stock', 36, DATE '2026-04-27', DATE '2026-07-13'),
   ('INV000627', DATE '2026-06-30', 'V0209', 'P091', 'WH-EAST', 0, 0, 14, 56, 'Backordered', 32, DATE '2026-05-12', DATE '2026-08-03'),
   ('INV000628', DATE '2026-04-30', 'V0210', 'P091', 'WH-EAST', 47, 3, 14, 42, 'In Stock', 32, DATE '2026-03-28', NULL),
@@ -1600,7 +1600,7 @@ INSERT INTO `agentic-bread.golf_products.fact_inventory_snapshots` (inventory_sn
   ('INV000671', DATE '2026-05-31', 'V0224', 'P100', 'DROP-SHIP', 25, 5, 24, 48, 'In Stock', 29, DATE '2026-03-31', NULL),
   ('INV000672', DATE '2026-06-30', 'V0224', 'P100', 'DROP-SHIP', 23, 3, 24, 72, 'Low Stock', 23, DATE '2026-05-05', DATE '2026-07-23');
 
-INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
   ('PH00001', 'V0001', 'P001', DATE '2025-02-01', DATE '2026-05-14', NUMERIC '449.99', NUMERIC '449.99', NUMERIC '449.99', 0, 'Launch Price', 'Expired'),
   ('PH00002', 'V0001', 'P001', DATE '2026-05-15', NULL, NUMERIC '449.99', NUMERIC '449.99', NUMERIC '449.99', 0, 'Everyday Price', 'Current'),
   ('PH00003', 'V0002', 'P001', DATE '2025-02-01', DATE '2026-05-14', NUMERIC '469.99', NUMERIC '469.99', NUMERIC '469.99', 0, 'Launch Price', 'Expired'),
@@ -1727,7 +1727,7 @@ INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, 
   ('PH00124', 'V0063', 'P031', DATE '2026-05-15', NULL, NUMERIC '159.99', NUMERIC '159.99', NUMERIC '159.99', 0, 'Everyday Price', 'Current'),
   ('PH00125', 'V0064', 'P031', DATE '2025-02-01', DATE '2026-05-14', NUMERIC '159.99', NUMERIC '159.99', NUMERIC '159.99', 0, 'Launch Price', 'Expired');
 
-INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
   ('PH00126', 'V0064', 'P031', DATE '2026-05-15', NULL, NUMERIC '159.99', NUMERIC '159.99', NUMERIC '159.99', 0, 'Everyday Price', 'Current'),
   ('PH00127', 'V0065', 'P032', DATE '2025-08-01', DATE '2026-05-14', NUMERIC '159.99', NUMERIC '159.99', NUMERIC '159.99', 0, 'Launch Price', 'Expired'),
   ('PH00128', 'V0065', 'P032', DATE '2026-05-15', NULL, NUMERIC '159.99', NUMERIC '159.99', NUMERIC '159.99', 0, 'Everyday Price', 'Current'),
@@ -1854,7 +1854,7 @@ INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, 
   ('PH00249', 'V0126', 'P058', DATE '2025-08-01', DATE '2026-05-14', NUMERIC '24.99', NUMERIC '24.99', NUMERIC '24.99', 0, 'Launch Price', 'Expired'),
   ('PH00250', 'V0126', 'P058', DATE '2026-05-15', NULL, NUMERIC '24.99', NUMERIC '24.99', NUMERIC '24.99', 0, 'Everyday Price', 'Current');
 
-INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
   ('PH00251', 'V0127', 'P058', DATE '2025-08-01', DATE '2026-05-14', NUMERIC '24.99', NUMERIC '24.99', NUMERIC '24.99', 0, 'Launch Price', 'Expired'),
   ('PH00252', 'V0127', 'P058', DATE '2026-05-15', NULL, NUMERIC '24.99', NUMERIC '24.99', NUMERIC '24.99', 0, 'Everyday Price', 'Current'),
   ('PH00253', 'V0128', 'P059', DATE '2025-02-01', DATE '2026-05-14', NUMERIC '27.99', NUMERIC '27.99', NUMERIC '27.99', 0, 'Launch Price', 'Expired'),
@@ -1981,7 +1981,7 @@ INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, 
   ('PH00374', 'V0189', 'P084', DATE '2026-05-15', NULL, NUMERIC '59.99', NUMERIC '59.99', NUMERIC '59.99', 0, 'Everyday Price', 'Current'),
   ('PH00375', 'V0190', 'P084', DATE '2026-02-01', DATE '2026-05-14', NUMERIC '59.99', NUMERIC '59.99', NUMERIC '59.99', 0, 'Launch Price', 'Expired');
 
-INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_price_history` (price_history_id, variant_id, product_id, effective_start_date, effective_end_date, msrp, list_price, sale_price, discount_percent, promotion_name, price_status) VALUES
   ('PH00376', 'V0190', 'P084', DATE '2026-05-15', NULL, NUMERIC '59.99', NUMERIC '59.99', NUMERIC '59.99', 0, 'Everyday Price', 'Current'),
   ('PH00377', 'V0191', 'P085', DATE '2026-05-01', DATE '2026-05-14', NUMERIC '119.99', NUMERIC '119.99', NUMERIC '119.99', 0, 'Launch Price', 'Expired'),
   ('PH00378', 'V0191', 'P085', DATE '2026-05-15', NULL, NUMERIC '119.99', NUMERIC '119.99', NUMERIC '119.99', 0, 'Limited Edition Hold', 'Current'),
@@ -2051,7 +2051,7 @@ INSERT INTO `agentic-bread.golf_products.fact_price_history` (price_history_id, 
   ('PH00442', 'V0224', 'P100', DATE '2023-02-01', DATE '2026-05-14', NUMERIC '49.99', NUMERIC '49.99', NUMERIC '49.99', 0, 'Launch Price', 'Expired'),
   ('PH00443', 'V0224', 'P100', DATE '2026-05-15', NULL, NUMERIC '49.99', NUMERIC '49.99', NUMERIC '34.99', 30.01, 'Final Stock Markdown', 'Current');
 
-INSERT INTO `agentic-bread.golf_products.fact_sales_order_lines` (order_line_id, order_id, order_date, product_id, variant_id, customer_state, sales_channel, quantity, unit_price, discount_amount, tax_amount, shipping_amount, gross_sales, net_sales, is_returned, return_reason, order_status) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_sales_order_lines` (order_line_id, order_id, order_date, product_id, variant_id, customer_state, sales_channel, quantity, unit_price, discount_amount, tax_amount, shipping_amount, gross_sales, net_sales, is_returned, return_reason, order_status) VALUES
   ('OL000001', 'O000001', DATE '2026-06-02', 'P059', 'V0129', 'VA', 'Marketplace', 1, NUMERIC '27.99', NUMERIC '2.80', NUMERIC '1.64', NUMERIC '7.99', NUMERIC '27.99', NUMERIC '34.82', FALSE, NULL, 'Completed'),
   ('OL000002', 'O000001', DATE '2026-06-13', 'P065', 'V0143', 'OH', 'Online', 1, NUMERIC '180.39', NUMERIC '0.00', NUMERIC '11.73', NUMERIC '0.00', NUMERIC '180.39', NUMERIC '192.12', FALSE, NULL, 'Completed'),
   ('OL000003', 'O000002', DATE '2026-05-14', 'P012', 'V0024', 'PA', 'Mobile App', 1, NUMERIC '229.99', NUMERIC '11.50', NUMERIC '14.20', NUMERIC '0.00', NUMERIC '229.99', NUMERIC '232.69', FALSE, NULL, 'Completed'),
@@ -2178,7 +2178,7 @@ INSERT INTO `agentic-bread.golf_products.fact_sales_order_lines` (order_line_id,
   ('OL000124', 'O000101', DATE '2026-06-16', 'P032', 'V0065', 'SC', 'Pro Shop Partner', 1, NUMERIC '159.99', NUMERIC '0.00', NUMERIC '10.40', NUMERIC '0.00', NUMERIC '159.99', NUMERIC '170.39', FALSE, NULL, 'Completed'),
   ('OL000125', 'O000101', DATE '2026-05-09', 'P075', 'V0170', 'NJ', 'Online', 1, NUMERIC '74.99', NUMERIC '0.00', NUMERIC '4.87', NUMERIC '0.00', NUMERIC '74.99', NUMERIC '79.86', FALSE, NULL, 'Completed');
 
-INSERT INTO `agentic-bread.golf_products.fact_sales_order_lines` (order_line_id, order_id, order_date, product_id, variant_id, customer_state, sales_channel, quantity, unit_price, discount_amount, tax_amount, shipping_amount, gross_sales, net_sales, is_returned, return_reason, order_status) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_sales_order_lines` (order_line_id, order_id, order_date, product_id, variant_id, customer_state, sales_channel, quantity, unit_price, discount_amount, tax_amount, shipping_amount, gross_sales, net_sales, is_returned, return_reason, order_status) VALUES
   ('OL000126', 'O000102', DATE '2026-06-20', 'P059', 'V0129', 'FL', 'Online', 1, NUMERIC '27.99', NUMERIC '2.80', NUMERIC '1.64', NUMERIC '7.99', NUMERIC '27.99', NUMERIC '34.82', FALSE, NULL, 'Shipped'),
   ('OL000127', 'O000102', DATE '2026-06-03', 'P021', 'V0042', 'AZ', 'Online', 1, NUMERIC '899.99', NUMERIC '45.00', NUMERIC '55.57', NUMERIC '0.00', NUMERIC '899.99', NUMERIC '910.56', FALSE, NULL, 'Completed'),
   ('OL000128', 'O000103', DATE '2026-05-10', 'P033', 'V0069', 'MN', 'Marketplace', 1, NUMERIC '199.99', NUMERIC '0.00', NUMERIC '13.00', NUMERIC '0.00', NUMERIC '199.99', NUMERIC '212.99', FALSE, NULL, 'Completed'),
@@ -2305,7 +2305,7 @@ INSERT INTO `agentic-bread.golf_products.fact_sales_order_lines` (order_line_id,
   ('OL000249', 'O000203', DATE '2026-04-23', 'P056', 'V0120', 'FL', 'Online', 3, NUMERIC '24.99', NUMERIC '0.00', NUMERIC '4.87', NUMERIC '0.00', NUMERIC '74.97', NUMERIC '79.84', FALSE, NULL, 'Completed'),
   ('OL000250', 'O000204', DATE '2026-06-30', 'P097', 'V0219', 'SC', 'Online', 1, NUMERIC '79.99', NUMERIC '0.00', NUMERIC '5.20', NUMERIC '0.00', NUMERIC '79.99', NUMERIC '85.19', FALSE, NULL, 'Completed');
 
-INSERT INTO `agentic-bread.golf_products.fact_sales_order_lines` (order_line_id, order_id, order_date, product_id, variant_id, customer_state, sales_channel, quantity, unit_price, discount_amount, tax_amount, shipping_amount, gross_sales, net_sales, is_returned, return_reason, order_status) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_sales_order_lines` (order_line_id, order_id, order_date, product_id, variant_id, customer_state, sales_channel, quantity, unit_price, discount_amount, tax_amount, shipping_amount, gross_sales, net_sales, is_returned, return_reason, order_status) VALUES
   ('OL000251', 'O000205', DATE '2026-04-23', 'P073', 'V0165', 'MI', 'Mobile App', 1, NUMERIC '54.99', NUMERIC '5.50', NUMERIC '3.22', NUMERIC '0.00', NUMERIC '54.99', NUMERIC '52.71', FALSE, NULL, 'Completed'),
   ('OL000252', 'O000206', DATE '2026-05-21', 'P050', 'V0109', 'MN', 'Retail Store', 2, NUMERIC '31.99', NUMERIC '6.40', NUMERIC '3.74', NUMERIC '0.00', NUMERIC '63.98', NUMERIC '61.32', FALSE, NULL, 'Completed'),
   ('OL000253', 'O000207', DATE '2026-06-18', 'P055', 'V0119', 'PA', 'Retail Store', 1, NUMERIC '56.99', NUMERIC '2.85', NUMERIC '3.52', NUMERIC '7.99', NUMERIC '56.99', NUMERIC '65.65', FALSE, NULL, 'Completed'),
@@ -2417,7 +2417,7 @@ INSERT INTO `agentic-bread.golf_products.fact_sales_order_lines` (order_line_id,
   ('OL000359', 'O000293', DATE '2026-06-19', 'P095', 'V0215', 'TX', 'Marketplace', 1, NUMERIC '179.99', NUMERIC '0.00', NUMERIC '11.70', NUMERIC '0.00', NUMERIC '179.99', NUMERIC '191.69', FALSE, NULL, 'Completed'),
   ('OL000360', 'O000294', DATE '2026-06-30', 'P090', 'V0205', 'NJ', 'Retail Store', 1, NUMERIC '89.99', NUMERIC '0.00', NUMERIC '5.85', NUMERIC '0.00', NUMERIC '89.99', NUMERIC '95.84', FALSE, NULL, 'Completed');
 
-INSERT INTO `agentic-bread.golf_products.fact_product_performance_90d` (metric_as_of_date, product_id, units_sold_30d, units_sold_90d, gross_revenue_90d, net_revenue_90d, return_rate, average_margin_percent, wishlist_count, cart_add_count, conversion_rate, views_90d) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_product_performance_90d` (metric_as_of_date, product_id, units_sold_30d, units_sold_90d, gross_revenue_90d, net_revenue_90d, return_rate, average_margin_percent, wishlist_count, cart_add_count, conversion_rate, views_90d) VALUES
   (DATE '2026-06-30', 'P001', 0, 0, NUMERIC '0.00', NUMERIC '0.00', 0, 44, 111, 90, 0.0325, 2769),
   (DATE '2026-06-30', 'P002', 1, 1, NUMERIC '549.99', NUMERIC '527.16', 0, 44, 102, 74, 0.0567, 1305),
   (DATE '2026-06-30', 'P003', 1, 1, NUMERIC '599.99', NUMERIC '575.09', 0, 42, 75, 39, 0.0751, 519),
@@ -2469,7 +2469,7 @@ INSERT INTO `agentic-bread.golf_products.fact_product_performance_90d` (metric_a
   (DATE '2026-06-30', 'P049', 6, 14, NUMERIC '355.36', NUMERIC '423.36', 0, 46.19, 182, 187, 0.075, 2493),
   (DATE '2026-06-30', 'P050', 2, 15, NUMERIC '469.85', NUMERIC '501.88', 0, 51.48, 241, 169, 0.0288, 5868);
 
-INSERT INTO `agentic-bread.golf_products.fact_product_performance_90d` (metric_as_of_date, product_id, units_sold_30d, units_sold_90d, gross_revenue_90d, net_revenue_90d, return_rate, average_margin_percent, wishlist_count, cart_add_count, conversion_rate, views_90d) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.fact_product_performance_90d` (metric_as_of_date, product_id, units_sold_30d, units_sold_90d, gross_revenue_90d, net_revenue_90d, return_rate, average_margin_percent, wishlist_count, cart_add_count, conversion_rate, views_90d) VALUES
   (DATE '2026-06-30', 'P051', 7, 10, NUMERIC '559.90', NUMERIC '605.41', 0, 52.99, 108, 118, 0.0556, 2122),
   (DATE '2026-06-30', 'P052', 6, 10, NUMERIC '337.74', NUMERIC '355.21', 0, 39.63, 108, 104, 0.0753, 1381),
   (DATE '2026-06-30', 'P053', 2, 5, NUMERIC '230.95', NUMERIC '261.94', 0, 51.99, 148, 130, 0.0647, 2009),
@@ -2522,77 +2522,77 @@ INSERT INTO `agentic-bread.golf_products.fact_product_performance_90d` (metric_a
   (DATE '2026-06-30', 'P100', 2, 2, NUMERIC '69.98', NUMERIC '82.52', 0, 19.29, 124, 62, 0.0579, 1070);
 
 
-INSERT INTO `agentic-bread.golf_products.dim_payment_methods` (payment_method_id, method_name, method_type, description, display_order, is_active, requires_credit_check, supports_promotional_apr, supports_rewards, min_purchase_amount, max_purchase_amount, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_payment_methods` (payment_method_id, method_name, method_type, description, display_order, is_active, requires_credit_check, supports_promotional_apr, supports_rewards, min_purchase_amount, max_purchase_amount, created_at) VALUES
   ('PM_STANDARD_CARD', 'Standard Credit or Debit Card', 'CARD', 'Pay in full at checkout with a major credit or debit card.', 1, TRUE, FALSE, FALSE, FALSE, NUMERIC '0.00', NULL, TIMESTAMP '2026-07-07 00:00:00+00'),
   ('PM_GOLF_STORE_CARD', 'Golf Store Credit Card', 'STORE_CREDIT_CARD', 'Private-label store card with promotional financing and rewards on eligible golf purchases.', 2, TRUE, TRUE, TRUE, TRUE, NUMERIC '99.00', NUMERIC '15000.00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('PM_GOLF_REWARDS_VISA', 'Golf Rewards Visa', 'COBRANDED_CARD', 'Co-branded card for store and everyday purchases with points earning.', 3, TRUE, TRUE, TRUE, TRUE, NUMERIC '0.00', NUMERIC '20000.00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('PM_INSTALLMENTS', 'Monthly Installments', 'INSTALLMENT_LOAN', 'Split qualifying purchases into fixed monthly payments through a third-party installment provider.', 4, TRUE, TRUE, FALSE, FALSE, NUMERIC '150.00', NUMERIC '10000.00', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('PM_DIGITAL_WALLET', 'Digital Wallet', 'DIGITAL_WALLET', 'Pay in full with an eligible wallet at checkout.', 5, TRUE, FALSE, FALSE, FALSE, NUMERIC '0.00', NULL, TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_card_offers` (card_offer_id, payment_method_id, offer_name, issuer_name, card_network, card_type, promotional_apr_percent, promotional_period_months, purchase_apr_min_percent, purchase_apr_max_percent, annual_fee, late_fee_up_to, returned_payment_fee_up_to, rewards_rate_description, signup_bonus_description, eligibility_summary, application_disclosure, responsible_use_note, terms_url, effective_start_date, effective_end_date, is_active) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_card_offers` (card_offer_id, payment_method_id, offer_name, issuer_name, card_network, card_type, promotional_apr_percent, promotional_period_months, purchase_apr_min_percent, purchase_apr_max_percent, annual_fee, late_fee_up_to, returned_payment_fee_up_to, rewards_rate_description, signup_bonus_description, eligibility_summary, application_disclosure, responsible_use_note, terms_url, effective_start_date, effective_end_date, is_active) VALUES
   ('CARD_STORE_12MO_500', 'PM_GOLF_STORE_CARD', '0% APR for 12 Months on $500+', 'Example Bank N.A.', 'Private Label', 'Store Credit Card', NUMERIC '0.00', 12, NUMERIC '19.99', NUMERIC '31.99', NUMERIC '0.00', NUMERIC '40.00', NUMERIC '30.00', 'Earn 2 points per $1 on eligible store purchases.', 'New cardmembers may receive 5,000 bonus points after first eligible purchase.', 'Subject to credit approval. Promotional terms require a qualifying purchase of $500 or more.', 'Application may affect credit score. Full terms are provided before submission.', 'Pay the promotional balance in full before the period ends to avoid deferred or accrued interest where applicable.', 'https://example.invalid/terms/store-card-12mo', DATE '2026-07-01', DATE '2026-12-31', TRUE),
   ('CARD_STORE_18MO_1500', 'PM_GOLF_STORE_CARD', 'Reduced APR for 18 Months on $1,500+', 'Example Bank N.A.', 'Private Label', 'Store Credit Card', NUMERIC '9.99', 18, NUMERIC '19.99', NUMERIC '31.99', NUMERIC '0.00', NUMERIC '40.00', NUMERIC '30.00', 'Earn 2 points per $1 on eligible store purchases.', 'No signup bonus on reduced APR plan.', 'Subject to credit approval. Available for qualifying larger purchases such as full club sets or launch monitors.', 'Application may affect credit score. Full terms are provided before submission.', 'Compare total interest against paying in full or choosing a lower-cost product.', 'https://example.invalid/terms/store-card-18mo', DATE '2026-07-01', DATE '2026-12-31', TRUE),
   ('CARD_REWARDS_VISA_EVERYDAY', 'PM_GOLF_REWARDS_VISA', 'Golf Rewards Visa Everyday Points', 'Example Bank N.A.', 'Visa', 'Co-Branded Credit Card', NULL, NULL, NUMERIC '18.99', NUMERIC '29.99', NUMERIC '0.00', NUMERIC '40.00', NUMERIC '30.00', 'Earn 3 points per $1 at the golf store, 2 points per $1 on gas and dining, and 1 point per $1 elsewhere.', '10,000 bonus points after $750 in purchases within 90 days, subject to terms.', 'Subject to credit approval and account terms.', 'Application may affect credit score. Rewards values and redemption rules may change.', 'Rewards can be useful if paid in full; carrying a balance may cost more than rewards are worth.', 'https://example.invalid/terms/rewards-visa', DATE '2026-07-01', NULL, TRUE);
 
-INSERT INTO `agentic-bread.golf_products.dim_installment_plan_offers` (installment_offer_id, payment_method_id, provider_name, plan_name, min_purchase_amount, max_purchase_amount, term_months, apr_min_percent, apr_max_percent, fees_summary, eligibility_summary, repayment_summary, disclosure, responsible_use_note, effective_start_date, effective_end_date, is_active) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_installment_plan_offers` (installment_offer_id, payment_method_id, provider_name, plan_name, min_purchase_amount, max_purchase_amount, term_months, apr_min_percent, apr_max_percent, fees_summary, eligibility_summary, repayment_summary, disclosure, responsible_use_note, effective_start_date, effective_end_date, is_active) VALUES
   ('INST_FAIRWAYPAY_STANDARD', 'PM_INSTALLMENTS', 'FairwayPay', 'Fixed Monthly Installments', NUMERIC '150.00', NUMERIC '5000.00', [3, 6, 12], NUMERIC '0.00', NUMERIC '29.99', 'No late fees from the store; provider terms may include interest depending on eligibility.', 'Subject to eligibility check by FairwayPay. Not all customers or purchases qualify.', 'Equal monthly payments over the selected term. First payment may be due at checkout.', 'APR and payment schedule are shown before the customer accepts the plan.', 'Choose a term only if the monthly payment fits the customer budget after regular expenses.', DATE '2026-07-01', NULL, TRUE),
   ('INST_LAUNCHMONITOR_24', 'PM_INSTALLMENTS', 'FairwayPay', 'Launch Monitor Extended Plan', NUMERIC '1000.00', NUMERIC '10000.00', [12, 18, 24], NUMERIC '7.99', NUMERIC '24.99', 'Interest-bearing plan for higher-ticket technology purchases.', 'Subject to eligibility check and purchase amount. May not combine with all promotions.', 'Fixed monthly payments over 12, 18, or 24 months.', 'Total cost may exceed cash price when APR is above 0%.', 'Review total repayment cost before choosing this option.', DATE '2026-07-01', DATE '2026-12-31', TRUE);
 
-INSERT INTO `agentic-bread.golf_products.dim_loyalty_programs` (loyalty_program_id, program_name, description, points_per_dollar, redemption_points, redemption_value, enrollment_fee, is_active, terms_summary, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_loyalty_programs` (loyalty_program_id, program_name, description, points_per_dollar, redemption_points, redemption_value, enrollment_fee, is_active, terms_summary, created_at) VALUES
   ('LOY_GOLF_PRO_REWARDS', 'Golf Pro Rewards', 'Free loyalty program for earning points, member pricing, early access, and category-specific bonus offers.', NUMERIC '1.00', 100, NUMERIC '1.00', NUMERIC '0.00', TRUE, 'Points have no cash value, may expire after 18 months of inactivity, and may be excluded from gift cards, services, and select final-sale items.', TIMESTAMP '2026-07-07 00:00:00+00');
 
-INSERT INTO `agentic-bread.golf_products.dim_loyalty_tiers` (loyalty_tier_id, loyalty_program_id, tier_name, annual_spend_min, annual_spend_max, points_multiplier, member_discount_percent, free_shipping_threshold, birthday_reward, early_access, benefits) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_loyalty_tiers` (loyalty_tier_id, loyalty_program_id, tier_name, annual_spend_min, annual_spend_max, points_multiplier, member_discount_percent, free_shipping_threshold, birthday_reward, early_access, benefits) VALUES
   ('TIER_PLAYER', 'LOY_GOLF_PRO_REWARDS', 'Player', NUMERIC '0.00', NUMERIC '499.99', NUMERIC '1.00', NUMERIC '0.00', NUMERIC '99.00', 'Birthday double-points day', FALSE, ['Earn 1 point per $1', 'Member-only sale alerts', 'Free standard shipping over $99']),
   ('TIER_CLUB', 'LOY_GOLF_PRO_REWARDS', 'Club', NUMERIC '500.00', NUMERIC '1499.99', NUMERIC '1.25', NUMERIC '5.00', NUMERIC '49.00', '$10 birthday reward', TRUE, ['Earn 1.25 points per $1', '5% member discount on select accessories', 'Early access to seasonal drops']),
   ('TIER_TOUR', 'LOY_GOLF_PRO_REWARDS', 'Tour', NUMERIC '1500.00', NULL, NUMERIC '1.50', NUMERIC '10.00', NUMERIC '0.00', '$25 birthday reward', TRUE, ['Earn 1.5 points per $1', '10% member discount on select apparel and accessories', 'Free standard shipping with no minimum', 'Priority support for custom-fit orders']);
 
-INSERT INTO `agentic-bread.golf_products.dim_promotions` (promotion_id, promotion_name, promotion_type, applies_to_category_id, applies_to_product_id, discount_percent, discount_amount, start_date, end_date, coupon_code, stackable_with_loyalty, stackable_with_financing, eligibility_summary, disclaimer, is_active) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_promotions` (promotion_id, promotion_name, promotion_type, applies_to_category_id, applies_to_product_id, discount_percent, discount_amount, start_date, end_date, coupon_code, stackable_with_loyalty, stackable_with_financing, eligibility_summary, disclaimer, is_active) VALUES
   ('PROMO_DRIVER_FIT_10', '10% Off Custom-Fit Drivers', 'CATEGORY_PERCENT', 'CAT_DRIVERS', NULL, NUMERIC '10.00', NULL, DATE '2026-07-01', DATE '2026-07-31', 'FITDRIVER10', TRUE, FALSE, 'Applies to active drivers with custom-fit configuration.', 'Cannot combine with promotional APR card offers. Excludes clearance and final-sale items.', TRUE),
   ('PROMO_BALLS_BULK_15', '15% Off Three Dozen Golf Balls', 'CATEGORY_PERCENT', 'CAT_BALLS', NULL, NUMERIC '15.00', NULL, DATE '2026-07-01', DATE '2026-08-15', 'BALLBUNDLE15', TRUE, TRUE, 'Applies when buying three or more eligible dozen-ball packs.', 'Discount applies before taxes and shipping.', TRUE),
   ('PROMO_SHOES_25', '$25 Off Waterproof Golf Shoes', 'CATEGORY_AMOUNT', 'CAT_SHOES', NULL, NULL, NUMERIC '25.00', DATE '2026-07-01', DATE '2026-07-21', 'DRYFEET25', TRUE, TRUE, 'Applies to eligible waterproof golf shoes over $100.', 'One use per order. Not valid on prior purchases.', TRUE),
   ('PROMO_APPAREL_MEMBER', 'Member Apparel Bonus Points', 'LOYALTY_BONUS', 'CAT_APPAREL', NULL, NULL, NULL, DATE '2026-07-01', DATE '2026-08-31', NULL, TRUE, TRUE, 'Golf Pro Rewards members earn double points on eligible apparel.', 'Bonus points may post after shipment and can expire under program terms.', TRUE);
 
-INSERT INTO `agentic-bread.golf_products.dim_shipping_services` (shipping_service_id, service_name, service_level, base_fee, free_shipping_threshold, estimated_min_business_days, estimated_max_business_days, oversized_fee, supports_pobox, supports_ak_hi, is_active, policy_notes) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_shipping_services` (shipping_service_id, service_name, service_level, base_fee, free_shipping_threshold, estimated_min_business_days, estimated_max_business_days, oversized_fee, supports_pobox, supports_ak_hi, is_active, policy_notes) VALUES
   ('SHIP_STANDARD', 'Standard Ground', 'STANDARD', NUMERIC '7.99', NUMERIC '99.00', 3, 5, NUMERIC '0.00', TRUE, TRUE, TRUE, 'Free standard shipping threshold is based on merchandise subtotal after discounts and before taxes. Oversized items may be excluded.'),
   ('SHIP_EXPRESS', 'Express Delivery', 'EXPRESS', NUMERIC '19.99', NULL, 1, 2, NUMERIC '0.00', FALSE, FALSE, TRUE, 'Express delivery is not available for PO boxes, some remote ZIP codes, or custom-fit build orders.'),
   ('SHIP_OVERSIZE', 'Oversize Club and Bag Shipping', 'OVERSIZE', NUMERIC '14.99', NULL, 4, 7, NUMERIC '12.00', FALSE, TRUE, TRUE, 'Large club sets, travel covers, and cart bags may receive an oversize fee and longer handling time.'),
   ('SHIP_CUSTOM_FIT', 'Custom-Fit Build and Ship', 'CUSTOM_BUILD', NUMERIC '0.00', NULL, 7, 14, NUMERIC '0.00', FALSE, TRUE, TRUE, 'Custom-fit clubs require build time before shipping. Delivery estimate begins after build completion.');
 
-INSERT INTO `agentic-bread.golf_products.dim_return_policies` (return_policy_id, category_id, policy_name, return_window_days, condition_requirements, restocking_fee_percent, return_shipping_responsibility, refund_method, exclusions, policy_notes) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_return_policies` (return_policy_id, category_id, policy_name, return_window_days, condition_requirements, restocking_fee_percent, return_shipping_responsibility, refund_method, exclusions, policy_notes) VALUES
   ('RET_STANDARD', NULL, 'Standard Unused Item Return', 30, 'Item must be unused, in original packaging, with tags, manuals, and accessories.', NUMERIC '0.00', 'Customer pays return shipping unless the item arrived damaged or incorrect.', 'Original payment method after inspection.', 'Gift cards, final-sale items, and personalized products are excluded.', 'Most unused products follow this policy unless a category-specific policy applies.'),
   ('RET_CLUBS_STANDARD', 'CAT_DRIVERS', 'Golf Club Return', 30, 'Clubs must be unused or hit only in an approved indoor trial condition with no visible wear.', NUMERIC '0.00', 'Customer pays return shipping unless damaged or incorrect.', 'Original payment method after inspection.', 'Custom-fit, altered, or personalized clubs may be non-returnable.', 'Drivers and woods should be returned with headcover, wrench, and original packaging when included.'),
   ('RET_CUSTOM_CLUBS', 'CAT_IRONS', 'Custom-Fit Club Return Restriction', 14, 'Custom-fit clubs are reviewed case by case and must be in like-new condition.', NUMERIC '15.00', 'Customer pays return shipping.', 'Store credit or original payment method depending on build status.', 'Personalized stamping, non-standard shafts, and special orders may be final sale.', 'Encourage customers to verify specs before checkout.'),
   ('RET_APPAREL_SHOES', 'CAT_APPAREL', 'Apparel Return', 30, 'Items must be unworn, unwashed, and have original tags attached.', NUMERIC '0.00', 'Customer pays return shipping unless damaged or incorrect.', 'Original payment method after inspection.', 'Final-sale clearance apparel is excluded.', 'Sizing exchanges are supported when inventory is available.'),
   ('RET_SHOES', 'CAT_SHOES', 'Golf Shoe Return', 30, 'Shoes must be unworn outdoors and returned with original box.', NUMERIC '0.00', 'Customer pays return shipping unless damaged or incorrect.', 'Original payment method after inspection.', 'Shoes with course wear, grass stains, or removed tags may be declined.', 'Try shoes indoors before wearing them on course.');
 
-INSERT INTO `agentic-bread.golf_products.dim_warranty_policies` (warranty_policy_id, category_id, policy_name, coverage_months, coverage_provider, covered_issues, excluded_issues, claim_requirements, support_contact, policy_notes) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_warranty_policies` (warranty_policy_id, category_id, policy_name, coverage_months, coverage_provider, covered_issues, excluded_issues, claim_requirements, support_contact, policy_notes) VALUES
   ('WAR_STANDARD', NULL, 'General Manufacturer Warranty', 12, 'Manufacturer', 'Manufacturing defects in materials or workmanship under normal use.', 'Normal wear, misuse, accidental damage, cosmetic wear, and unauthorized repairs.', 'Order number, product photos, description of issue, and proof of purchase.', 'support@example.invalid', 'Coverage varies by brand and product type.'),
   ('WAR_CLUBS', 'CAT_DRIVERS', 'Club Head and Shaft Warranty', 24, 'Manufacturer', 'Club head structural defects, shaft defects, and adapter failures under normal use.', 'Sky marks, dents from misuse, broken shafts from abuse, and custom alterations.', 'Order number, serial number if present, photos of club head/shaft, and usage description.', 'clubs-warranty@example.invalid', 'Warranty replacement specs may vary based on available inventory.'),
   ('WAR_BAGS', 'CAT_BAGS', 'Golf Bag Hardware Warranty', 12, 'Store and manufacturer', 'Stand mechanism, strap, zipper, and seam failures under normal carrying use.', 'Airline damage, overloaded pockets, stains, and normal abrasion.', 'Order number, photos of failed component, and bag SKU.', 'bags-warranty@example.invalid', 'Travel damage should be filed with the carrier first.'),
   ('WAR_SHOES', 'CAT_SHOES', 'Waterproof Shoe Warranty', 12, 'Manufacturer', 'Waterproof membrane failure under normal golf use on eligible models.', 'Wear-through, improper care, cuts, sole wear, and non-waterproof models.', 'Order number, photos, model name, and explanation of water intrusion.', 'shoes-warranty@example.invalid', 'Waterproof coverage applies only to models sold as waterproof.'),
   ('WAR_TECH', 'CAT_TRAINING_AIDS', 'Electronics and Training Aid Warranty', 12, 'Manufacturer', 'Electronic component defects, sensor failure, and display failure under normal use.', 'Battery wear, cracked screens, water damage, and unauthorized software modifications.', 'Order number, serial number, diagnostic screenshots, and photos.', 'tech-warranty@example.invalid', 'Some electronics require manufacturer registration for full warranty support.');
 
-INSERT INTO `agentic-bread.golf_products.dim_checkout_guidance` (checkout_step_id, step_order, step_name, description, data_required, applies_to, risk_note, created_at) VALUES
+INSERT INTO `affable-seat-501018-q0.golf_products.dim_checkout_guidance` (checkout_step_id, step_order, step_name, description, data_required, applies_to, risk_note, created_at) VALUES
   ('CHK_REVIEW_CART', 1, 'Review cart and fit details', 'Confirm product, variant, dexterity, shaft flex, loft, size, color, quantity, and custom-fit selections before payment.', ['product_id', 'variant_id', 'quantity', 'fit_specs'], 'All orders', 'Custom-fit or personalized selections may restrict returns.', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('CHK_APPLY_DISCOUNTS', 2, 'Apply discounts and loyalty rewards', 'Apply coupon codes, member discounts, loyalty points, gift cards, and eligible promotions before choosing payment.', ['coupon_code', 'loyalty_member_id', 'points_to_redeem'], 'Orders with promotions or loyalty redemption', 'Some offers do not stack with financing or other promotions.', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('CHK_SHIPPING', 3, 'Choose shipping', 'Select shipping speed, confirm address, review oversize fees, and note custom-fit build time when applicable.', ['shipping_address', 'shipping_service_id'], 'Physical goods', 'Estimated delivery can change for custom-fit builds, preorder items, or remote ZIP codes.', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('CHK_PAYMENT', 4, 'Choose payment or financing', 'Select pay-in-full, store card, co-branded card, or installment option and review APR, fees, payment schedule, and eligibility requirements.', ['payment_method_id', 'billing_address'], 'All paid orders', 'Do not assume approval or choose financing unless the total repayment fits the customer budget.', TIMESTAMP '2026-07-07 00:00:00+00'),
   ('CHK_CONFIRM', 5, 'Confirm order', 'Review merchandise subtotal, discounts, estimated taxes, shipping, financing disclosures, total cost, and return/warranty links before placing the order.', ['order_total', 'tax_estimate', 'terms_acceptance'], 'All orders', 'The customer should save confirmation details for support, returns, and warranty claims.', TIMESTAMP '2026-07-07 00:00:00+00');
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_product_catalog_current` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_catalog_current` AS
 WITH latest_inventory AS (
   SELECT * EXCEPT(row_num)
   FROM (
     SELECT
       i.*,
       ROW_NUMBER() OVER (PARTITION BY variant_id ORDER BY snapshot_date DESC) AS row_num
-    FROM `agentic-bread.golf_products.fact_inventory_snapshots` AS i
+    FROM `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` AS i
   )
   WHERE row_num = 1
 ),
 current_prices AS (
   SELECT *
-  FROM `agentic-bread.golf_products.fact_price_history`
+  FROM `affable-seat-501018-q0.golf_products.fact_price_history`
   WHERE effective_end_date IS NULL
 )
 SELECT
@@ -2702,28 +2702,28 @@ SELECT
   ] AS image_uris,
   p.specs,
   p.tags
-FROM `agentic-bread.golf_products.dim_products` AS p
-JOIN `agentic-bread.golf_products.dim_brands` AS b
+FROM `affable-seat-501018-q0.golf_products.dim_products` AS p
+JOIN `affable-seat-501018-q0.golf_products.dim_brands` AS b
   ON p.brand_id = b.brand_id
-JOIN `agentic-bread.golf_products.dim_categories` AS c
+JOIN `affable-seat-501018-q0.golf_products.dim_categories` AS c
   ON p.category_id = c.category_id
-JOIN `agentic-bread.golf_products.dim_product_variants` AS v
+JOIN `affable-seat-501018-q0.golf_products.dim_product_variants` AS v
   ON p.product_id = v.product_id
 LEFT JOIN current_prices AS cp
   ON v.variant_id = cp.variant_id
 LEFT JOIN latest_inventory AS li
   ON v.variant_id = li.variant_id
-LEFT JOIN `agentic-bread.golf_products.fact_product_reviews` AS r
+LEFT JOIN `affable-seat-501018-q0.golf_products.fact_product_reviews` AS r
   ON p.product_id = r.product_id;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_product_listing_current` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_listing_current` AS
 WITH latest_performance AS (
   SELECT * EXCEPT(row_num)
   FROM (
     SELECT
       perf.*,
       ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY metric_as_of_date DESC) AS row_num
-    FROM `agentic-bread.golf_products.fact_product_performance_90d` AS perf
+    FROM `affable-seat-501018-q0.golf_products.fact_product_performance_90d` AS perf
   )
   WHERE row_num = 1
 )
@@ -2769,19 +2769,19 @@ SELECT
   ANY_VALUE(perf.cart_add_count) AS cart_add_count,
   ANY_VALUE(perf.conversion_rate) AS conversion_rate,
   ANY_VALUE(perf.views_90d) AS views_90d
-FROM `agentic-bread.golf_products.vw_product_catalog_current` AS catalog
+FROM `affable-seat-501018-q0.golf_products.vw_product_catalog_current` AS catalog
 LEFT JOIN latest_performance AS perf
   ON catalog.product_id = perf.product_id
 GROUP BY catalog.product_id;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_product_detail_current` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_detail_current` AS
 WITH latest_performance AS (
   SELECT * EXCEPT(row_num)
   FROM (
     SELECT
       perf.*,
       ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY metric_as_of_date DESC) AS row_num
-    FROM `agentic-bread.golf_products.fact_product_performance_90d` AS perf
+    FROM `affable-seat-501018-q0.golf_products.fact_product_performance_90d` AS perf
   )
   WHERE row_num = 1
 )
@@ -2856,35 +2856,35 @@ SELECT
     )
     ORDER BY catalog.current_sale_price, catalog.variant_id
   ) AS variants
-FROM `agentic-bread.golf_products.vw_product_catalog_current` AS catalog
+FROM `affable-seat-501018-q0.golf_products.vw_product_catalog_current` AS catalog
 LEFT JOIN latest_performance AS perf
   ON catalog.product_id = perf.product_id
 GROUP BY catalog.product_id;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_product_facets` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_product_facets` AS
 SELECT 'category' AS facet_type, category_id AS facet_value, category_slug AS facet_slug, category_name AS facet_label, COUNT(*) AS result_count, MIN(min_current_sale_price) AS min_price, MAX(max_current_sale_price) AS max_price
-FROM `agentic-bread.golf_products.vw_product_listing_current`
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'brand', brand_name, REGEXP_REPLACE(LOWER(brand_name), r'[^a-z0-9]+', '-'), brand_name, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
-FROM `agentic-bread.golf_products.vw_product_listing_current`
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 WHERE brand_name IS NOT NULL
 GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'player_profile', target_player_profile, REGEXP_REPLACE(LOWER(target_player_profile), r'[^a-z0-9]+', '-'), target_player_profile, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
-FROM `agentic-bread.golf_products.vw_product_listing_current`
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 WHERE target_player_profile IS NOT NULL
 GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'stock', inventory_status, REGEXP_REPLACE(LOWER(inventory_status), r'[^a-z0-9]+', '-'), inventory_status, COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
-FROM `agentic-bread.golf_products.vw_product_listing_current`
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 WHERE inventory_status IS NOT NULL
 GROUP BY 2, 3, 4
 UNION ALL
 SELECT 'price', 'price', 'price', 'Price range', COUNT(*), MIN(min_current_sale_price), MAX(max_current_sale_price)
-FROM `agentic-bread.golf_products.vw_product_listing_current`;
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_category_navigation` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_category_navigation` AS
 SELECT
   category_id,
   category_slug,
@@ -2896,10 +2896,10 @@ SELECT
   ROUND(AVG(average_rating), 2) AS average_rating,
   ANY_VALUE(image_url) AS image_url,
   ANY_VALUE(image_alt) AS image_alt
-FROM `agentic-bread.golf_products.vw_product_listing_current`
+FROM `affable-seat-501018-q0.golf_products.vw_product_listing_current`
 GROUP BY category_id, category_slug, category_name, parent_category;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_cart_pricing_current` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_cart_pricing_current` AS
 SELECT
   product_id,
   variant_id,
@@ -2930,16 +2930,16 @@ SELECT
     AND IFNULL(stock_quantity, 0) > 0
     AND LOWER(IFNULL(variant_status, 'active')) NOT IN ('discontinued', 'inactive')
     AS is_purchasable
-FROM `agentic-bread.golf_products.vw_product_catalog_current`;
+FROM `affable-seat-501018-q0.golf_products.vw_product_catalog_current`;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_low_stock_best_sellers` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_low_stock_best_sellers` AS
 WITH latest_inventory AS (
   SELECT * EXCEPT(row_num)
   FROM (
     SELECT
       i.*,
       ROW_NUMBER() OVER (PARTITION BY variant_id ORDER BY snapshot_date DESC) AS row_num
-    FROM `agentic-bread.golf_products.fact_inventory_snapshots` AS i
+    FROM `affable-seat-501018-q0.golf_products.fact_inventory_snapshots` AS i
   )
   WHERE row_num = 1
 )
@@ -3016,16 +3016,16 @@ SELECT
       WHEN 'CAT_ACCESSORIES' THEN 'https://upload.wikimedia.org/wikipedia/commons/5/59/Golf_gear.jpg'
     END IGNORE NULLS LIMIT 3
   ) AS image_uris
-FROM `agentic-bread.golf_products.dim_products` AS p
-JOIN `agentic-bread.golf_products.dim_categories` AS c
+FROM `affable-seat-501018-q0.golf_products.dim_products` AS p
+JOIN `affable-seat-501018-q0.golf_products.dim_categories` AS c
   ON p.category_id = c.category_id
-JOIN `agentic-bread.golf_products.dim_product_variants` AS v
+JOIN `affable-seat-501018-q0.golf_products.dim_product_variants` AS v
   ON p.product_id = v.product_id
 JOIN latest_inventory AS li
   ON v.variant_id = li.variant_id
-LEFT JOIN `agentic-bread.golf_products.fact_product_performance_90d` AS perf
+LEFT JOIN `affable-seat-501018-q0.golf_products.fact_product_performance_90d` AS perf
   ON p.product_id = perf.product_id
-LEFT JOIN `agentic-bread.golf_products.fact_product_reviews` AS r
+LEFT JOIN `affable-seat-501018-q0.golf_products.fact_product_reviews` AS r
   ON p.product_id = r.product_id
 GROUP BY
   p.product_id,
@@ -3039,10 +3039,10 @@ GROUP BY
 HAVING SUM(li.stock_quantity) <= SUM(li.reorder_level)
    AND (perf.units_sold_30d >= 2 OR perf.units_sold_90d >= 8);
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_category_margin_summary` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_category_margin_summary` AS
 WITH current_prices AS (
   SELECT *
-  FROM `agentic-bread.golf_products.fact_price_history`
+  FROM `affable-seat-501018-q0.golf_products.fact_price_history`
   WHERE effective_end_date IS NULL
 ),
 variant_prices AS (
@@ -3052,8 +3052,8 @@ variant_prices AS (
     COUNT(DISTINCT v.variant_id) AS variant_count,
     ROUND(AVG(CAST(cp.sale_price AS FLOAT64)), 2) AS avg_current_sale_price,
     ROUND(AVG(SAFE_DIVIDE(CAST(cp.sale_price - v.cost AS FLOAT64), CAST(cp.sale_price AS FLOAT64))) * 100, 2) AS avg_margin_percent
-  FROM `agentic-bread.golf_products.dim_products` AS p
-  JOIN `agentic-bread.golf_products.dim_product_variants` AS v
+  FROM `affable-seat-501018-q0.golf_products.dim_products` AS p
+  JOIN `affable-seat-501018-q0.golf_products.dim_product_variants` AS v
     ON p.product_id = v.product_id
   LEFT JOIN current_prices AS cp
     ON v.variant_id = cp.variant_id
@@ -3067,10 +3067,10 @@ product_metrics AS (
     SUM(perf.net_revenue_90d) AS net_revenue_90d,
     ROUND(AVG(perf.return_rate), 4) AS avg_return_rate,
     ROUND(AVG(r.average_rating), 2) AS avg_rating
-  FROM `agentic-bread.golf_products.dim_products` AS p
-  LEFT JOIN `agentic-bread.golf_products.fact_product_performance_90d` AS perf
+  FROM `affable-seat-501018-q0.golf_products.dim_products` AS p
+  LEFT JOIN `affable-seat-501018-q0.golf_products.fact_product_performance_90d` AS perf
     ON p.product_id = perf.product_id
-  LEFT JOIN `agentic-bread.golf_products.fact_product_reviews` AS r
+  LEFT JOIN `affable-seat-501018-q0.golf_products.fact_product_reviews` AS r
     ON p.product_id = r.product_id
   GROUP BY p.category_id
 )
@@ -3087,13 +3087,13 @@ SELECT
   pm.net_revenue_90d,
   pm.avg_return_rate,
   pm.avg_rating
-FROM `agentic-bread.golf_products.dim_categories` AS c
+FROM `affable-seat-501018-q0.golf_products.dim_categories` AS c
 LEFT JOIN variant_prices AS vp
   ON c.category_id = vp.category_id
 LEFT JOIN product_metrics AS pm
   ON c.category_id = pm.category_id;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_active_financing_options` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_active_financing_options` AS
 SELECT
   'CARD' AS option_type,
   co.card_offer_id AS option_id,
@@ -3123,8 +3123,8 @@ SELECT
   co.effective_start_date,
   co.effective_end_date,
   co.is_active
-FROM `agentic-bread.golf_products.dim_card_offers` AS co
-JOIN `agentic-bread.golf_products.dim_payment_methods` AS pm
+FROM `affable-seat-501018-q0.golf_products.dim_card_offers` AS co
+JOIN `affable-seat-501018-q0.golf_products.dim_payment_methods` AS pm
   ON co.payment_method_id = pm.payment_method_id
 WHERE co.is_active
   AND pm.is_active
@@ -3159,14 +3159,14 @@ SELECT
   io.effective_start_date,
   io.effective_end_date,
   io.is_active
-FROM `agentic-bread.golf_products.dim_installment_plan_offers` AS io
-JOIN `agentic-bread.golf_products.dim_payment_methods` AS pm
+FROM `affable-seat-501018-q0.golf_products.dim_installment_plan_offers` AS io
+JOIN `affable-seat-501018-q0.golf_products.dim_payment_methods` AS pm
   ON io.payment_method_id = pm.payment_method_id
 WHERE io.is_active
   AND pm.is_active
   AND CURRENT_DATE() BETWEEN io.effective_start_date AND COALESCE(io.effective_end_date, DATE '9999-12-31');
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_loyalty_benefits` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_loyalty_benefits` AS
 SELECT
   lp.loyalty_program_id,
   lp.program_name,
@@ -3186,12 +3186,12 @@ SELECT
   lt.birthday_reward,
   lt.early_access,
   lt.benefits
-FROM `agentic-bread.golf_products.dim_loyalty_programs` AS lp
-JOIN `agentic-bread.golf_products.dim_loyalty_tiers` AS lt
+FROM `affable-seat-501018-q0.golf_products.dim_loyalty_programs` AS lp
+JOIN `affable-seat-501018-q0.golf_products.dim_loyalty_tiers` AS lt
   ON lp.loyalty_program_id = lt.loyalty_program_id
 WHERE lp.is_active;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_active_promotions` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_active_promotions` AS
 SELECT
   pr.promotion_id,
   pr.promotion_name,
@@ -3211,15 +3211,15 @@ SELECT
   pr.eligibility_summary,
   pr.disclaimer,
   pr.is_active
-FROM `agentic-bread.golf_products.dim_promotions` AS pr
-LEFT JOIN `agentic-bread.golf_products.dim_categories` AS c
+FROM `affable-seat-501018-q0.golf_products.dim_promotions` AS pr
+LEFT JOIN `affable-seat-501018-q0.golf_products.dim_categories` AS c
   ON pr.applies_to_category_id = c.category_id
-LEFT JOIN `agentic-bread.golf_products.dim_products` AS p
+LEFT JOIN `affable-seat-501018-q0.golf_products.dim_products` AS p
   ON pr.applies_to_product_id = p.product_id
 WHERE pr.is_active
   AND CURRENT_DATE() BETWEEN pr.start_date AND COALESCE(pr.end_date, DATE '9999-12-31');
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_purchase_support_policies` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_purchase_support_policies` AS
 SELECT
   'SHIPPING' AS policy_type,
   shipping_service_id AS policy_id,
@@ -3245,7 +3245,7 @@ SELECT
   CAST(NULL AS STRING) AS excluded_issues,
   CAST(NULL AS STRING) AS claim_requirements,
   policy_notes
-FROM `agentic-bread.golf_products.dim_shipping_services`
+FROM `affable-seat-501018-q0.golf_products.dim_shipping_services`
 WHERE is_active
 UNION ALL
 SELECT
@@ -3273,8 +3273,8 @@ SELECT
   rp.exclusions AS excluded_issues,
   CAST(NULL AS STRING) AS claim_requirements,
   rp.policy_notes
-FROM `agentic-bread.golf_products.dim_return_policies` AS rp
-LEFT JOIN `agentic-bread.golf_products.dim_categories` AS c
+FROM `affable-seat-501018-q0.golf_products.dim_return_policies` AS rp
+LEFT JOIN `affable-seat-501018-q0.golf_products.dim_categories` AS c
   ON rp.category_id = c.category_id
 UNION ALL
 SELECT
@@ -3302,11 +3302,11 @@ SELECT
   wp.excluded_issues,
   wp.claim_requirements,
   wp.policy_notes
-FROM `agentic-bread.golf_products.dim_warranty_policies` AS wp
-LEFT JOIN `agentic-bread.golf_products.dim_categories` AS c
+FROM `affable-seat-501018-q0.golf_products.dim_warranty_policies` AS wp
+LEFT JOIN `affable-seat-501018-q0.golf_products.dim_categories` AS c
   ON wp.category_id = c.category_id;
 
-CREATE OR REPLACE VIEW `agentic-bread.golf_products.vw_checkout_support` AS
+CREATE OR REPLACE VIEW `affable-seat-501018-q0.golf_products.vw_checkout_support` AS
 SELECT
   checkout_step_id,
   step_order,
@@ -3315,28 +3315,28 @@ SELECT
   data_required,
   applies_to,
   risk_note
-FROM `agentic-bread.golf_products.dim_checkout_guidance`;
+FROM `affable-seat-501018-q0.golf_products.dim_checkout_guidance`;
 
 
 -- Optional validation query. The expected product count is 100.
-SELECT 'dim_brands' AS table_name, COUNT(*) AS row_count FROM `agentic-bread.golf_products.dim_brands`
-UNION ALL SELECT 'dim_suppliers', COUNT(*) FROM `agentic-bread.golf_products.dim_suppliers`
-UNION ALL SELECT 'dim_categories', COUNT(*) FROM `agentic-bread.golf_products.dim_categories`
-UNION ALL SELECT 'dim_products', COUNT(*) FROM `agentic-bread.golf_products.dim_products`
-UNION ALL SELECT 'dim_product_variants', COUNT(*) FROM `agentic-bread.golf_products.dim_product_variants`
-UNION ALL SELECT 'fact_product_reviews', COUNT(*) FROM `agentic-bread.golf_products.fact_product_reviews`
-UNION ALL SELECT 'fact_inventory_snapshots', COUNT(*) FROM `agentic-bread.golf_products.fact_inventory_snapshots`
-UNION ALL SELECT 'fact_price_history', COUNT(*) FROM `agentic-bread.golf_products.fact_price_history`
-UNION ALL SELECT 'fact_sales_order_lines', COUNT(*) FROM `agentic-bread.golf_products.fact_sales_order_lines`
-UNION ALL SELECT 'fact_product_performance_90d', COUNT(*) FROM `agentic-bread.golf_products.fact_product_performance_90d`
-UNION ALL SELECT 'dim_payment_methods', COUNT(*) FROM `agentic-bread.golf_products.dim_payment_methods`
-UNION ALL SELECT 'dim_card_offers', COUNT(*) FROM `agentic-bread.golf_products.dim_card_offers`
-UNION ALL SELECT 'dim_installment_plan_offers', COUNT(*) FROM `agentic-bread.golf_products.dim_installment_plan_offers`
-UNION ALL SELECT 'dim_loyalty_programs', COUNT(*) FROM `agentic-bread.golf_products.dim_loyalty_programs`
-UNION ALL SELECT 'dim_loyalty_tiers', COUNT(*) FROM `agentic-bread.golf_products.dim_loyalty_tiers`
-UNION ALL SELECT 'dim_promotions', COUNT(*) FROM `agentic-bread.golf_products.dim_promotions`
-UNION ALL SELECT 'dim_shipping_services', COUNT(*) FROM `agentic-bread.golf_products.dim_shipping_services`
-UNION ALL SELECT 'dim_return_policies', COUNT(*) FROM `agentic-bread.golf_products.dim_return_policies`
-UNION ALL SELECT 'dim_warranty_policies', COUNT(*) FROM `agentic-bread.golf_products.dim_warranty_policies`
-UNION ALL SELECT 'dim_checkout_guidance', COUNT(*) FROM `agentic-bread.golf_products.dim_checkout_guidance`
+SELECT 'dim_brands' AS table_name, COUNT(*) AS row_count FROM `affable-seat-501018-q0.golf_products.dim_brands`
+UNION ALL SELECT 'dim_suppliers', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_suppliers`
+UNION ALL SELECT 'dim_categories', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_categories`
+UNION ALL SELECT 'dim_products', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_products`
+UNION ALL SELECT 'dim_product_variants', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_product_variants`
+UNION ALL SELECT 'fact_product_reviews', COUNT(*) FROM `affable-seat-501018-q0.golf_products.fact_product_reviews`
+UNION ALL SELECT 'fact_inventory_snapshots', COUNT(*) FROM `affable-seat-501018-q0.golf_products.fact_inventory_snapshots`
+UNION ALL SELECT 'fact_price_history', COUNT(*) FROM `affable-seat-501018-q0.golf_products.fact_price_history`
+UNION ALL SELECT 'fact_sales_order_lines', COUNT(*) FROM `affable-seat-501018-q0.golf_products.fact_sales_order_lines`
+UNION ALL SELECT 'fact_product_performance_90d', COUNT(*) FROM `affable-seat-501018-q0.golf_products.fact_product_performance_90d`
+UNION ALL SELECT 'dim_payment_methods', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_payment_methods`
+UNION ALL SELECT 'dim_card_offers', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_card_offers`
+UNION ALL SELECT 'dim_installment_plan_offers', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_installment_plan_offers`
+UNION ALL SELECT 'dim_loyalty_programs', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_loyalty_programs`
+UNION ALL SELECT 'dim_loyalty_tiers', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_loyalty_tiers`
+UNION ALL SELECT 'dim_promotions', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_promotions`
+UNION ALL SELECT 'dim_shipping_services', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_shipping_services`
+UNION ALL SELECT 'dim_return_policies', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_return_policies`
+UNION ALL SELECT 'dim_warranty_policies', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_warranty_policies`
+UNION ALL SELECT 'dim_checkout_guidance', COUNT(*) FROM `affable-seat-501018-q0.golf_products.dim_checkout_guidance`
 ORDER BY table_name;
